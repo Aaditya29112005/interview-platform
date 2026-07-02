@@ -1,0 +1,530 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/components/auth-context';
+import { useRouter } from 'next/navigation';
+import {
+  Plus,
+  Play,
+  FileText,
+  Clock,
+  Sparkles,
+  Award,
+  Loader2,
+  TrendingUp,
+  Brain,
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { DashboardCharts } from '@/components/dashboard-charts';
+
+interface Interview {
+  id: string;
+  role: string;
+  difficulty: string;
+  company: string;
+  experience: number;
+  status: string;
+  startedAt: string;
+  objective: string | null;
+  scores?: {
+    overall: number;
+  } | null;
+}
+
+interface Analytics {
+  totalInterviews: number;
+  averageOverall: number;
+  radarData: Array<{ subject: string; A: number; fullMark: number }>;
+  trendData: Array<{ name: string; score: number; date: string; role: string }>;
+  recentFeedback: Array<{
+    id: string;
+    role: string;
+    company: string;
+    overall: number;
+    recommendation: string;
+    date: string;
+  }>;
+}
+
+export default function DashboardPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics>({
+    totalInterviews: 0,
+    averageOverall: 0,
+    radarData: [],
+    trendData: [],
+    recentFeedback: [],
+  });
+  const [dataLoading, setDataLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Form states
+  const [role, setRole] = useState('Software Engineer');
+  const [difficulty, setDifficulty] = useState('Medium');
+  const [company, setCompany] = useState('Startup');
+  const [experience, setExperience] = useState(3);
+  const [resume, setResume] = useState('');
+
+  // Authentication check
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  // Fetch data
+  const fetchData = async () => {
+    try {
+      const [interviewsRes, analyticsRes] = await Promise.all([
+        fetch('/api/interviews'),
+        fetch('/api/analytics'),
+      ]);
+
+      if (interviewsRes.ok) {
+        const data = await interviewsRes.json();
+        setInterviews(data.interviews);
+      }
+      if (analyticsRes.ok) {
+        const data = await analyticsRes.json();
+        setAnalytics(data);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      const timer = setTimeout(() => {
+        fetchData();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
+
+  const handleStartInterview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreating(true);
+
+    try {
+      const res = await fetch('/api/interviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role, difficulty, company, experience, resume }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.interview) {
+        setIsModalOpen(false);
+        router.push(`/interview/${data.interview.id}`);
+      } else {
+        alert(data.error || 'Failed to create interview');
+        setIsCreating(false);
+      }
+    } catch (err) {
+      console.error('Create interview error:', err);
+      alert('An unexpected error occurred. Please try again.');
+      setIsCreating(false);
+    }
+  };
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-zinc-950">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-zinc-950 pb-16 pt-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Welcome Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-white">
+              Hello, {user.name.split(' ')[0]} 👋
+            </h1>
+            <p className="mt-1 text-sm text-zinc-400">
+              Welcome back. Let&apos;s review your progress or start a new mock interview session.
+            </p>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:from-indigo-600 hover:to-purple-700"
+          >
+            <Plus className="h-4.5 w-4.5" />
+            <span>Start New Interview</span>
+          </button>
+        </div>
+
+        {dataLoading ? (
+          <div className="flex h-64 items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+          </div>
+        ) : (
+          <>
+            {/* Stats Summary Cards */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              {/* Card 1: Average Score */}
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-md">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-zinc-400">Average Score</span>
+                  <Award className="h-5 w-5 text-indigo-400" />
+                </div>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-white">
+                    {analytics.averageOverall > 0 ? `${analytics.averageOverall}%` : 'N/A'}
+                  </span>
+                  {analytics.averageOverall > 0 && (
+                    <span className="text-xs font-semibold text-emerald-400 flex items-center gap-0.5">
+                      <TrendingUp className="h-3 w-3" /> Ready
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Target: 80%+ to unlock major tech standards
+                </p>
+              </div>
+
+              {/* Card 2: Completed Interviews */}
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-md">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-zinc-400">Completed Sessions</span>
+                  <Play className="h-5 w-5 text-purple-400" />
+                </div>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-white">{analytics.totalInterviews}</span>
+                </div>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Total voice simulations completed successfully
+                </p>
+              </div>
+
+              {/* Card 3: Experience Focus */}
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-md">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-zinc-400">Adaptive Intelligence</span>
+                  <Brain className="h-5 w-5 text-pink-400" />
+                </div>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-white">Dynamic</span>
+                </div>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Steered dynamically by background evaluation loops
+                </p>
+              </div>
+            </div>
+
+            {/* Analytics Charts */}
+            {interviews.length > 0 && (
+              <DashboardCharts
+                radarData={analytics.radarData}
+                trendData={analytics.trendData}
+              />
+            )}
+
+            {/* Main Content Layout (Grid) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column: Recent Feedback & Guidelines */}
+              <div className="lg:col-span-1 space-y-6">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-4">
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-indigo-400" />
+                    <span>Recent Evaluation Insights</span>
+                  </h2>
+                  {analytics.recentFeedback.length > 0 ? (
+                    <div className="space-y-4">
+                      {analytics.recentFeedback.map((feedback) => (
+                        <div
+                          key={feedback.id}
+                          className="border-l-2 border-indigo-500/50 pl-3 py-1 space-y-1.5"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-zinc-300">
+                              {feedback.role} ({feedback.company})
+                            </span>
+                            <span className="text-xs font-bold text-indigo-400">
+                              {feedback.overall}%
+                            </span>
+                          </div>
+                          <p className="text-xs text-zinc-400 line-clamp-2">
+                            {feedback.recommendation}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-zinc-500">
+                      No feedback insights yet. Complete your first voice interview to analyze your performance!
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-4">
+                  <h3 className="text-sm font-semibold text-white">Directives for Candidates</h3>
+                  <ul className="text-xs text-zinc-400 space-y-2 list-disc list-inside">
+                    <li>Grant browser microphone access before loading the interview.</li>
+                    <li>Avoid chat elements; speak clearly to the AI like a real panel.</li>
+                    <li>Provide specific metrics (e.g. &quot;reduced CLS by 40%&quot;) to trigger harder scaling questions.</li>
+                    <li>If you struggle, clarify assumptions or ask for hints.</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Right Column: Interviews List */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm">
+                  <h2 className="text-lg font-bold text-white mb-6">Your Interviews</h2>
+                  {interviews.length > 0 ? (
+                    <div className="divide-y divide-zinc-900">
+                      {interviews.map((interview) => (
+                        <div
+                          key={interview.id}
+                          className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 first:pt-0 last:pb-0"
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2.5">
+                              <h3 className="text-sm font-bold text-white">{interview.role}</h3>
+                              <span className="inline-flex items-center rounded-md bg-zinc-800 px-2 py-0.5 text-2xs font-medium text-zinc-400">
+                                {interview.company}
+                              </span>
+                              <span className="inline-flex items-center rounded-md bg-zinc-800/40 px-2 py-0.5 text-2xs font-medium text-zinc-400">
+                                {interview.difficulty}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-2xs text-zinc-500">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3.5 w-3.5" />
+                                {new Date(interview.startedAt).toLocaleDateString()}
+                              </span>
+                              <span>• {interview.experience} Years Exp.</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            {interview.status === 'completed' ? (
+                              <>
+                                <span className="text-sm font-bold text-indigo-400">
+                                  Score: {interview.scores?.overall}%
+                                </span>
+                                <Link
+                                  href={`/interview/${interview.id}/report`}
+                                  className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-800 hover:text-white"
+                                >
+                                  <FileText className="h-3.5 w-3.5" />
+                                  <span>Report</span>
+                                </Link>
+                              </>
+                            ) : (
+                              <>
+                                <span className="inline-flex items-center rounded-md bg-yellow-500/10 px-2 py-1 text-2xs font-medium text-yellow-400 ring-1 ring-inset ring-yellow-500/20">
+                                  {interview.status === 'active' ? 'Active' : 'Created'}
+                                </span>
+                                <Link
+                                  href={`/interview/${interview.id}`}
+                                  className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+                                >
+                                  <Play className="h-3.5 w-3.5" />
+                                  <span>Resume</span>
+                                </Link>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 space-y-4">
+                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-zinc-900 text-zinc-500">
+                        <Clock className="h-6 w-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-bold text-white">No interviews found</h3>
+                        <p className="text-xs text-zinc-500">
+                          Launch your first real-time voice interview session to begin.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span>Start First Interview</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Start Interview Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isCreating && setIsModalOpen(false)}
+              className="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm"
+            />
+
+            {/* Modal Dialog */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl backdrop-blur-md max-h-[90vh] flex flex-col justify-between"
+            >
+              {isCreating ? (
+                // Full Screen Creating Screen
+                <div className="py-12 flex flex-col items-center justify-center text-center space-y-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-indigo-500/20 blur-xl animate-pulse" />
+                    <Loader2 className="h-16 w-16 animate-spin text-indigo-500 relative z-10" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-bold text-white">Generating Interview Plan...</h3>
+                    <p className="text-xs text-zinc-400 max-w-xs mx-auto">
+                      AI is generating customized objectives, topic timelines, and rubrics tailored to your role, company style, and resume.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                // Modal Form
+                <form onSubmit={handleStartInterview} className="space-y-6 flex-1 overflow-y-auto pr-1">
+                  <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-indigo-400" />
+                      <span>Configure New Interview</span>
+                    </h3>
+                  </div>
+
+                  {/* Role Dropdown */}
+                  <div className="space-y-2">
+                    <label htmlFor="role" className="block text-xs font-semibold text-zinc-400">
+                      Target Job Role
+                    </label>
+                    <select
+                      id="role"
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option>Software Engineer</option>
+                      <option>Frontend Engineer</option>
+                      <option>Backend Engineer</option>
+                      <option>Fullstack Developer</option>
+                      <option>ML Engineer</option>
+                      <option>Data Scientist</option>
+                    </select>
+                  </div>
+
+                  {/* Grid for Company & Difficulty */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label htmlFor="company" className="block text-xs font-semibold text-zinc-400">
+                        Company Style
+                      </label>
+                      <select
+                        id="company"
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      >
+                        <option>Google (Tech Giant / Core Algorithms)</option>
+                        <option>Amazon (LP / Systems focus)</option>
+                        <option>Meta (Fast Execution / Performance)</option>
+                        <option>Startup (Fullstack / High Velocity)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="difficulty" className="block text-xs font-semibold text-zinc-400">
+                        Difficulty
+                      </label>
+                      <select
+                        id="difficulty"
+                        value={difficulty}
+                        onChange={(e) => setDifficulty(e.target.value)}
+                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      >
+                        <option>Easy</option>
+                        <option>Medium</option>
+                        <option>Hard</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Experience Slider */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <label htmlFor="experience" className="block text-xs font-semibold text-zinc-400">
+                        Years of Experience
+                      </label>
+                      <span className="text-xs font-bold text-indigo-400">{experience} Years</span>
+                    </div>
+                    <input
+                      id="experience"
+                      type="range"
+                      min="0"
+                      max="15"
+                      value={experience}
+                      onChange={(e) => setExperience(Number(e.target.value))}
+                      className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                  </div>
+
+                  {/* Resume Area */}
+                  <div className="space-y-2">
+                    <label htmlFor="resume" className="block text-xs font-semibold text-zinc-400">
+                      Paste Resume / Experience Text (Optional)
+                    </label>
+                    <textarea
+                      id="resume"
+                      value={resume}
+                      onChange={(e) => setResume(e.target.value)}
+                      rows={4}
+                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
+                      placeholder="Paste your resume or relevant experience summary here for personalized questions."
+                    />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
+                      className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-2.5 text-sm font-semibold text-zinc-400 transition hover:border-zinc-700 hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:from-indigo-600 hover:to-purple-700"
+                    >
+                      <Play className="h-4 w-4" />
+                      <span>Start Interview</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
