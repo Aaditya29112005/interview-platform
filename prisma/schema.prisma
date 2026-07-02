@@ -1,0 +1,64 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         String      @id @default(uuid())
+  name       String
+  email      String      @unique
+  password   String
+  createdAt  DateTime    @default(now())
+  interviews Interview[]
+}
+
+model Interview {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String
+  difficulty     String
+  company        String
+  experience     Int       @default(1)
+  status         String    @default("pending") // pending, active, completed
+  startedAt      DateTime  @default(now())
+  endedAt        DateTime?
+  objective      String?   @db.Text
+  topics         Json?     // Array of topics, e.g. [{"name": "React Hooks", "status": "pending"}]
+  memory         Json?     // Running memory JSON (strengths, weaknesses, etc.)
+  messages       Message[]
+  scores         Score?
+}
+
+model Message {
+  id          String    @id @default(uuid())
+  interviewId String
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  speaker     String    // "candidate" or "ai"
+  text        String    @db.Text
+  timestamp   DateTime  @default(now())
+}
+
+model Score {
+  id           String    @id @default(uuid())
+  interviewId  String    @unique
+  interview    Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  communication Int
+  problemSolving Int
+  confidence   Int
+  technicalDepth Int
+  clarity      Int
+  leadership   Int
+  overall      Int
+  strengths    String[]  @default([])
+  weaknesses   String[]  @default([])
+  recommendations String @db.Text
+  struggledQuestions String[] @default([])
+  suggestedStudyPlan String @db.Text
+  recommendedResources String[] @default([])
+  estimatedLevel String  @default("L3")
+}
