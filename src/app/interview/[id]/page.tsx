@@ -296,8 +296,9 @@ export default function InterviewStudioPage() {
       const int16Data = new Int16Array(buf);
       const audioBuffer = playCtx.createBuffer(1, int16Data.length, 24000);
       const channelData = audioBuffer.getChannelData(0);
+      const inv32768 = 1.0 / 32768.0;
       for (let i = 0; i < int16Data.length; i++) {
-        channelData[i] = int16Data[i] / 32768.0;
+        channelData[i] = int16Data[i] * inv32768;
       }
 
       const source = playCtx.createBufferSource();
@@ -340,8 +341,9 @@ export default function InterviewStudioPage() {
       const int16Data = new Int16Array(buf);
       const audioBuffer = playCtx.createBuffer(1, int16Data.length, 24000);
       const channelData = audioBuffer.getChannelData(0);
+      const inv32768 = 1.0 / 32768.0;
       for (let i = 0; i < int16Data.length; i++) {
-        channelData[i] = int16Data[i] / 32768.0;
+        channelData[i] = int16Data[i] * inv32768;
       }
 
       const source = playCtx.createBufferSource();
@@ -491,7 +493,12 @@ export default function InterviewStudioPage() {
           try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-            const audioCtx = new AudioCtx();
+            let audioCtx;
+            try {
+              audioCtx = new AudioCtx({ sampleRate: 16000 });
+            } catch {
+              audioCtx = new AudioCtx();
+            }
             const nativeRate = audioCtx.sampleRate;
             audioContextRef.current = audioCtx;
 
