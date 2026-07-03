@@ -142,15 +142,15 @@ export default function ReportPage() {
 
   if (loading || !user || dataLoading) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#050816]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#020305]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#7DD3FC]" />
       </div>
     );
   }
 
   if (!interview || !score) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-[#050816] text-center space-y-4">
+      <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-[#020305] text-center space-y-4">
         <AlertTriangle className="h-12 w-12 text-yellow-500" />
         <h2 className="text-xl font-bold text-white">Report Not Found</h2>
         <p className="text-sm text-zinc-400">
@@ -158,7 +158,7 @@ export default function ReportPage() {
         </p>
         <button
           onClick={() => router.push('/dashboard')}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-[#7DD3FC] text-zinc-950 px-4 py-2 text-sm font-semibold transition hover:bg-[#7DD3FC]/90"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Dashboard</span>
@@ -173,16 +173,16 @@ export default function ReportPage() {
   const strokeDashoffset = circumference - (score.overall / 100) * circumference;
 
   const scoreCategories = [
-    { name: 'Technical Depth', value: score.technicalDepth, color: 'bg-indigo-500' },
-    { name: 'Problem Solving', value: score.problemSolving, color: 'bg-purple-500' },
-    { name: 'Communication', value: score.communication, color: 'bg-pink-500' },
+    { name: 'Technical Depth', value: score.technicalDepth, color: 'bg-[#7DD3FC]' },
+    { name: 'Problem Solving', value: score.problemSolving, color: 'bg-zinc-400' },
+    { name: 'Communication', value: score.communication, color: 'bg-zinc-500' },
     { name: 'Confidence', value: score.confidence, color: 'bg-emerald-500' },
-    { name: 'Clarity', value: score.clarity, color: 'bg-blue-500' },
+    { name: 'Clarity', value: score.clarity, color: 'bg-zinc-300' },
     { name: 'Leadership', value: score.leadership, color: 'bg-amber-500' },
   ];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#050816] pb-16 pt-8 print:bg-white print:text-black">
+    <div className="min-h-[calc(100vh-4rem)] bg-[#020305] pb-16 pt-8 print:bg-white print:text-black">
       {/* Print-specific style adjustments */}
       <style jsx global>{`
         @media print {
@@ -231,7 +231,7 @@ export default function ReportPage() {
             </button>
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#7DD3FC] text-zinc-950 px-4 py-2 text-xs font-semibold shadow-sm transition hover:bg-[#7DD3FC]/90"
             >
               <Printer className="h-4 w-4" />
               <span>Export PDF / Print</span>
@@ -294,10 +294,10 @@ export default function ReportPage() {
           {/* Card 2: Industry Readiness Level */}
           <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm flex flex-col justify-between print-card relative overflow-hidden">
             {/* Glowing decorative background item */}
-            <div className="absolute right-[-10%] top-[-20%] h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl" />
+            <div className="absolute right-[-10%] top-[-20%] h-48 w-48 rounded-full bg-[#7DD3FC]/10 blur-3xl" />
 
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-1 rounded-full border border-indigo-500/30 bg-indigo-500/5 px-2.5 py-0.5 text-2xs font-semibold text-indigo-400">
+              <div className="inline-flex items-center gap-1 rounded-full border border-[#7DD3FC]/30 bg-[#7DD3FC]/5 px-2.5 py-0.5 text-2xs font-semibold text-[#7DD3FC]">
                 <Sparkles className="h-3 w-3" />
                 <span>Hiring Bar Calibrated</span>
               </div>
@@ -312,9 +312,9 @@ export default function ReportPage() {
                 <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider print-muted">
                   Target Hiring Benchmark
                 </span>
-                <p className="text-lg font-bold text-indigo-400 mt-1">{score.estimatedLevel}</p>
+                <p className="text-lg font-bold text-[#7DD3FC] mt-1">{score.estimatedLevel}</p>
               </div>
-              <Award className="h-10 w-10 text-indigo-500 opacity-60 shrink-0" />
+              <Award className="h-10 w-10 text-[#7DD3FC] opacity-60 shrink-0" />
             </div>
           </div>
         </div>
@@ -325,7 +325,7 @@ export default function ReportPage() {
           <div className="md:col-span-1 rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-6 print-card flex flex-col justify-between">
             <div>
               <h3 className="text-sm font-bold text-white print-text mb-4 flex items-center gap-2">
-                <Volume2 className="h-4.5 w-4.5 text-indigo-400" />
+                <Volume2 className="h-4.5 w-4.5 text-[#7DD3FC]" />
                 <span>Speech Telemetry</span>
               </h3>
               <div className="space-y-4">
@@ -347,7 +347,7 @@ export default function ReportPage() {
                     <span className="font-bold text-zinc-200">{score.vocabScore || 70}%</span>
                   </div>
                   <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${score.vocabScore || 70}%` }} />
+                    <div className="h-full bg-[#7DD3FC]" style={{ width: `${score.vocabScore || 70}%` }} />
                   </div>
                 </div>
               </div>
@@ -407,7 +407,7 @@ export default function ReportPage() {
                           const data = payload[0].payload;
                           return (
                             <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-3 shadow-xl backdrop-blur-sm max-w-xs space-y-1.5 text-2xs">
-                              <p className="font-bold text-indigo-400">Turn {data.turn}: {data.score}%</p>
+                              <p className="font-bold text-[#7DD3FC]">Turn {data.turn}: {data.score}%</p>
                               <p className="text-zinc-400 line-clamp-2"><span className="text-zinc-500 font-semibold">Q:</span> {data.question}</p>
                               <p className="text-zinc-400 line-clamp-2"><span className="text-zinc-500 font-semibold">A:</span> {data.answer}</p>
                               <p className="text-[10px] text-zinc-500 italic mt-1">Click dot to open in Mentor Mode below</p>
@@ -441,7 +441,7 @@ export default function ReportPage() {
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-4 print-card">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-white print-text flex items-center gap-2">
-                <Brain className="h-4.5 w-4.5 text-indigo-400" />
+                <Brain className="h-4.5 w-4.5 text-[#7DD3FC]" />
                 <span>The Interview Genome Profile</span>
               </h3>
               <span className="text-2xs text-zinc-500">Multi-Dimensional Capability</span>
@@ -475,10 +475,10 @@ export default function ReportPage() {
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-4 print-card">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-white print-text flex items-center gap-2">
-                <Sparkles className="h-4.5 w-4.5 text-purple-400" />
+                <Sparkles className="h-4.5 w-4.5 text-[#7DD3FC]" />
                 <span>Interview Forecast Dashboard</span>
               </h3>
-              <span className="text-2xs text-zinc-500 font-bold text-purple-400">Target Match Estimations</span>
+              <span className="text-2xs text-zinc-500 font-bold text-[#7DD3FC]">Target Match Estimations</span>
             </div>
 
             {score.forecast ? (
@@ -495,7 +495,7 @@ export default function ReportPage() {
                           Number(val) >= 80 
                             ? 'from-emerald-500 to-teal-400' 
                             : Number(val) >= 60 
-                              ? 'from-indigo-500 to-purple-400' 
+                              ? 'from-[#7DD3FC] to-white' 
                               : 'from-amber-500 to-orange-400'
                         }`}
                         style={{ width: `${val}%` }}
@@ -540,7 +540,7 @@ export default function ReportPage() {
 
         {/* Living Interview Universe (Constellation Map) */}
         <div className="rounded-2xl border border-zinc-800 bg-[#0B1020]/60 p-6 backdrop-blur-sm space-y-4 print-card relative overflow-hidden">
-          <div className="absolute inset-0 bg-radial-gradient from-indigo-500/5 to-transparent blur-[60px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(125,211,252,0.05)_0%,transparent_70%)] to-transparent blur-[60px]" />
           
           <div className="flex items-center justify-between border-b border-zinc-900 pb-4 relative z-10">
             <div>
@@ -550,7 +550,7 @@ export default function ReportPage() {
               </h3>
               <p className="text-[10px] text-zinc-500 mt-0.5">Explore your skill stars. Stronger skills burn brighter; weaker areas appear dim.</p>
             </div>
-            <span className="inline-flex items-center rounded-md bg-indigo-500/10 px-2 py-0.5 text-2xs font-bold text-indigo-400 border border-indigo-500/20 uppercase tracking-wider">
+            <span className="inline-flex items-center rounded-md bg-[#7DD3FC]/10 px-2 py-0.5 text-2xs font-bold text-[#7DD3FC] border border-[#7DD3FC]/20 uppercase tracking-wider">
               Constellation Map
             </span>
           </div>
@@ -607,7 +607,7 @@ export default function ReportPage() {
                       cy={star.y} 
                       r={brightnessRadius / 3 + 2} 
                       fill="#FFFFFF" 
-                      className="stroke-2 stroke-indigo-400 group-hover:fill-[#00E5FF] transition-all" 
+                      className="stroke-2 stroke-[#7DD3FC] group-hover:fill-[#00E5FF] transition-all" 
                     />
                     {/* Labels */}
                     <text 
@@ -694,7 +694,7 @@ export default function ReportPage() {
         {/* Custom Study Plan */}
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm print-card space-y-4">
           <h3 className="text-sm font-bold text-white print-text flex items-center gap-2">
-            <ListTodo className="h-4.5 w-4.5 text-indigo-400" />
+            <ListTodo className="h-4.5 w-4.5 text-[#7DD3FC]" />
             <span>Targeted Study Plan</span>
           </h3>
           <p className="text-xs text-zinc-300 print-text leading-relaxed whitespace-pre-line bg-zinc-950/30 p-4 rounded-xl border border-zinc-900">
@@ -720,7 +720,7 @@ export default function ReportPage() {
                     href={`https://google.com/search?q=${encodeURIComponent(resName)}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-indigo-400 hover:text-indigo-300 no-print"
+                    className="text-[#7DD3FC] hover:text-[#BAE6FD] no-print"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>
@@ -757,7 +757,7 @@ export default function ReportPage() {
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm print-card space-y-4">
             <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
               <h3 className="text-sm font-bold text-white print-text flex items-center gap-2">
-                <Sparkles className="h-4.5 w-4.5 text-indigo-400" />
+                <Sparkles className="h-4.5 w-4.5 text-[#7DD3FC]" />
                 <span>Code Sandbox Workspace Submission</span>
               </h3>
               <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest capitalize">
@@ -776,7 +776,7 @@ export default function ReportPage() {
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm print-card space-y-6 no-print">
             <div className="flex items-center justify-between border-b border-zinc-850 pb-3">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Brain className="h-4.5 w-4.5 text-indigo-400" />
+                <Brain className="h-4.5 w-4.5 text-[#7DD3FC]" />
                 <span>Interactive Mentor Mode Review</span>
               </h3>
               <span className="text-2xs text-zinc-500">Select any question turn to examine</span>
@@ -790,7 +790,7 @@ export default function ReportPage() {
                   onClick={() => handleLoadMentorFeedback(turn)}
                   className={`px-3 py-2 text-xs font-semibold rounded-xl border transition shrink-0 ${
                     selectedTurn?.turn === turn.turn
-                      ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/10'
+                      ? 'bg-[#0EA5E9] border-[#7DD3FC]/40 text-white shadow-lg shadow-[#7DD3FC]/10'
                       : 'bg-zinc-900/40 border-zinc-850 text-zinc-400 hover:border-zinc-700 hover:text-white'
                   }`}
                 >
@@ -820,7 +820,7 @@ export default function ReportPage() {
                 <div className="pt-4 border-t border-zinc-900">
                   {mentorLoading ? (
                     <div className="py-6 flex items-center justify-center gap-2 text-xs text-zinc-400">
-                      <Loader2 className="h-4.5 w-4.5 animate-spin text-indigo-400" />
+                      <Loader2 className="h-4.5 w-4.5 animate-spin text-[#7DD3FC]" />
                       <span>Mentor is analyzing your answer...</span>
                     </div>
                   ) : mentorCritique ? (
@@ -835,8 +835,8 @@ export default function ReportPage() {
 
                       {/* Ideal Response */}
                       <div className="space-y-1">
-                        <span className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Ideal Answer Guide</span>
-                        <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-line bg-indigo-950/5 border border-indigo-900/10 rounded-lg p-3">
+                        <span className="text-[10px] text-[#7DD3FC] uppercase tracking-widest font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#7DD3FC] to-white">Ideal Answer Guide</span>
+                        <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-line bg-white/[0.02] border border-white/[0.06] rounded-lg p-3">
                           {mentorCritique.idealAnswer}
                         </p>
                       </div>
@@ -853,7 +853,7 @@ export default function ReportPage() {
                     <div className="py-2 text-center">
                       <button
                         onClick={() => handleLoadMentorFeedback(selectedTurn)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#0EA5E9] px-4 py-2 text-xs font-semibold text-white hover:bg-[#0EA5E9] transition"
                       >
                         <Sparkles className="h-4 w-4" />
                         <span>Generate Mentor Feedback</span>

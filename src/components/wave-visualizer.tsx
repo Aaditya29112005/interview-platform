@@ -8,7 +8,7 @@ interface WaveVisualizerProps {
   colorClass?: string;
 }
 
-export function WaveVisualizer({ active, colorClass = 'bg-indigo-500' }: WaveVisualizerProps) {
+export function WaveVisualizer({ active, colorClass = 'bg-[#7DD3FC]' }: WaveVisualizerProps) {
   // 12 bars for the waveform
   const bars = Array.from({ length: 15 });
 

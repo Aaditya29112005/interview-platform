@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/components/auth-context';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { AlertCircle, ArrowRight, Loader2, Bot } from 'lucide-react';
+import { AlertCircle, ArrowRight, Loader2, Check } from 'lucide-react';
 
 export default function SignupPage() {
   const { signup, user, loading } = useAuth();
@@ -17,29 +17,22 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // If already logged in, redirect to dashboard
   useEffect(() => {
-    if (!loading && user) {
-      router.push('/dashboard');
-    }
+    if (!loading && user) router.push('/dashboard');
   }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
-
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError('Password must be at least 6 characters long.');
       setIsSubmitting(false);
       return;
     }
-
     try {
       const result = await signup(name, email, password);
-      if (result.error) {
-        setError(result.error);
-      }
+      if (result.error) setError(result.error);
     } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {
@@ -49,58 +42,116 @@ export default function SignupPage() {
 
   if (loading || user) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-zinc-950">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#020305]">
+        <Loader2 className="h-7 w-7 animate-spin text-[#7DD3FC]" />
       </div>
     );
   }
 
+  const perks = [
+    'Unlimited AI voice mock interviews',
+    'Real-time adaptive questioning',
+    'Sandboxed code execution environment',
+    'Forensic performance analytics',
+  ];
+
   return (
-    <div className="relative flex min-h-[calc(100vh-4rem)] flex-col justify-center px-6 py-12 lg:px-8 bg-zinc-950">
-      {/* Background Gradients */}
-      <div className="absolute top-[20%] left-[10%] h-[400px] w-[400px] rounded-full bg-indigo-500/5 blur-[100px]" />
-      <div className="absolute bottom-[20%] right-[10%] h-[400px] w-[400px] rounded-full bg-purple-500/5 blur-[100px]" />
+    <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center px-6 py-16 bg-[#020305] overflow-hidden">
+      {/* Background radial blooms */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(125,211,252,0.05)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] h-48 bg-gradient-to-t from-white/[0.02] to-transparent blur-3xl pointer-events-none" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        {/* Left: benefits column */}
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-md shadow-indigo-500/10"
+          initial={{ opacity: 0, x: -24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="hidden lg:flex flex-col gap-8"
         >
-          <Bot className="h-6 w-6 text-white" />
-        </motion.div>
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-white">
-          Create your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-zinc-400">
-          Or{' '}
-          <Link href="/login" className="font-semibold text-indigo-400 hover:text-indigo-300">
-            sign in to your existing account
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="relative flex h-9 w-9 items-center justify-center">
+              <div className="absolute inset-0 rounded-xl bg-[#7DD3FC]/10 blur-sm" />
+              <svg className="relative w-5 h-5 text-white drop-shadow-[0_0_10px_rgba(125,211,252,0.8)]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C12 7.52285 7.52285 12 2 12C7.52285 12 12 16.4771 12 22C12 16.4771 16.4771 12 22 12C16.4771 12 12 7.52285 12 2Z" />
+              </svg>
+            </div>
+            <span className="text-base font-bold tracking-tight text-white">InterviewOS<span className="text-[#7DD3FC]">AI</span></span>
           </Link>
-        </p>
-      </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="space-y-4">
+            <h1 className="text-4xl font-black tracking-[-0.04em] text-white leading-[1.05]">
+              Start preparing for your <span className="text-gradient-ice">dream role.</span>
+            </h1>
+            <p className="text-sm text-[#64748B] leading-relaxed">
+              Join 12,000+ engineers who've leveled up with InterviewOS AI's real-time voice coaching and adaptive interview engine.
+            </p>
+          </div>
+
+          <ul className="space-y-3">
+            {perks.map((perk) => (
+              <li key={perk} className="flex items-center gap-3 text-sm text-[#94A3B8]">
+                <div className="flex-shrink-0 h-5 w-5 rounded-full bg-[#7DD3FC]/10 border border-[#7DD3FC]/20 flex items-center justify-center">
+                  <Check className="h-3 w-3 text-[#7DD3FC]" />
+                </div>
+                {perk}
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex items-center gap-4 pt-4">
+            <div className="flex -space-x-2">
+              {['S', 'M', 'D', 'R'].map((l, i) => (
+                <div key={i} className="h-8 w-8 rounded-full border-2 border-[#020305] bg-[#0C111B] flex items-center justify-center text-[10px] font-bold text-white">
+                  {l}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-[#475569]"><span className="text-white font-bold">12,400+</span> engineers prepared</p>
+          </div>
+        </motion.div>
+
+        {/* Right: form column */}
         <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-8 shadow-xl backdrop-blur-md"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
         >
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 p-3.5 text-sm text-red-400">
-                <AlertCircle className="h-4.5 w-4.5 shrink-0" />
-                <span>{error}</span>
+          {/* Mobile logo */}
+          <div className="lg:hidden flex flex-col items-center mb-8 gap-2">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="relative flex h-9 w-9 items-center justify-center">
+                <div className="absolute inset-0 rounded-xl bg-[#7DD3FC]/10 blur-sm" />
+                <svg className="relative w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C12 7.52285 7.52285 12 2 12C7.52285 12 12 16.4771 12 22C12 16.4771 16.4771 12 22 12C16.4771 12 12 7.52285 12 2Z" />
+                </svg>
               </div>
-            )}
+              <span className="text-base font-bold text-white">InterviewOS<span className="text-[#7DD3FC]">AI</span></span>
+            </Link>
+            <h1 className="text-2xl font-black tracking-tight text-white">Create your account</h1>
+          </div>
 
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-zinc-300">
-                Full Name
-              </label>
-              <div className="mt-2">
+          <div className="glass-panel rounded-3xl p-8 border border-white/[0.06]">
+            <div className="hidden lg:block mb-6">
+              <h2 className="text-xl font-black text-white tracking-[-0.04em]">Create your account</h2>
+              <p className="text-sm text-[#64748B] mt-1">
+                Already have one?{' '}
+                <Link href="/login" className="text-[#7DD3FC] font-semibold hover:text-white transition-colors">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {error && (
+                <div className="flex items-center gap-2.5 rounded-2xl border border-red-500/15 bg-red-500/05 p-4 text-sm text-red-400">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <label htmlFor="name" className="block text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Full Name</label>
                 <input
                   id="name"
                   name="name"
@@ -108,17 +159,13 @@ export default function SignupPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="block w-full rounded-xl border border-zinc-800 bg-zinc-950/50 px-4 py-3 text-white placeholder-zinc-500 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                  placeholder="Aaditya Mohan"
+                  className="block w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3.5 text-sm text-white placeholder-[#475569] outline-none transition-all duration-200 focus:border-[#7DD3FC]/40 focus:bg-white/[0.05]"
+                  placeholder="Your full name"
                 />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
-                Email address
-              </label>
-              <div className="mt-2">
+              <div className="space-y-1.5">
+                <label htmlFor="email" className="block text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Email address</label>
                 <input
                   id="email"
                   name="email"
@@ -127,17 +174,13 @@ export default function SignupPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full rounded-xl border border-zinc-800 bg-zinc-950/50 px-4 py-3 text-white placeholder-zinc-500 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                  placeholder="name@company.com"
+                  className="block w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3.5 text-sm text-white placeholder-[#475569] outline-none transition-all duration-200 focus:border-[#7DD3FC]/40 focus:bg-white/[0.05]"
+                  placeholder="you@company.com"
                 />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-zinc-300">
-                Password
-              </label>
-              <div className="mt-2">
+              <div className="space-y-1.5">
+                <label htmlFor="password" className="block text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Password</label>
                 <input
                   id="password"
                   name="password"
@@ -146,29 +189,41 @@ export default function SignupPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full rounded-xl border border-zinc-800 bg-zinc-950/50 px-4 py-3 text-white placeholder-zinc-500 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="block w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3.5 text-sm text-white placeholder-[#475569] outline-none transition-all duration-200 focus:border-[#7DD3FC]/40 focus:bg-white/[0.05]"
                   placeholder="At least 6 characters"
                 />
               </div>
-            </div>
 
-            <div>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50"
+                className="group relative w-full flex items-center justify-center gap-2 rounded-full bg-[#7DD3FC] py-3.5 text-sm font-bold text-[#020305] transition-all duration-200 hover:bg-[#93DBFD] disabled:opacity-50 shadow-[0_0_30px_rgba(125,211,252,0.2)] mt-2"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
                     <span>Create Account</span>
-                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </>
                 )}
+                <div className="absolute inset-0 rounded-full pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%)' }} />
               </button>
-            </div>
-          </form>
+
+              <p className="text-center text-[11px] text-[#334155] pt-1">
+                By creating an account you agree to our{' '}
+                <a href="#" className="text-[#475569] hover:text-white transition-colors">Terms of Service</a>
+                {' '}and{' '}
+                <a href="#" className="text-[#475569] hover:text-white transition-colors">Privacy Policy</a>
+              </p>
+            </form>
+          </div>
+
+          {/* Mobile sign in link */}
+          <p className="lg:hidden text-center text-sm text-[#64748B] mt-6">
+            Already have an account?{' '}
+            <Link href="/login" className="text-[#7DD3FC] font-semibold hover:text-white transition-colors">Sign in</Link>
+          </p>
         </motion.div>
       </div>
     </div>

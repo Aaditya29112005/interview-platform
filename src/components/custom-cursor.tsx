@@ -1,97 +1,109 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 export function CustomCursor() {
-  const [position, setPosition] = useState({ x: -100, y: -100 });
-  const [trail, setTrail] = useState({ x: -100, y: -100 });
+  const [position, setPosition] = useState({ x: -200, y: -200 });
+  const [trail, setTrail] = useState({ x: -200, y: -200 });
   const [isHovered, setIsHovered] = useState(false);
+  const [isClicking, setIsClicking] = useState(false);
+  const animRef = useRef<number>(0);
+  const trailRef = useRef({ x: -200, y: -200 });
+  const posRef = useRef({ x: -200, y: -200 });
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const onMove = (e: MouseEvent) => {
+      posRef.current = { x: e.clientX, y: e.clientY };
       setPosition({ x: e.clientX, y: e.clientY });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-
-    // Track if hovering over buttons or links
-    const handleMouseOver = (e: MouseEvent) => {
+    const onOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (
-        target.tagName === 'BUTTON' ||
-        target.tagName === 'A' ||
-        target.closest('button') ||
-        target.closest('a') ||
-        target.classList.contains('interactive')
-      ) {
-        setIsHovered(true);
-      } else {
-        setIsHovered(false);
-      }
+      setIsHovered(
+        !!target.closest('button, a, [role="button"], input, textarea, select, label, .interactive')
+      );
     };
 
-    window.addEventListener('mouseover', handleMouseOver);
+    const onDown = () => setIsClicking(true);
+    const onUp = () => setIsClicking(false);
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseover', onOver);
+    window.addEventListener('mousedown', onDown);
+    window.addEventListener('mouseup', onUp);
+
+    // Smooth trail via rAF
+    const updateTrail = () => {
+      const dx = posRef.current.x - trailRef.current.x;
+      const dy = posRef.current.y - trailRef.current.y;
+      if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
+        trailRef.current = {
+          x: trailRef.current.x + dx * 0.1,
+          y: trailRef.current.y + dy * 0.1,
+        };
+        setTrail({ ...trailRef.current });
+      }
+      animRef.current = requestAnimationFrame(updateTrail);
+    };
+    animRef.current = requestAnimationFrame(updateTrail);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseover', handleMouseOver);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseover', onOver);
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('mouseup', onUp);
+      cancelAnimationFrame(animRef.current);
     };
   }, []);
 
-  // Smooth trail effect using requestAnimationFrame interpolation
-  useEffect(() => {
-    let animId: number;
-    const updateTrail = () => {
-      setTrail((prev) => {
-        const dx = position.x - prev.x;
-        const dy = position.y - prev.y;
-        if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
-          return prev;
-        }
-        return {
-          x: prev.x + dx * 0.12,
-          y: prev.y + dy * 0.12,
-        };
-      });
-      animId = requestAnimationFrame(updateTrail);
-    };
-    animId = requestAnimationFrame(updateTrail);
-    return () => cancelAnimationFrame(animId);
-  }, [position]);
+  const cursorSize = isClicking ? 6 : isHovered ? 24 : 8;
+  const cursorOpacity = isClicking ? 0.9 : 1;
 
   return (
     <>
-      {/* Background Spotlight Layer - Apple & Linear style dynamic glow */}
+      {/* Background spotlight — follows cursor slowly */}
       <div
-        className="pointer-events-none fixed inset-0 z-0 hidden md:block"
+        className="pointer-events-none fixed inset-0 z-0 hidden md:block transition-none"
         style={{
-          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(79, 124, 255, 0.05), rgba(124, 108, 255, 0.02) 40%, transparent 80%)`,
+          background: `radial-gradient(700px circle at ${position.x}px ${position.y}px, rgba(125,211,252,0.04), rgba(255,255,255,0.01) 40%, transparent 80%)`,
         }}
       />
 
-      {/* Lag-smoothed ambient blob light */}
+      {/* Trailing soft blob */}
       <div
-        className="pointer-events-none fixed z-50 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-[#4F7CFF]/30 to-[#7C6CFF]/30 blur-[14px] transition-transform duration-300 ease-out hidden md:block"
+        className="pointer-events-none fixed z-[9998] hidden md:block rounded-full"
         style={{
-          left: `${trail.x}px`,
-          top: `${trail.y}px`,
-          transform: `translate(-50%, -50%) scale(${isHovered ? 2.8 : 1})`,
+          left: trail.x,
+          top: trail.y,
+          width: isHovered ? 56 : 32,
+          height: isHovered ? 56 : 32,
+          transform: 'translate(-50%, -50%)',
+          background: 'radial-gradient(circle, rgba(125,211,252,0.18) 0%, rgba(255,255,255,0.06) 60%, transparent 100%)',
+          filter: 'blur(8px)',
+          transition: 'width 0.25s ease, height 0.25s ease',
         }}
       />
-      
-      {/* Precision cursor tip: stretches to capsule/pill on hover */}
+
+      {/* Precision cursor dot */}
       <div
-        className="pointer-events-none fixed z-50 rounded-full bg-[#4F7CFF] mix-blend-screen transition-all duration-200 ease-out hidden md:block shadow-[0_0_12px_rgba(79,124,255,0.8)]"
+        className="pointer-events-none fixed z-[9999] hidden md:block mix-blend-screen"
         style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          width: isHovered ? '28px' : '8px',
-          height: isHovered ? '8px' : '8px',
-          transform: `translate(-50%, -50%)`,
+          left: position.x,
+          top: position.y,
+          width: isHovered ? 32 : cursorSize,
+          height: cursorSize,
+          transform: 'translate(-50%, -50%)',
           borderRadius: isHovered ? '4px' : '50%',
+          background: isHovered
+            ? 'rgba(125,211,252,0.9)'
+            : 'rgba(255,255,255,0.95)',
+          opacity: cursorOpacity,
+          boxShadow: isHovered
+            ? '0 0 16px rgba(125,211,252,0.8), 0 0 40px rgba(125,211,252,0.3)'
+            : '0 0 12px rgba(255,255,255,0.8)',
+          transition: 'width 0.2s ease, height 0.2s ease, border-radius 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
         }}
       />
     </>
   );
 }
-

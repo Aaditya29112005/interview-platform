@@ -4,16 +4,11 @@ import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth-context';
 import {
-  Plus,
   Play,
-  FileText,
-  Clock,
   Sparkles,
   Award,
-  Loader2,
   TrendingUp,
   Brain,
-  Globe,
   Database,
   Code,
   Heart,
@@ -21,684 +16,574 @@ import {
   ChevronUp,
   ChevronDown,
   ArrowRight,
-  ArrowUpRight,
   Star,
   Mic,
   Cpu,
   Layers,
   Activity,
+  Shield,
+  Zap,
+  BarChart3,
+  Users,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { OrbVisualizer } from '@/components/orb-visualizer';
 
-// Canvas-based dynamic background particle generator
+// ─── Background Particles ───────────────────────────────────────
 function BackgroundParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
-    let animationFrameId: number;
-
-    const particles: Array<{
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      alpha: number;
-      alphaSpeed: number;
-    }> = [];
-
-    // Create particles
-    for (let i = 0; i < 45; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: (Math.random() - 0.5) * 0.15,
-        size: Math.random() * 1.5 + 0.5,
-        alpha: Math.random() * 0.5 + 0.1,
-        alphaSpeed: (Math.random() - 0.5) * 0.002,
-      });
-    }
-
-    const handleResize = () => {
+    let raf: number;
+    const particles = Array.from({ length: 55 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.12,
+      vy: (Math.random() - 0.5) * 0.12,
+      size: Math.random() * 1.4 + 0.4,
+      alpha: Math.random() * 0.4 + 0.05,
+      alphaDir: (Math.random() - 0.5) * 0.0015,
+      color: Math.random() > 0.5 ? 1 : 0, // 1=ice blue, 0=white
+    }));
+    const onResize = () => {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
-    window.addEventListener('resize', handleResize);
-
+    window.addEventListener('resize', onResize, { passive: true });
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
-      particles.forEach((p) => {
+      for (const p of particles) {
         p.x += p.vx;
         p.y += p.vy;
-
-        // Bounce borders
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
-
-        // Animate alpha
-        p.alpha += p.alphaSpeed;
-        if (p.alpha <= 0.05 || p.alpha >= 0.6) {
-          p.alphaSpeed *= -1;
-        }
-
+        p.alpha += p.alphaDir;
+        if (p.alpha <= 0.03 || p.alpha >= 0.5) p.alphaDir *= -1;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(79, 124, 255, ${Math.max(0, p.alpha)})`;
+        ctx.fillStyle = p.color
+          ? `rgba(125,211,252,${Math.max(0, p.alpha)})`
+          : `rgba(255,255,255,${Math.max(0, p.alpha * 0.6)})`;
         ctx.fill();
-      });
-      animationFrameId = requestAnimationFrame(draw);
+      }
+      raf = requestAnimationFrame(draw);
     };
-
     draw();
-
     return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', onResize);
+      cancelAnimationFrame(raf);
     };
   }, []);
-
   return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-0" />;
 }
 
+// ─── Waveform Bars ───────────────────────────────────────────────
+function WaveformBars({ active }: { active: boolean }) {
+  const bars = [0.35, 0.6, 0.85, 1, 0.85, 0.6, 0.45, 0.7, 0.9, 0.75, 0.5, 0.65, 0.4];
+  return (
+    <div className="flex items-center justify-center gap-[3px] h-8">
+      {bars.map((h, i) => (
+        <motion.div
+          key={i}
+          className="w-[3px] rounded-full bg-[#7DD3FC]"
+          animate={active ? { scaleY: [h * 0.3, h, h * 0.4, h * 0.8, h * 0.3] } : { scaleY: 0.15 }}
+          transition={{
+            duration: active ? 1.2 : 0.5,
+            repeat: active ? Infinity : 0,
+            delay: i * 0.08,
+            ease: 'easeInOut',
+          }}
+          style={{ height: 28, transformOrigin: 'bottom', opacity: active ? 0.9 : 0.25 }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Main Component ──────────────────────────────────────────────
 export default function Home() {
   const { user } = useAuth();
   const [orbState, setOrbState] = useState<'idle' | 'listening' | 'thinking' | 'speaking' | 'challenging'>('idle');
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
-  
-  // Interactive Voice Demo Simulation states
   const [isPlayingDemo, setIsPlayingDemo] = useState(false);
   const [demoStep, setDemoStep] = useState(0);
   const [demoTranscript, setDemoTranscript] = useState<Array<{ speaker: 'ai' | 'candidate'; text: string }>>([
-    { speaker: 'ai', text: 'Welcome to your technical review. Let us start with system design. How would you handle a sudden peak of 100k requests/sec?' }
+    { speaker: 'ai', text: 'Welcome. Let\'s start with system design. How would you architect a service handling 100k requests per second?' }
   ]);
-
-  // All-in-one features tabs
   const [activeTab, setActiveTab] = useState<'usage' | 'technology' | 'data'>('usage');
 
-  // Demo play step timeline simulation
+  // Demo timeline
   useEffect(() => {
     if (!isPlayingDemo) return;
-    
     let timer: NodeJS.Timeout;
-    
     if (demoStep === 0) {
       setOrbState('speaking');
-      timer = setTimeout(() => {
-        setOrbState('idle');
-        setDemoStep(1);
-      }, 5000);
+      timer = setTimeout(() => { setOrbState('idle'); setDemoStep(1); }, 5000);
     } else if (demoStep === 1) {
       setOrbState('listening');
       timer = setTimeout(() => {
-        setDemoTranscript(prev => [
-          ...prev,
-          { speaker: 'candidate', text: 'I would set up an ingress rate limiter backed by Redis, and offload processing to an asynchronous Kafka queue.' }
-        ]);
+        setDemoTranscript(p => [...p, { speaker: 'candidate', text: 'I\'d use an ingress rate limiter backed by Redis, offloading processing to an async Kafka queue with idempotent consumers.' }]);
         setOrbState('thinking');
         setDemoStep(2);
-      }, 4000);
+      }, 4500);
     } else if (demoStep === 2) {
       timer = setTimeout(() => {
-        setDemoTranscript(prev => [
-          ...prev,
-          { speaker: 'ai', text: 'Good. But what if Redis fails or becomes a bottleneck? How do you prevent split-brain issues in clustering?' }
-        ]);
+        setDemoTranscript(p => [...p, { speaker: 'ai', text: 'Interesting. But if Redis becomes the bottleneck under sustained load, how do you prevent a split-brain in your clustering topology?' }]);
         setOrbState('challenging');
         setDemoStep(3);
       }, 3500);
     } else if (demoStep === 3) {
-      timer = setTimeout(() => {
-        setIsPlayingDemo(false);
-        setOrbState('idle');
-      }, 6000);
+      timer = setTimeout(() => { setIsPlayingDemo(false); setOrbState('idle'); }, 6000);
     }
-
     return () => clearTimeout(timer);
   }, [isPlayingDemo, demoStep]);
 
   const handleResetDemo = () => {
     setIsPlayingDemo(true);
     setDemoStep(0);
-    setDemoTranscript([
-      { speaker: 'ai', text: 'Welcome to your technical review. Let us start with system design. How would you handle a sudden peak of 100k requests/sec?' }
-    ]);
+    setDemoTranscript([{ speaker: 'ai', text: 'Welcome. Let\'s start with system design. How would you architect a service handling 100k requests per second?' }]);
   };
 
-  const headlineWords = "Next-gen enterprise with AI Agents".split(" ");
-
   const faqs = [
-    {
-      q: "How does the real-time voice streaming work?",
-      a: "InterviewOS AI establishes a direct WebRTC audio connection or real-time WebSocket channel to Google Gemini. This lets you speak naturally with less than 200ms latency, enabling natural interruptions and pacing."
-    },
-    {
-      q: "What programming languages are supported in the Code Arena?",
-      a: "Our sandboxed IDE supports JavaScript, TypeScript, Python, Go, Java, and SQL. The code is compiled and evaluated in real-time by sandboxed execution nodes."
-    },
-    {
-      q: "How does the AI detect cheating or focus shifts?",
-      a: "We log page blurs, focus changes, tab switches, and clipboard events. These incidents are compiled into a recruiter assess integrity report without violating candidate privacy."
-    },
-    {
-      q: "Can I customize the interviewer personality?",
-      a: "Yes! Choose from Google Staff Engineers, Amazon Bar Raisers, YC Founders, or Friendly Mentors. Each interviewer adopts different scoring styles, pacing, and questions."
-    }
+    { q: 'How does the real-time voice streaming work?', a: 'InterviewOS AI establishes a direct WebRTC audio connection to Google Gemini, enabling natural speech with under 200ms latency. This lets you speak and interrupt naturally, simulating a real interview.' },
+    { q: 'What programming languages are supported?', a: 'Our sandboxed IDE supports JavaScript, TypeScript, Python, Go, Java, and SQL with real-time compilation and test execution against hidden cases.' },
+    { q: 'How does the AI detect focus shifts or cheating?', a: 'We log page blurs, tab switches, clipboard events, and eye-focus anomalies. These incidents are compiled into a recruiter integrity report without violating candidate privacy.' },
+    { q: 'Can I customize the interviewer personality?', a: 'Yes — choose from Google Staff Engineers, Amazon Bar Raisers, YC Founders, or Friendly Mentors. Each adopts different scoring rubrics, pacing, and follow-up depth.' },
   ];
 
   const testimonials = [
-    {
-      name: "Sarah Jenkins",
-      role: "SDE II @ Stripe",
-      quote: "The Stress Test mode felt exactly like my final loop at Stripe. Probing follow-ups, demanding metric details. Outstanding prep tool."
-    },
-    {
-      name: "Marcus Aurelius",
-      role: "Backend Lead @ Vercel",
-      quote: "InterviewOS's dashboard maps exactly what you need to improve on. The Skill Galaxy layout showed me my architectural gaps instantly."
-    },
-    {
-      name: "Devon Chen",
-      role: "Founder @ YC W26",
-      quote: "We calibrated our hiring targets using the Recruiter Suite. The Gemini integration matches candidates' responses to JDs with stunning precision."
-    }
+    { name: 'Sarah Jenkins', role: 'SDE II @ Stripe', quote: 'The Stress Test mode felt exactly like my final loop at Stripe. Probing follow-ups, demanding metric details. Outstanding prep.' },
+    { name: 'Marcus Lee', role: 'Backend Lead @ Vercel', quote: 'The dashboard mapped exactly what I needed to improve. The Skill Galaxy layout showed architectural gaps in minutes.' },
+    { name: 'Devon Chen', role: 'Founder @ YC W26', quote: 'We calibrated hiring targets using the Recruiter Suite. The Gemini integration matches responses to JDs with stunning precision.' },
+  ];
+
+  const features = [
+    { icon: Mic, title: 'Live Voice AI', desc: 'Ultra-low latency speech-to-speech with Google Gemini. Natural interruptions, tone analysis, and dynamic question pivots.' },
+    { icon: Code, title: 'Code Sandbox', desc: 'Monaco-powered IDE with sandboxed execution for JS, Python, Go, SQL, and TypeScript. Real-time compilation feedback.' },
+    { icon: Shield, title: 'Anti-Cheat Suite', desc: 'Focus blur detection, clipboard monitoring, and tab-switch logging. Full recruiter integrity reports.' },
+    { icon: BarChart3, title: 'Deep Analytics', desc: 'Skill constellation maps, technical readiness index, and JD alignment matrices with percentile benchmarks.' },
+    { icon: Users, title: 'Recruiter Console', desc: 'Multi-candidate oversight, custom rubric configuration, and automated evaluation pipeline with AI scoring.' },
+    { icon: Brain, title: 'Multi-Persona AI', desc: 'Choose from Google SDE, Amazon Bar Raiser, YC Founder, or Friendly Mentor personas with distinct interview styles.' },
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#020305] text-[#CBD5E1] selection:bg-[#5B7CFF]/30 selection:text-white overflow-x-hidden pt-20">
-      {/* Background Noise Layer */}
+    <div className="relative min-h-screen bg-[#020305] text-[#D7DEE8] overflow-x-hidden pt-16">
+      {/* Noise overlay */}
       <div className="noise-overlay" />
 
-      {/* Grid overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0c1020_1px,transparent_1px),linear-gradient(to_bottom,#0c1020_1px,transparent_1px)] bg-[size:5rem_5rem] opacity-25 pointer-events-none z-0" />
-      
-      {/* Molten White Hero Glow background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,.18),transparent_25%),radial-gradient(circle_at_30%_20%,rgba(91,124,255,.10),transparent_35%),radial-gradient(circle_at_80%_70%,rgba(77,226,255,.08),transparent_40%)] pointer-events-none z-0" />
-
-      <BackgroundParticles />
-
-      {/* Persistent Navigation Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between backdrop-blur-md bg-zinc-950/20 border-b border-zinc-900/60 max-w-7xl mx-auto rounded-b-2xl">
-        <div className="text-md font-black tracking-tight text-white flex items-center gap-2">
-          <Sparkles className="h-4.5 w-4.5 text-[#4DE2FF] animate-pulse" />
-          <span>INTERVIEWOS</span>
+      {/* ═══════════════════════════════════════════════════════
+          HERO SECTION
+      ═══════════════════════════════════════════════════════ */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center text-center overflow-hidden px-5">
+        {/* Background layers */}
+        <div className="absolute inset-0 bg-grid opacity-60" />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(125,211,252,0.06)_0%,transparent_70%)] blur-3xl" />
+          <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)] blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(125,211,252,0.04)_0%,transparent_70%)] blur-3xl" />
         </div>
-        <div className="hidden md:flex items-center gap-1.5 border border-zinc-800 bg-[#0D111B]/80 px-5 py-2 rounded-full backdrop-blur-md">
-          <a href="#about" className="text-2xs font-semibold text-[#94A3B8] hover:text-white transition px-3">AI Solutions</a>
-          <a href="#exceptionalities" className="text-2xs font-semibold text-[#94A3B8] hover:text-white transition px-3">About</a>
-          <a href="#features" className="text-2xs font-semibold text-[#94A3B8] hover:text-white transition px-3">Pricing</a>
-          <a href="#pricing" className="text-2xs font-semibold text-[#94A3B8] hover:text-white transition px-3">Contact</a>
-        </div>
-        <div>
-          <Link
-            href={user ? "/dashboard" : "/signup"}
-            className="glow-button px-5 py-2.5 text-2xs text-white shadow-xl flex items-center justify-center font-bold tracking-wider"
+        <BackgroundParticles />
+
+        {/* Content */}
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8 pt-20 pb-12">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 py-1.5 text-[11px] font-semibold text-[#94A3B8]"
           >
-            {user ? "Command Center" : "Get Started"}
-          </Link>
-        </div>
-      </header>
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7DD3FC] opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#7DD3FC]" />
+            </span>
+            Beta launches September 12th — Join the waitlist
+          </motion.div>
 
-      {/* SECTION 1: Hero Section */}
-      <section className="relative min-h-[92vh] mx-auto max-w-7xl px-4 pt-20 pb-28 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center z-10 space-y-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-[#0D111B]/65 px-4 py-1.5 text-xs font-semibold text-[#5B7CFF] shadow-[0_0_15px_rgba(91,124,255,0.1)] backdrop-blur-md"
-        >
-          <span>Beta Version is launching on 12th September</span>
-        </motion.div>
+          {/* Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[1.02] text-white"
+          >
+            <span className="text-gradient-white block">The AI Interview</span>
+            <span className="text-gradient-white block">Platform for</span>
+            <span className="text-gradient-ice block">Elite Engineers.</span>
+          </motion.h1>
 
-        <h1 className="text-5xl sm:text-7xl font-black tracking-tighter leading-[1.02] max-w-3xl mx-auto text-white molten-text">
-          {headlineWords.map((word, i) => (
-            <motion.span
-              key={i}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.06 }}
-              className={word === "AI" || word === "Agents" ? "bg-gradient-to-r from-[#5B7CFF] via-[#8B5CF6] to-[#4DE2FF] bg-clip-text text-transparent ml-2.5 mr-1 animate-pulse" : ""}
+          {/* Subheadline */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="text-lg sm:text-xl text-[#94A3B8] leading-relaxed max-w-2xl mx-auto font-medium"
+          >
+            Real-time voice AI, adaptive questioning, sandboxed code execution, and forensic performance analytics. All in one cinematic interface.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="flex flex-wrap items-center justify-center gap-4"
+          >
+            <Link
+              href={user ? '/dashboard' : '/signup'}
+              className="btn-primary inline-flex items-center gap-2 px-8 py-4 text-sm font-bold rounded-full"
             >
-              {word}{' '}
-            </motion.span>
-          ))}
-        </h1>
+              {user ? 'Go to Dashboard' : 'Start Free Today'}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <button
+              onClick={handleResetDemo}
+              className="glow-button inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold rounded-full"
+            >
+              <Play className="h-4 w-4 fill-white" />
+              Watch Live Demo
+            </button>
+          </motion.div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="text-md sm:text-lg text-[#94A3B8] leading-relaxed max-w-2xl mx-auto"
-        >
-          Accelerate the speed of hiring loops with the InterviewOS platform and our AI solutions for work, code, service, and telemetry.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="flex flex-wrap items-center justify-center gap-4"
-        >
-          <Link
-            href="/signup"
-            className="group glow-button inline-flex items-center gap-2 rounded-xl px-7 py-4 text-xs font-bold text-white shadow-xl cursor-pointer"
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+            className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 pt-4"
           >
-            Get Started
-          </Link>
-        </motion.div>
+            {[
+              { label: 'Engineers prepared', value: '12,400+' },
+              { label: 'Offers received', value: '94%' },
+              { label: 'Avg latency', value: '<180ms' },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-xl font-black text-white tracking-tight">{stat.value}</div>
+                <div className="text-xs text-[#64748B] font-medium">{stat.label}</div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
 
-        {/* Premium White Glow under Hero */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[160%] aspect-[2/1] rounded-t-full bg-gradient-to-t from-white/10 via-[#5B7CFF]/5 to-transparent blur-[80px] border-t border-white/10 z-0 pointer-events-none translate-y-[20%]" />
-
-        {/* Dashboard Mockup emerges from horizon */}
+        {/* ─── Central Orb + Demo Panel ─── */}
         <motion.div
-          initial={{ y: 80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-          className="w-full max-w-4xl mx-auto mt-16 glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl relative z-10 border border-zinc-800/80 bg-zinc-950/40"
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="relative z-10 w-full max-w-5xl mx-auto mb-16"
         >
-          <div className="flex items-center justify-between border-b border-zinc-900 pb-3 mb-4 text-[10px] text-zinc-550">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-500/50" />
-              <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/50" />
-              <span className="h-2.5 w-2.5 rounded-full bg-green-500/50" />
-              <span className="ml-2 font-mono text-zinc-500">interviewos.com/dashboard</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Sparkles className="h-3 w-3 text-[#4DE2FF]" />
-              <span className="font-bold text-white uppercase tracking-wider">Candidate Hub</span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4 text-left">
-            <div className="col-span-2 bg-[#020305]/60 border border-zinc-900 rounded-xl p-4 space-y-3">
-              <span className="text-[9px] font-bold text-[#4DE2FF] uppercase tracking-wider block">Real-time Performance</span>
-              <h4 className="text-xs font-bold text-white">Technical Readiness Index</h4>
-              <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#5B7CFF] to-[#8B5CF6] w-[82%]" />
-              </div>
-              <p className="text-[10px] text-zinc-400">Excellent metrics matching React Hooks, Kafka pipelines, and custom SQL runtimes.</p>
-            </div>
-            <div className="col-span-1 bg-[#020305]/60 border border-zinc-900 rounded-xl p-4 flex flex-col justify-between">
-              <span className="text-[9px] font-bold text-[#8B5CF6] uppercase tracking-wider block font-mono">Calibrated Grade</span>
-              <span className="text-3xl font-extrabold text-white font-mono">L4 <span className="text-2xs text-[#94A3B8] font-normal">SDE-II</span></span>
-              <span className="text-[10px] text-[#00E676] font-semibold">92% Match</span>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* SECTION 2: Trusted Partners Gallery */}
-      <section className="relative py-8 z-10">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="glass-panel py-6 px-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-white/[0.06] bg-zinc-950/20 shadow-2xl">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Trusted by innovative teams</span>
-            <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-50 contrast-125">
-              <span className="text-xs font-black tracking-widest text-white font-mono">MICROSOFT</span>
-              <span className="text-xs font-black tracking-widest text-white font-mono">GOOGLE</span>
-              <span className="text-xs font-black tracking-widest text-white font-mono">STRIPE</span>
-              <span className="text-xs font-black tracking-widest text-white font-mono">NOTION</span>
-              <span className="text-xs font-black tracking-widest text-white font-mono">VERCEL</span>
-              <span className="text-xs font-black tracking-widest text-white font-mono">AIRBNB</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 3: Split AI Orb Description */}
-      <section id="about" className="relative py-28 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        <div className="space-y-6 text-left">
-          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-            We help engineering loop builders scale loop speed.
-          </h2>
-          <p className="text-base text-[#94A3B8] leading-relaxed font-medium">
-            Unlock loops automation with InterviewOS AI. Real-time voice recruiters, interactive capability grids, and automated report calibration. We help teams evaluate architectural depth, analyze sandboxed code, and map telemetry instantly.
-          </p>
-          <button
-            onClick={handleResetDemo}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B7CFF] to-[#8B5CF6] px-6 py-3.5 text-xs font-bold text-white shadow-lg transition hover:brightness-110 cursor-pointer"
-          >
-            <Play className="h-4 w-4 fill-white" />
-            <span>Play AI Interview Demo</span>
-          </button>
-        </div>
-
-        {/* Floating Orb visualizer card */}
-        <div className="flex items-center justify-center relative w-full h-[380px] bg-zinc-950/20 border border-zinc-900 rounded-3xl overflow-hidden glass-panel">
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#5B7CFF]/5 to-transparent blur-[80px]" />
-          <div className="absolute top-4 right-4 text-[10px] text-zinc-550 font-mono uppercase tracking-widest bg-zinc-950/80 px-3 py-1 rounded-full border border-zinc-900 z-30">
-            {orbState === 'idle' ? 'AI Orb: Standby' : `AI Orb: ${orbState}`}
-          </div>
-          
-          <OrbVisualizer state={orbState} />
-        </div>
-      </section>
-
-      {/* SECTION 4: Exceptionalities Section (Capabilities Cards) */}
-      <section id="exceptionalities" className="relative py-28 border-t border-zinc-900 bg-[#020305] z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-zinc-900 pb-8">
-            <div className="space-y-4 text-left">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#5B7CFF]/10 px-3.5 py-1.5 text-[10px] font-bold text-[#5B7CFF] border border-[#5B7CFF]/25 tracking-wider uppercase font-mono">
-                <Cpu className="h-3 w-3" />
-                <span>EXCEPTIONALITIES</span>
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">What sets InterviewOS apart</h2>
-            </div>
-            <p className="text-[#94A3B8] text-xs max-w-xs text-left leading-relaxed">
-              Smarter, faster, and more adaptive than traditional coding mocks. Experience loop orchestration calibrated to candidate project outlines.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Speed Card */}
-            <div className="glass-panel p-8 space-y-6 flex flex-col justify-between overflow-hidden relative group cursor-pointer border border-zinc-800 hover:border-[#5B7CFF]/45 transition-colors duration-300">
-              <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition duration-300 pointer-events-none">
-                {/* SVG gravity orbit background */}
-                <svg className="w-full h-full" viewBox="0 0 200 200">
-                  <circle cx="100" cy="100" r="80" fill="none" stroke="#5B7CFF" strokeWidth="1" strokeDasharray="4 4" />
-                  <circle cx="100" cy="100" r="50" fill="none" stroke="#8B5CF6" strokeWidth="1" strokeDasharray="3 3" />
-                  <circle cx="100" cy="100" r="3" fill="#5B7CFF" />
-                  <line x1="100" y1="100" x2="160" y2="40" stroke="#8B5CF6" strokeWidth="1" strokeDasharray="2 2" />
-                </svg>
-              </div>
-              <div className="space-y-2 z-10 text-left">
-                <h3 className="text-lg font-bold text-white">Speed</h3>
-                <p className="text-2xs text-[#94A3B8] leading-relaxed">
-                  Faster time-to-value with our automated pipeline and instant grading metrics framework.
-                </p>
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/[0.06] overflow-hidden">
+            {/* Browser chrome */}
+            <div className="flex items-center gap-2 pb-5 mb-5 border-b border-white/[0.06]">
+              <span className="h-3 w-3 rounded-full bg-[#FF5F57]" />
+              <span className="h-3 w-3 rounded-full bg-[#FFBD2E]" />
+              <span className="h-3 w-3 rounded-full bg-[#28CA41]" />
+              <span className="ml-3 text-[11px] text-[#64748B] font-mono">interviewos.ai — Live Interview Session</span>
+              <div className="ml-auto flex items-center gap-1.5 text-[10px] text-[#7DD3FC] font-semibold">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute h-full w-full rounded-full bg-[#7DD3FC] opacity-75" />
+                  <span className="relative h-1.5 w-1.5 rounded-full bg-[#7DD3FC]" />
+                </span>
+                LIVE
               </div>
             </div>
 
-            {/* Deep Capabilities Card */}
-            <div className="glass-panel p-8 space-y-6 flex flex-col justify-between overflow-hidden relative group cursor-pointer border border-zinc-800 hover:border-[#8B5CF6]/45 transition-colors duration-300">
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#8B5CF6]/5 via-[#4DE2FF]/5 to-transparent opacity-40 blur-[40px] pointer-events-none" />
-              <div className="space-y-2 z-10 text-left">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-bold text-white">Deep Capabilities</h3>
-                  <Brain className="h-5 w-5 text-[#8B5CF6] opacity-40 group-hover:opacity-100 transition duration-300" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+              {/* Orb column */}
+              <div className="flex flex-col items-center gap-4">
+                <div
+                  className="relative flex items-center justify-center rounded-3xl overflow-hidden"
+                  style={{ background: 'radial-gradient(ellipse at center, rgba(125,211,252,0.06) 0%, transparent 70%)', padding: '2rem' }}
+                >
+                  <OrbVisualizer state={orbState} size="md" />
                 </div>
-                <p className="text-2xs text-[#94A3B8] leading-relaxed">
-                  An agent platform with the depth to adapt to every answer profile, candidate projection, and evaluation rubric.
-                </p>
-              </div>
-            </div>
-
-            {/* Control Card */}
-            <div className="glass-panel p-8 space-y-6 flex flex-col justify-between overflow-hidden relative group cursor-pointer border border-zinc-800 hover:border-[#4DE2FF]/45 transition-colors duration-300">
-              <div className="space-y-4 z-10 text-left w-full">
-                <h3 className="text-lg font-bold text-white">Control</h3>
-                <p className="text-2xs text-[#94A3B8] leading-relaxed mb-4">
-                  The power of a standardized platform built for the demands of high-scale enterprise teams.
-                </p>
-                {/* 3 interactive vertical sliders visual mockup */}
-                <div className="flex gap-6 h-20 items-end justify-center pt-2">
-                  {[40, 75, 55].map((val, idx) => (
-                    <div key={idx} className="w-1.5 h-full bg-zinc-900 rounded-full relative overflow-hidden">
-                      <div 
-                        className="absolute bottom-0 w-full bg-gradient-to-t from-[#5B7CFF] to-[#8B5CF6]" 
-                        style={{ height: `${val}%` }}
-                      />
-                      <div 
-                        className="absolute w-3.5 h-3.5 rounded-full bg-white border border-[#5B7CFF] -translate-x-1/3 shadow"
-                        style={{ bottom: `calc(${val}% - 7px)` }}
-                      />
-                    </div>
-                  ))}
+                {/* State label */}
+                <div className="flex items-center gap-2 text-xs text-[#64748B] font-mono">
+                  <span className={`h-1.5 w-1.5 rounded-full ${orbState !== 'idle' ? 'bg-[#7DD3FC]' : 'bg-[#334155]'}`} />
+                  {orbState === 'idle' ? 'Standby' : `AI: ${orbState.charAt(0).toUpperCase() + orbState.slice(1)}`}
                 </div>
+                {/* Waveform */}
+                <WaveformBars active={orbState === 'speaking' || orbState === 'listening'} />
               </div>
-            </div>
 
-            {/* Flexibility Card */}
-            <div className="glass-panel p-8 space-y-6 flex flex-col justify-between overflow-hidden relative group cursor-pointer border border-zinc-800 hover:border-emerald-500/40 transition-colors duration-300">
-              <div className="space-y-2 z-10 text-left w-full">
-                <h3 className="text-lg font-bold text-white">Flexibility</h3>
-                <p className="text-2xs text-[#94A3B8] leading-relaxed">
-                  Our design approach is ecosystem agnostic, allowing you to choose standard environments, databases, and telemetry runtimes.
-                </p>
-                <div className="flex flex-wrap gap-2 pt-4 justify-center">
-                  {['NextJS', 'SQL', 'TypeScript', 'NodeJS', 'Python', 'Kafka'].map((tech, idx) => (
-                    <span 
-                      key={idx} 
-                      className="bg-[#5B7CFF]/15 text-[#5B7CFF] border border-[#5B7CFF]/20 text-[9px] px-2.5 py-1 rounded font-mono uppercase tracking-wider font-bold"
+              {/* Transcript column */}
+              <div className="flex flex-col gap-3 h-64 overflow-y-auto pr-1">
+                <AnimatePresence initial={false}>
+                  {demoTranscript.map((msg, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className={`flex gap-2 items-start ${msg.speaker === 'ai' ? '' : 'flex-row-reverse'}`}
                     >
-                      {tech}
-                    </span>
+                      <div className={`flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-bold ${msg.speaker === 'ai' ? 'bg-[#7DD3FC]/10 text-[#7DD3FC] border border-[#7DD3FC]/20' : 'bg-white/05 text-white border border-white/10'}`}>
+                        {msg.speaker === 'ai' ? 'AI' : 'You'}
+                      </div>
+                      <div className={`text-xs leading-relaxed rounded-2xl px-3.5 py-2.5 max-w-[85%] ${msg.speaker === 'ai' ? 'bg-[#0C111B] border border-white/[0.06] text-[#D7DEE8] rounded-tl-sm' : 'bg-white/[0.05] border border-white/[0.06] text-white rounded-tr-sm'}`}>
+                        {msg.text}
+                      </div>
+                    </motion.div>
                   ))}
-                </div>
+                </AnimatePresence>
+                {!isPlayingDemo && (
+                  <button
+                    onClick={handleResetDemo}
+                    className="mt-auto flex items-center gap-2 text-[11px] text-[#7DD3FC] font-semibold hover:text-white transition self-center border border-[#7DD3FC]/20 bg-[#7DD3FC]/05 rounded-full px-4 py-2"
+                  >
+                    <Play className="h-3 w-3 fill-current" />
+                    {demoTranscript.length === 1 ? 'Start Demo Interview' : 'Restart Demo'}
+                  </button>
+                )}
               </div>
             </div>
+          </div>
+        </motion.div>
 
-            {/* CTA exceptionalities box */}
-            <div className="col-span-1 md:col-span-2 glass-panel p-8 flex flex-col sm:flex-row items-center justify-between border border-zinc-800 gap-6">
-              <div className="text-left space-y-2">
-                <h3 className="text-lg font-bold text-white">Ready to get started?</h3>
-                <p className="text-2xs text-[#94A3B8]">Let us make this happen. We are ready when you are.</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <Link href="/signup" className="glow-button px-6 py-3 text-2xs text-white shadow-xl cursor-pointer">
-                  Get Started
-                </Link>
-                <a href="#" className="text-2xs font-bold text-white hover:text-[#5B7CFF] transition underline">Get in touch</a>
-              </div>
-            </div>
+        {/* White bloom horizon glow */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[140%] h-48 bg-gradient-to-t from-white/[0.04] via-[#7DD3FC]/[0.03] to-transparent blur-3xl pointer-events-none" />
+      </section>
 
+      {/* ═══════════════════════════════════════════════════════
+          TRUSTED BY SECTION
+      ═══════════════════════════════════════════════════════ */}
+      <section className="relative py-10 border-y border-white/[0.04] bg-[#020305] z-10 overflow-hidden">
+        <p className="text-center text-[10px] font-bold text-[#475569] uppercase tracking-[0.2em] mb-8 font-mono">Trusted by engineers at</p>
+        <div className="flex overflow-hidden">
+          <div className="flex gap-16 items-center animate-marquee whitespace-nowrap">
+            {['GOOGLE', 'STRIPE', 'VERCEL', 'NOTION', 'MICROSOFT', 'AIRBNB', 'LINEAR', 'FIGMA', 'ANTHROPIC', 'OPENAI'].map((co, i) => (
+              <span key={i} className="text-sm font-black tracking-[0.15em] text-[#1E293B] hover:text-[#475569] transition font-mono">{co}</span>
+            ))}
+            {['GOOGLE', 'STRIPE', 'VERCEL', 'NOTION', 'MICROSOFT', 'AIRBNB', 'LINEAR', 'FIGMA', 'ANTHROPIC', 'OPENAI'].map((co, i) => (
+              <span key={`dup-${i}`} className="text-sm font-black tracking-[0.15em] text-[#1E293B] hover:text-[#475569] transition font-mono">{co}</span>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION 5: Features Section (Vertical Tabs System) */}
-      <section id="features" className="relative py-28 border-t border-zinc-900 bg-[#020305]/70 z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-zinc-900 pb-8">
-            <div className="space-y-4 text-left">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#4DE2FF]/10 px-3.5 py-1.5 text-[10px] font-bold text-[#4DE2FF] border border-[#4DE2FF]/25 tracking-wider uppercase font-mono">
-                <Layers className="h-3 w-3" />
-                <span>FEATURES</span>
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">All-in-one AI for enterprise</h2>
+      {/* ═══════════════════════════════════════════════════════
+          ABOUT SECTION
+      ═══════════════════════════════════════════════════════ */}
+      <section id="about" className="relative py-32 z-10">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div className="space-y-8 text-left">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
+              <Sparkles className="h-3 w-3" />
+              Platform
             </div>
-            <p className="text-[#94A3B8] text-xs max-w-xs text-left leading-relaxed">
-              Simplify, accelerate, and transform candidate evaluation screens with one connected AI platform layout.
+            <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white leading-[1.05]">
+              Built to simulate the <span className="text-gradient-ice">hardest interviews</span> in the world.
+            </h2>
+            <p className="text-base text-[#94A3B8] leading-relaxed font-medium">
+              InterviewOS AI runs live voice interviews, evaluates sandboxed code, detects candidate hesitations, and maps every response to a calibrated skill matrix — all in real time.
+            </p>
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              {[
+                { label: 'Response latency', value: '<180ms', icon: Zap },
+                { label: 'Languages supported', value: '6+', icon: Code },
+                { label: 'Interviewer personas', value: '4 modes', icon: Users },
+                { label: 'Skill dimensions', value: '24+', icon: BarChart3 },
+              ].map((s) => {
+                const Icon = s.icon;
+                return (
+                  <div key={s.label} className="glass-elevated rounded-2xl p-4 space-y-1">
+                    <Icon className="h-4 w-4 text-[#7DD3FC] mb-2" />
+                    <div className="text-xl font-black text-white tracking-tight">{s.value}</div>
+                    <div className="text-[11px] text-[#64748B] font-medium">{s.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+            <button
+              onClick={handleResetDemo}
+              className="glow-button inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold rounded-full"
+            >
+              <Play className="h-4 w-4 fill-white" />
+              Play Demo Interview
+            </button>
+          </div>
+
+          {/* Orb glass card */}
+          <div className="relative h-[420px] glass-panel rounded-3xl overflow-hidden flex items-center justify-center">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(125,211,252,0.06)_0%,transparent_60%)]" />
+            <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-[#020305]/60 backdrop-blur-xl border border-white/[0.06] rounded-full px-3 py-1.5 text-[10px] font-mono text-[#7DD3FC]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#7DD3FC] animate-pulse" />
+              {orbState === 'idle' ? 'Standby' : orbState.toUpperCase()}
+            </div>
+            <OrbVisualizer state={orbState} size="lg" />
+            {/* Floating metric cards */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute bottom-6 left-6 z-20 glass-elevated rounded-2xl px-4 py-3 border border-white/[0.08]"
+            >
+              <div className="text-[9px] text-[#7DD3FC] font-mono font-bold uppercase tracking-wider">Readiness Index</div>
+              <div className="text-lg font-black text-white mt-0.5">92 <span className="text-xs text-[#7DD3FC] font-semibold">/ 100</span></div>
+            </motion.div>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+              className="absolute top-16 right-6 z-20 glass-elevated rounded-2xl px-4 py-3 border border-white/[0.08]"
+            >
+              <div className="text-[9px] text-[#64748B] font-mono font-bold uppercase tracking-wider">Calibrated Level</div>
+              <div className="text-base font-black text-white mt-0.5">L5 <span className="text-xs text-[#22C55E] font-semibold">SDE-III</span></div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          FEATURES GRID
+      ═══════════════════════════════════════════════════════ */}
+      <section id="features" className="relative py-32 border-t border-white/[0.04] z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(125,211,252,0.03)_0%,transparent_70%)] pointer-events-none" />
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 space-y-16">
+          <div className="text-center max-w-2xl mx-auto space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
+              <Layers className="h-3 w-3" />
+              Capabilities
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">
+              Every tool you need to <span className="text-gradient-ice">ace your loop.</span>
+            </h2>
+            <p className="text-base text-[#94A3B8] leading-relaxed">
+              One connected AI platform — from voice coaching to code execution to recruiter analytics.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            
-            {/* Left side: vertical tabs links menu */}
-            <div className="lg:col-span-1 space-y-3">
-              {[
-                { id: 'usage', label: 'Usage', icon: Activity, desc: 'Real-time phone and audio evaluations.' },
-                { id: 'technology', label: 'Technology', icon: Cpu, desc: 'Gemini WebSocket loop configurations.' },
-                { id: 'data', label: 'Data', icon: Database, desc: 'Candidate capability constellations mapping.' },
-              ].map((tab) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <motion.div
+                  key={i}
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="glass-panel p-7 space-y-4 group cursor-default light-sweep"
+                >
+                  <div className="h-10 w-10 rounded-xl bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 flex items-center justify-center group-hover:bg-[#7DD3FC]/15 group-hover:border-[#7DD3FC]/30 transition-all duration-300">
+                    <Icon className="h-5 w-5 text-[#7DD3FC]" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-base font-bold text-white">{f.title}</h3>
+                    <p className="text-sm text-[#94A3B8] leading-relaxed">{f.desc}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Feature Tabs */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-8 border-t border-white/[0.04]">
+            <div className="space-y-2">
+              {([
+                { id: 'usage', label: 'Platform Usage', icon: Activity, desc: 'Real-time phone and audio evaluations.' },
+                { id: 'technology', label: 'AI Technology', icon: Cpu, desc: 'Gemini WebSocket loop configurations.' },
+                { id: 'data', label: 'Data & Analytics', icon: Database, desc: 'Candidate capability constellation mapping.' },
+              ] as const).map((tab) => {
                 const Icon = tab.icon;
-                const isSelected = activeTab === tab.id;
+                const sel = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`w-full text-left p-4 rounded-xl border transition-all duration-300 flex items-center gap-4 cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#0D111B] border-zinc-800 text-white shadow-xl shadow-[#5B7CFF]/5'
-                        : 'border-transparent text-[#94A3B8] hover:text-white'
-                    }`}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 flex items-center gap-3 ${sel ? 'bg-white/[0.04] border-white/[0.08] text-white shadow-lg' : 'border-transparent text-[#64748B] hover:text-[#94A3B8]'}`}
                   >
-                    <div className={`p-2 rounded-lg border ${
-                      isSelected 
-                        ? 'bg-[#5B7CFF]/10 border-[#5B7CFF]/20 text-[#5B7CFF]' 
-                        : 'bg-zinc-950/40 border-zinc-900 text-zinc-500'
-                    }`}>
+                    <div className={`p-2 rounded-xl border transition-all ${sel ? 'bg-[#7DD3FC]/10 border-[#7DD3FC]/20 text-[#7DD3FC]' : 'bg-white/[0.02] border-white/[0.06] text-[#475569]'}`}>
                       <Icon className="h-4 w-4" />
                     </div>
-                    <div className="space-y-0.5">
-                      <h4 className="text-xs font-bold">{tab.label}</h4>
-                      <p className="text-[10px] text-zinc-550">{tab.desc}</p>
+                    <div>
+                      <div className="text-xs font-bold">{tab.label}</div>
+                      <div className="text-[10px] text-[#475569]">{tab.desc}</div>
                     </div>
                   </button>
                 );
               })}
             </div>
 
-            {/* Right side: tab content panel */}
-            <div className="lg:col-span-2 glass-panel p-6 sm:p-8 border border-zinc-800 bg-[#0D111B]/60 min-h-[300px] flex flex-col justify-between relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-48 w-48 bg-gradient-to-bl from-[#8B5CF6]/5 to-transparent rounded-bl-full pointer-events-none" />
-              
+            <div className="lg:col-span-2 glass-panel p-7 border border-white/[0.06] min-h-[260px] flex flex-col justify-between relative overflow-hidden">
+              <div className="absolute top-0 right-0 h-48 w-48 bg-[radial-gradient(ellipse_at_top_right,rgba(125,211,252,0.06)_0%,transparent_70%)] pointer-events-none" />
               <AnimatePresence mode="wait">
                 {activeTab === 'usage' && (
-                  <motion.div
-                    key="usage-panel"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6 text-left"
-                  >
-                    <div className="space-y-2">
-                      <span className="text-[9px] font-bold text-[#4DE2FF] uppercase tracking-wider block font-mono">Loop Orchestration</span>
-                      <h3 className="text-lg font-bold text-white">AI Agent for work</h3>
-                      <p className="text-2xs text-[#94A3B8] leading-relaxed">
-                        Connect to your technical hiring workflows, understand candidate project portfolios, and activate live agentic interviews with custom-trained interviewer personalities.
-                      </p>
+                  <motion.div key="usage" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.25 }} className="space-y-5 text-left">
+                    <div>
+                      <span className="text-[10px] font-bold text-[#7DD3FC] uppercase tracking-widest block font-mono mb-1">Loop Orchestration</span>
+                      <h3 className="text-xl font-bold text-white">AI Agent for real interviews</h3>
+                      <p className="text-sm text-[#94A3B8] leading-relaxed mt-2">Connect to your technical hiring workflows, understand candidate portfolios, and activate live agentic interviews with custom-trained interviewer personalities.</p>
                     </div>
-
                     <div className="flex flex-wrap gap-2">
-                      {['Healthcare', 'Tech Assistance', 'Support', 'Marketer'].map((badge, idx) => (
-                        <span 
-                          key={idx} 
-                          className="bg-zinc-950/40 text-zinc-300 border border-zinc-900 text-[10px] px-3 py-1 rounded-lg font-medium"
-                        >
-                          {badge}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="pt-4">
-                      <button className="glow-button px-5 py-2.5 text-2xs text-white shadow">
-                        See Uses
-                      </button>
+                      {['Healthcare', 'Tech Screening', 'Support Eval', 'Leadership'].map((b) => <span key={b} className="text-[11px] font-medium text-[#94A3B8] border border-white/[0.07] bg-white/[0.02] px-3 py-1 rounded-full">{b}</span>)}
                     </div>
                   </motion.div>
                 )}
-
                 {activeTab === 'technology' && (
-                  <motion.div
-                    key="tech-panel"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6 text-left"
-                  >
-                    <div className="space-y-2">
-                      <span className="text-[9px] font-bold text-[#8B5CF6] uppercase tracking-wider block font-mono">Orchestration Nodes</span>
-                      <h3 className="text-lg font-bold text-white">Alpha Technology</h3>
-                      <p className="text-2xs text-[#94A3B8] leading-relaxed">
-                        Deploy real-time speech-to-speech loops on sandboxed environments. Gemini integration detects micro-hesitations and automatically rotates hiring panels based on topic checklists.
-                      </p>
+                  <motion.div key="tech" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.25 }} className="space-y-5 text-left">
+                    <div>
+                      <span className="text-[10px] font-bold text-[#7DD3FC] uppercase tracking-widest block font-mono mb-1">Orchestration Nodes</span>
+                      <h3 className="text-xl font-bold text-white">Alpha-tier AI technology</h3>
+                      <p className="text-sm text-[#94A3B8] leading-relaxed mt-2">Deploy real-time speech-to-speech loops on sandboxed environments. Gemini detects micro-hesitations and automatically rotates hiring panels based on topic checklists.</p>
                     </div>
-
                     <div className="flex flex-wrap gap-2">
-                      {['WebSockets', 'WebRTC Voice', 'Sandboxed Code', 'Contradiction Detector'].map((badge, idx) => (
-                        <span 
-                          key={idx} 
-                          className="bg-zinc-950/40 text-zinc-300 border border-zinc-900 text-[10px] px-3 py-1 rounded-lg font-medium"
-                        >
-                          {badge}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="pt-4">
-                      <button className="glow-button px-5 py-2.5 text-2xs text-white shadow">
-                        Explore Tech
-                      </button>
+                      {['WebSockets', 'WebRTC Voice', 'Sandbox VM', 'Contradiction Detector'].map((b) => <span key={b} className="text-[11px] font-medium text-[#94A3B8] border border-white/[0.07] bg-white/[0.02] px-3 py-1 rounded-full">{b}</span>)}
                     </div>
                   </motion.div>
                 )}
-
                 {activeTab === 'data' && (
-                  <motion.div
-                    key="data-panel"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6 text-left"
-                  >
-                    <div className="space-y-2">
-                      <span className="text-[9px] font-bold text-[#4DE2FF] uppercase tracking-wider block font-mono">Capability Matrix</span>
-                      <h3 className="text-lg font-bold text-white">Intellectual Database</h3>
-                      <p className="text-2xs text-[#94A3B8] leading-relaxed">
-                        Map candidate responses instantly into a unified skill matrix database. Detect plagiarized logic, calculate overall technical index thresholds, and forecast candidate fit.
-                      </p>
+                  <motion.div key="data" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.25 }} className="space-y-5 text-left">
+                    <div>
+                      <span className="text-[10px] font-bold text-[#7DD3FC] uppercase tracking-widest block font-mono mb-1">Capability Matrix</span>
+                      <h3 className="text-xl font-bold text-white">Intellectual skill database</h3>
+                      <p className="text-sm text-[#94A3B8] leading-relaxed mt-2">Map candidate responses into a unified skill matrix. Detect plagiarized logic, calculate technical index thresholds, and forecast candidate fit across JD categories.</p>
                     </div>
-
                     <div className="flex flex-wrap gap-2">
-                      {['Constellation Map', 'Weekly Streaks', 'Pass Rate Index', 'JD Alignment Matrix'].map((badge, idx) => (
-                        <span 
-                          key={idx} 
-                          className="bg-zinc-950/40 text-zinc-300 border border-zinc-900 text-[10px] px-3 py-1 rounded-lg font-medium"
-                        >
-                          {badge}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="pt-4">
-                      <button className="glow-button px-5 py-2.5 text-2xs text-white shadow">
-                        Review Database
-                      </button>
+                      {['Constellation Map', 'Weekly Streaks', 'Pass Rate Index', 'JD Alignment'].map((b) => <span key={b} className="text-[11px] font-medium text-[#94A3B8] border border-white/[0.07] bg-white/[0.02] px-3 py-1 rounded-full">{b}</span>)}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            
           </div>
         </div>
       </section>
 
-      {/* SECTION 6: Testimonials */}
-      <section className="relative py-24 border-t border-[rgba(255,255,255,0.05)] bg-[#020305] z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-12">
-          <div className="max-w-xl mx-auto space-y-4">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#5B7CFF]/10 px-3 py-1 text-2xs font-bold text-[#5B7CFF] border border-[#5B7CFF]/20">
+      {/* ═══════════════════════════════════════════════════════
+          TESTIMONIALS
+      ═══════════════════════════════════════════════════════ */}
+      <section className="relative py-32 border-t border-white/[0.04] z-10">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 space-y-16">
+          <div className="text-center max-w-xl mx-auto space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Heart className="h-3 w-3" />
-              <span>Reviews</span>
+              Reviews
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-              Succeeding at Top Tier Teams.
-            </h2>
-            <p className="text-base text-[#94A3B8]">
-              Candidates prepared with InterviewOS are landing leadership offers at high-scale tech firms.
-            </p>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">Succeeding at top-tier teams.</h2>
+            <p className="text-base text-[#94A3B8]">Candidates prepared with InterviewOS are landing leadership offers at high-scale tech firms.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
-              <motion.div 
-                key={i} 
-                whileHover={{ y: -4, rotate: 1 }}
-                className="glass-panel rounded-2xl p-6 space-y-4 transition-all duration-300"
+              <motion.div
+                key={i}
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="glass-panel p-7 space-y-5 flex flex-col"
               >
-                <div className="flex gap-1 text-[#4DE2FF]">
-                  {[...Array(5)].map((_, idx) => <Star key={idx} className="h-3.5 w-3.5 fill-[#4DE2FF]" />)}
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-[#7DD3FC] text-[#7DD3FC]" />)}
                 </div>
-                <p className="text-xs text-[#94A3B8] leading-relaxed italic">"{t.quote}"</p>
-                <div className="pt-2 border-t border-[rgba(255,255,255,0.06)] flex items-center justify-between">
-                  <span className="text-xs font-bold text-white">{t.name}</span>
-                  <span className="text-[10px] text-[#5B7CFF] font-medium font-mono">{t.role}</span>
+                <p className="text-sm text-[#94A3B8] leading-relaxed flex-1">"{t.quote}"</p>
+                <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-[10px] font-bold text-white">{t.name[0]}</div>
+                    <span className="text-sm font-bold text-white">{t.name}</span>
+                  </div>
+                  <span className="text-[11px] text-[#7DD3FC] font-mono font-semibold">{t.role}</span>
                 </div>
               </motion.div>
             ))}
@@ -706,93 +591,112 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 7: Pricing */}
-      <section className="relative py-24 border-t border-[rgba(255,255,255,0.05)] bg-[#020305]/60 z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-12">
-          <div className="max-w-xl mx-auto space-y-4">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#5B7CFF]/10 px-3 py-1 text-2xs font-bold text-[#5B7CFF] border border-[#5B7CFF]/20">
+      {/* ═══════════════════════════════════════════════════════
+          PRICING
+      ═══════════════════════════════════════════════════════ */}
+      <section id="pricing" className="relative py-32 border-t border-white/[0.04] z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(125,211,252,0.04)_0%,transparent_60%)] pointer-events-none" />
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 space-y-16">
+          <div className="text-center max-w-xl mx-auto space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Award className="h-3 w-3" />
-              <span>Pricing Packages</span>
+              Pricing
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-              Flexible Plans For Candidates & Teams.
-            </h2>
-            <p className="text-base text-[#94A3B8]">
-              Unlock infinite voice interview practices and recruiters calibration tools.
-            </p>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">Flexible plans for candidates and teams.</h2>
+            <p className="text-base text-[#94A3B8]">Unlock unlimited voice interview practice and enterprise-grade recruiter tools.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto text-left">
-            {/* Free Tier */}
-            <motion.div 
-              whileHover={{ scale: 1.01 }}
-              className="glass-panel rounded-2xl p-8 space-y-6 flex flex-col justify-between"
-            >
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-white uppercase tracking-wider">Starter Practice</h3>
-                <p className="text-xs text-[#94A3B8]">Perfect for developers warming up for technical phone screenings.</p>
-                <div className="text-3xl font-extrabold text-white font-mono">$0 <span className="text-xs text-zinc-500 font-normal">/ forever</span></div>
-                <ul className="text-xs text-[#94A3B8] space-y-3 pt-4 border-t border-[rgba(255,255,255,0.06)]">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#5B7CFF]" /> 2 voice mock interviews</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#5B7CFF]" /> Live coding workspace</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#5B7CFF]" /> Basic rubric scorecard</li>
-                </ul>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {/* Free */}
+            <div className="glass-panel rounded-3xl p-8 flex flex-col gap-6">
+              <div>
+                <div className="text-xs font-bold text-[#64748B] uppercase tracking-widest font-mono mb-3">Starter</div>
+                <div className="text-4xl font-black text-white font-mono">$0 <span className="text-sm text-[#475569] font-normal">/ forever</span></div>
+                <p className="text-sm text-[#64748B] mt-2">For developers warming up for phone screenings.</p>
               </div>
-              <Link href="/signup" className="mt-8 block text-center rounded-xl border border-[rgba(255,255,255,0.08)] bg-zinc-950 px-4 py-3 text-xs font-bold text-white hover:border-[#5B7CFF]/40 transition">
+              <ul className="space-y-3 flex-1">
+                {['2 voice mock interviews', 'Live coding workspace', 'Basic rubric scorecard'].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-[#94A3B8]">
+                    <Check className="h-4 w-4 text-[#7DD3FC] flex-shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="block text-center rounded-full border border-white/[0.08] bg-white/[0.03] py-3 text-sm font-bold text-white hover:border-[#7DD3FC]/30 hover:bg-white/[0.05] transition-all">
                 Get Started
               </Link>
-            </motion.div>
+            </div>
 
-            {/* Pro Tier */}
-            <motion.div 
-              whileHover={{ scale: 1.01 }}
-              className="rounded-2xl border border-[#5B7CFF]/50 bg-[#0D111B] p-8 space-y-6 flex flex-col justify-between relative overflow-hidden shadow-2xl shadow-[#5B7CFF]/5"
-            >
-              <div className="absolute top-0 right-0 bg-[#5B7CFF] text-white text-[9px] font-bold uppercase px-3.5 py-1 rounded-bl-lg">
-                Recommended
+            {/* Pro */}
+            <div className="relative rounded-3xl border border-[#7DD3FC]/40 bg-gradient-to-b from-[#0C111B] to-[#070B12] p-8 flex flex-col gap-6 shadow-[0_0_80px_rgba(125,211,252,0.08)]">
+              <div className="absolute -top-px left-6 right-6 h-px bg-gradient-to-r from-transparent via-[#7DD3FC]/50 to-transparent" />
+              <div className="absolute top-3 right-4 bg-[#7DD3FC] text-[#020305] text-[10px] font-black uppercase px-3 py-1 rounded-full">
+                Most Popular
               </div>
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-white flex items-center gap-1.5 uppercase tracking-wider">
-                  <span>Pro Member</span>
-                  <Star className="h-4 w-4 text-[#4DE2FF] fill-[#4DE2FF]" />
-                </h3>
-                <p className="text-xs text-[#94A3B8]">For serious candidates seeking placement at premium startups and tech giants.</p>
-                <div className="text-3xl font-extrabold text-white font-mono">$29 <span className="text-xs text-zinc-555 font-normal">/ month</span></div>
-                <ul className="text-xs text-[#94A3B8] space-y-3 pt-4 border-t border-[rgba(255,255,255,0.06)]">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#4DE2FF]" /> Infinite voice mock interviews</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#4DE2FF]" /> Access to all 4 Modes (Stress Test, Mentor, etc.)</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#4DE2FF]" /> Full recruiter monitoring telemetry</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#4DE2FF]" /> Multi-agent panel rotation</li>
-                </ul>
+              <div>
+                <div className="flex items-center gap-1.5 mb-3">
+                  <span className="text-xs font-bold text-[#7DD3FC] uppercase tracking-widest font-mono">Pro Member</span>
+                  <Star className="h-3 w-3 fill-[#7DD3FC] text-[#7DD3FC]" />
+                </div>
+                <div className="text-4xl font-black text-white font-mono">$29 <span className="text-sm text-[#475569] font-normal">/ month</span></div>
+                <p className="text-sm text-[#64748B] mt-2">For serious candidates targeting top-tier companies.</p>
               </div>
-              <Link href="/signup" className="mt-8 block text-center rounded-xl bg-gradient-to-r from-[#5B7CFF] to-[#8B5CF6] px-4 py-3 text-xs font-bold text-white shadow-lg shadow-[#5B7CFF]/20 hover:brightness-110 transition">
+              <ul className="space-y-3 flex-1">
+                {['Unlimited voice mock interviews', 'All 4 interviewer personas', 'Full recruiter monitoring suite', 'Multi-agent panel rotation', 'Priority Gemini inference'].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-[#D7DEE8]">
+                    <Check className="h-4 w-4 text-[#7DD3FC] flex-shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="block text-center rounded-full bg-[#7DD3FC] text-[#020305] py-3 text-sm font-bold hover:bg-[#93DBFD] transition-all shadow-[0_0_30px_rgba(125,211,252,0.25)]">
                 Start Pro Practice
               </Link>
-            </motion.div>
+            </div>
+
+            {/* Enterprise */}
+            <div className="glass-panel rounded-3xl p-8 flex flex-col gap-6">
+              <div>
+                <div className="text-xs font-bold text-[#64748B] uppercase tracking-widest font-mono mb-3">Enterprise</div>
+                <div className="text-4xl font-black text-white font-mono">Custom</div>
+                <p className="text-sm text-[#64748B] mt-2">For recruiting teams and engineering orgs at scale.</p>
+              </div>
+              <ul className="space-y-3 flex-1">
+                {['Unlimited candidates & seats', 'Custom JD rubric builder', 'HRIS & ATS integrations', 'Dedicated support SLA', 'On-prem deployment option'].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-[#94A3B8]">
+                    <Check className="h-4 w-4 text-[#7DD3FC] flex-shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <a href="mailto:hello@interviewos.ai" className="block text-center rounded-full border border-white/[0.08] bg-white/[0.03] py-3 text-sm font-bold text-white hover:border-[#7DD3FC]/30 hover:bg-white/[0.05] transition-all">
+                Contact Sales
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 8: FAQs */}
-      <section className="relative py-24 border-t border-[rgba(255,255,255,0.05)] bg-[#020305] z-10">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">Frequently Asked Questions</h2>
-            <p className="text-sm text-[#94A3B8]">Got questions? We have got answers.</p>
+      {/* ═══════════════════════════════════════════════════════
+          FAQ
+      ═══════════════════════════════════════════════════════ */}
+      <section id="faq" className="relative py-32 border-t border-white/[0.04] z-10">
+        <div className="mx-auto max-w-3xl px-5 sm:px-8 space-y-16">
+          <div className="text-center space-y-5">
+            <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">Frequently asked questions.</h2>
+            <p className="text-base text-[#94A3B8]">Everything you need to know about InterviewOS AI.</p>
           </div>
-          
-          <div className="space-y-4">
+          <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <div 
-                key={i}
-                className="glass-panel rounded-xl overflow-hidden transition-all duration-300"
-              >
+              <div key={i} className="glass-panel rounded-2xl overflow-hidden">
                 <button
                   onClick={() => setActiveFaq(activeFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-5 text-left text-xs font-bold text-white outline-none cursor-pointer"
+                  className="w-full flex items-center justify-between p-6 text-left group"
                 >
-                  <span>{faq.q}</span>
-                  {activeFaq === i ? <ChevronUp className="h-4 w-4 text-[#5B7CFF]" /> : <ChevronDown className="h-4 w-4 text-zinc-500" />}
+                  <span className={`text-sm font-bold transition-colors ${activeFaq === i ? 'text-white' : 'text-[#94A3B8] group-hover:text-white'}`}>{faq.q}</span>
+                  <div className={`flex-shrink-0 ml-4 h-6 w-6 rounded-full border flex items-center justify-center transition-all ${activeFaq === i ? 'border-[#7DD3FC]/30 bg-[#7DD3FC]/10 text-[#7DD3FC]' : 'border-white/[0.08] text-[#475569]'}`}>
+                    {activeFaq === i ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                  </div>
                 </button>
                 <AnimatePresence initial={false}>
                   {activeFaq === i && (
@@ -800,10 +704,10 @@ export default function Home() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="border-t border-[rgba(255,255,255,0.05)] bg-zinc-950/20"
+                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                      className="border-t border-white/[0.05]"
                     >
-                      <p className="p-5 text-2xs text-[#94A3B8] leading-relaxed">{faq.a}</p>
+                      <p className="px-6 py-5 text-sm text-[#94A3B8] leading-relaxed">{faq.a}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -813,88 +717,103 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="w-full border-t border-[rgba(255,255,255,0.05)] bg-[#020305] pt-24 pb-12 z-10 relative overflow-hidden">
-        {/* Upper Call to Action section */}
-        <div className="max-w-4xl mx-auto text-center px-4 space-y-6">
-          <p className="text-sm font-semibold text-[#94A3B8]">
-            Everything your team needs, in one simple workspace. Stay focused, stay in sync.
-          </p>
-          <div className="relative inline-block">
-            {/* Ambient radial glow under the button */}
-            <div className="absolute inset-0 rounded-full bg-[#5B7CFF]/50 blur-xl opacity-60 scale-125 pointer-events-none" />
-            <Link
-              href="/signup"
-              className="relative inline-flex items-center justify-center rounded-full bg-zinc-950 border border-zinc-800 px-6 py-3 text-xs font-bold text-white shadow-2xl transition hover:border-[#5B7CFF]/50 hover:bg-[#0D111B] cursor-pointer"
-            >
-              Get Started
+      {/* ═══════════════════════════════════════════════════════
+          FOOTER CTA
+      ═══════════════════════════════════════════════════════ */}
+      <section className="relative py-32 border-t border-white/[0.04] z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(255,255,255,0.04)_0%,transparent_70%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_50%,rgba(125,211,252,0.06)_0%,transparent_70%)] pointer-events-none" />
+        <div className="mx-auto max-w-4xl px-5 text-center space-y-8 relative z-10">
+          <div className="text-[10px] font-bold text-[#475569] uppercase tracking-[0.2em] font-mono">Ready to level up?</div>
+          <h2 className="text-5xl sm:text-7xl font-black tracking-[-0.04em] text-white leading-[1.02]">
+            Land your dream <span className="text-gradient-ice">engineering role.</span>
+          </h2>
+          <p className="text-lg text-[#64748B] max-w-xl mx-auto">Join thousands of engineers who prepared with InterviewOS AI and are now at Google, Stripe, Vercel, and beyond.</p>
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+            <Link href="/signup" className="btn-primary inline-flex items-center gap-2 px-10 py-4 text-sm font-bold rounded-full">
+              Start Free Today
+              <ArrowRight className="h-4 w-4" />
             </Link>
+            <a href="#faq" className="text-sm font-semibold text-[#64748B] hover:text-white transition">Learn more →</a>
           </div>
         </div>
+      </section>
 
-        {/* Large CosmoQ style text backdrop with multi-color mesh gradient */}
-        <div className="relative w-full h-[15vw] flex items-center justify-center overflow-hidden my-16 pointer-events-none select-none">
-          {/* Vibrant multi-color background gradient strip */}
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-amber-500/25 via-rose-500/25 via-[#8B5CF6]/25 via-[#5B7CFF]/25 to-emerald-400/20 opacity-60 blur-[70px]" />
-          
-          <div className="relative text-white font-black text-[11vw] tracking-tighter leading-none uppercase mix-blend-overlay opacity-80 select-none">
+      {/* ═══════════════════════════════════════════════════════
+          FOOTER
+      ═══════════════════════════════════════════════════════ */}
+      <footer className="relative border-t border-white/[0.04] bg-[#020305] z-10 overflow-hidden">
+        {/* Giant watermark text */}
+        <div className="relative w-full overflow-hidden select-none pointer-events-none py-10">
+          <div className="text-[clamp(3rem,12vw,9rem)] font-black tracking-[-0.04em] text-center text-white/[0.03] leading-none uppercase whitespace-nowrap">
             INTERVIEWOS
           </div>
         </div>
 
-        {/* Links Grid & Brand Details */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-[rgba(255,255,255,0.05)] pt-12">
-          {/* Column 1 */}
-          <div className="space-y-4 text-left">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Navigation</h4>
-            <ul className="space-y-2 text-2xs text-[#94A3B8]">
-              <li><Link href="/" className="hover:text-white transition">Home</Link></li>
-              <li><Link href="/login" className="hover:text-white transition">Sign In</Link></li>
-              <li><Link href="/signup" className="hover:text-white transition">Create Account</Link></li>
-              <li><Link href="/design-system" className="hover:text-white transition">Design Library</Link></li>
-            </ul>
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 pb-12">
+          {/* Links grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 border-t border-white/[0.04] pt-12 pb-12">
+            <div className="col-span-2 md:col-span-1 space-y-5">
+              <Link href="/" className="flex items-center gap-2.5">
+                <div className="relative flex h-7 w-7 items-center justify-center">
+                  <div className="absolute inset-0 rounded-lg bg-[#7DD3FC]/10 blur-sm" />
+                  <svg className="relative w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C12 7.52285 7.52285 12 2 12C7.52285 12 12 16.4771 12 22C12 16.4771 16.4771 12 22 12C16.4771 12 12 7.52285 12 2Z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-bold text-white tracking-tight">InterviewOS<span className="text-[#7DD3FC]">AI</span></span>
+              </Link>
+              <p className="text-xs text-[#475569] leading-relaxed">The world's most advanced AI interview preparation platform.</p>
+            </div>
+
+            {[
+              {
+                heading: 'Product', links: [
+                  { label: 'Dashboard', href: '/dashboard' },
+                  { label: 'Sign In', href: '/login' },
+                  { label: 'Create Account', href: '/signup' },
+                  { label: 'Design System', href: '/design-system' },
+                ]
+              },
+              {
+                heading: 'Company', links: [
+                  { label: 'Changelog', href: '#' },
+                  { label: 'Privacy Policy', href: '#' },
+                  { label: 'Terms & Conditions', href: '#' },
+                  { label: 'Contact', href: 'mailto:hello@interviewos.ai' },
+                ]
+              },
+              {
+                heading: 'Community', links: [
+                  { label: 'GitHub', href: 'https://github.com/Aaditya29112005/interview-platform' },
+                  { label: 'X / Twitter', href: '#' },
+                  { label: 'LinkedIn', href: '#' },
+                  { label: 'Discord', href: '#' },
+                ]
+              },
+            ].map((col) => (
+              <div key={col.heading} className="space-y-4">
+                <h4 className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-widest font-mono">{col.heading}</h4>
+                <ul className="space-y-2.5">
+                  {col.links.map((link) => (
+                    <li key={link.label}>
+                      <a href={link.href} className="text-xs text-[#475569] hover:text-white transition-colors duration-200">{link.label}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
 
-          {/* Column 2 */}
-          <div className="space-y-4 text-left">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Documentation</h4>
-            <ul className="space-y-2 text-2xs text-[#94A3B8]">
-              <li><a href="#" className="hover:text-white transition">Blogs</a></li>
-              <li><a href="#" className="hover:text-white transition">Changelog</a></li>
-              <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition">Terms & Conditions</a></li>
-            </ul>
-          </div>
-
-          {/* Column 3 */}
-          <div className="space-y-4 text-left">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Other Pages</h4>
-            <ul className="space-y-2 text-2xs text-[#94A3B8]">
-              <li><Link href="/dashboard" className="hover:text-white transition">Command Center</Link></li>
-              <li><span className="text-zinc-650 italic">Launcher Mode (Soon...)</span></li>
-              <li><a href="#" className="hover:text-white transition">404 Error Preview</a></li>
-            </ul>
-          </div>
-
-          {/* Column 4 */}
-          <div className="space-y-4 text-left">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Social Connect</h4>
-            <ul className="space-y-2 text-2xs text-[#94A3B8]">
-              <li><a href="https://github.com/Aaditya29112005/interview-platform" target="_blank" rel="noreferrer" className="hover:text-white transition">GitHub Repo</a></li>
-              <li><a href="#" className="hover:text-white transition">X / Twitter</a></li>
-              <li><a href="#" className="hover:text-white transition">LinkedIn</a></li>
-              <li><a href="#" className="hover:text-white transition">Discord Guild</a></li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom copyright details bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-[rgba(255,255,255,0.03)] flex flex-col sm:flex-row items-center justify-between text-2xs text-zinc-500 gap-4">
-          <p>© {new Date().getFullYear()} InterviewOS. Designed with high-fidelity Apple & Stripe level mechanics.</p>
-          <div className="flex gap-4">
-            <Link href="/design-system" className="hover:text-zinc-400 transition">Design System Library</Link>
-            <span>•</span>
-            <Link href="/dashboard" className="hover:text-zinc-400 transition">Command Center</Link>
+          {/* Bottom bar */}
+          <div className="border-t border-white/[0.04] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#334155]">
+            <p>© {new Date().getFullYear()} InterviewOS AI. All rights reserved.</p>
+            <div className="flex items-center gap-1.5 text-[#7DD3FC]/50">
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C12 7.52285 7.52285 12 2 12C7.52285 12 12 16.4771 12 22C12 16.4771 16.4771 12 22 12C16.4771 12 12 7.52285 12 2Z" />
+              </svg>
+              <span className="text-[10px] font-mono">Designed with Apple & Stripe-level precision</span>
+            </div>
           </div>
         </div>
       </footer>
