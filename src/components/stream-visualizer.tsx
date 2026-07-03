@@ -151,12 +151,12 @@ export function StreamVisualizer() {
     window.addEventListener('mousemove', onMouseMove);
 
     // Loop Frame Execution tick
-    const clock = new THREE.Clock();
+    const startTime = performance.now();
     let animationFrameId: number;
 
     function renderFrame() {
       animationFrameId = requestAnimationFrame(renderFrame);
-      const elapsedTime = clock.getElapsedTime();
+      const elapsedTime = (performance.now() - startTime) * 0.001;
       material.uniforms.uTime.value = elapsedTime;
 
       // Fluid camera tracking delay damping equations
