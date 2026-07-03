@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { OrbVisualizer } from '@/components/orb-visualizer';
+import { useGSAPAnimations } from '@/hooks/use-gsap-animations';
 
 // ─── Background Particles ───────────────────────────────────────
 function BackgroundParticles() {
@@ -118,7 +119,9 @@ export default function Home() {
   ]);
   const [activeTab, setActiveTab] = useState<'usage' | 'technology' | 'data'>('usage');
 
-  // Demo timeline
+  // ── GSAP scroll animations ──
+  useGSAPAnimations();
+
   useEffect(() => {
     if (!isPlayingDemo) return;
     let timer: NodeJS.Timeout;
@@ -372,7 +375,7 @@ export default function Home() {
       ═══════════════════════════════════════════════════════ */}
       <section id="about" className="relative py-32 z-10">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div className="space-y-8 text-left">
+          <div data-gsap="fade-left" className="space-y-8 text-left">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Sparkles className="h-3 w-3" />
               Platform
@@ -410,7 +413,7 @@ export default function Home() {
           </div>
 
           {/* Orb glass card */}
-          <div className="relative h-[420px] glass-panel rounded-3xl overflow-hidden flex items-center justify-center">
+          <div data-gsap="fade-right" className="relative h-[420px] glass-panel rounded-3xl overflow-hidden flex items-center justify-center">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(125,211,252,0.06)_0%,transparent_60%)]" />
             <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-[#020305]/60 backdrop-blur-xl border border-white/[0.06] rounded-full px-3 py-1.5 text-[10px] font-mono text-[#7DD3FC]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#7DD3FC] animate-pulse" />
@@ -444,7 +447,7 @@ export default function Home() {
       <section id="features" className="relative py-32 border-t border-white/[0.04] z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(125,211,252,0.03)_0%,transparent_70%)] pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 space-y-16">
-          <div className="text-center max-w-2xl mx-auto space-y-5">
+          <div data-gsap="fade-up" className="text-center max-w-2xl mx-auto space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Layers className="h-3 w-3" />
               Capabilities
@@ -463,6 +466,7 @@ export default function Home() {
               return (
                 <motion.div
                   key={i}
+                  data-gsap="scale-in"
                   whileHover={{ y: -6 }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   className="glass-panel p-7 space-y-4 group cursor-default light-sweep"
@@ -557,7 +561,7 @@ export default function Home() {
       ═══════════════════════════════════════════════════════ */}
       <section className="relative py-32 border-t border-white/[0.04] z-10">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 space-y-16">
-          <div className="text-center max-w-xl mx-auto space-y-5">
+          <div data-gsap="fade-up" className="text-center max-w-xl mx-auto space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Heart className="h-3 w-3" />
               Reviews
@@ -570,6 +574,7 @@ export default function Home() {
             {testimonials.map((t, i) => (
               <motion.div
                 key={i}
+                data-gsap="scale-in"
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className="glass-panel p-7 space-y-5 flex flex-col"
@@ -597,7 +602,7 @@ export default function Home() {
       <section id="pricing" className="relative py-32 border-t border-white/[0.04] z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(125,211,252,0.04)_0%,transparent_60%)] pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 space-y-16">
-          <div className="text-center max-w-xl mx-auto space-y-5">
+          <div data-gsap="fade-up" className="text-center max-w-xl mx-auto space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Award className="h-3 w-3" />
               Pricing
@@ -608,7 +613,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Free */}
-            <div className="glass-panel rounded-3xl p-8 flex flex-col gap-6">
+            <div data-gsap="pricing-card" className="glass-panel rounded-3xl p-8 flex flex-col gap-6">
               <div>
                 <div className="text-xs font-bold text-[#64748B] uppercase tracking-widest font-mono mb-3">Starter</div>
                 <div className="text-4xl font-black text-white font-mono">$0 <span className="text-sm text-[#475569] font-normal">/ forever</span></div>
@@ -628,7 +633,7 @@ export default function Home() {
             </div>
 
             {/* Pro */}
-            <div className="relative rounded-3xl border border-[#7DD3FC]/40 bg-gradient-to-b from-[#0C111B] to-[#070B12] p-8 flex flex-col gap-6 shadow-[0_0_80px_rgba(125,211,252,0.08)]">
+            <div data-gsap="pricing-card" className="relative rounded-3xl border border-[#7DD3FC]/40 bg-gradient-to-b from-[#0C111B] to-[#070B12] p-8 flex flex-col gap-6 shadow-[0_0_80px_rgba(125,211,252,0.08)]">
               <div className="absolute -top-px left-6 right-6 h-px bg-gradient-to-r from-transparent via-[#7DD3FC]/50 to-transparent" />
               <div className="absolute top-3 right-4 bg-[#7DD3FC] text-[#020305] text-[10px] font-black uppercase px-3 py-1 rounded-full">
                 Most Popular
@@ -655,7 +660,7 @@ export default function Home() {
             </div>
 
             {/* Enterprise */}
-            <div className="glass-panel rounded-3xl p-8 flex flex-col gap-6">
+            <div data-gsap="pricing-card" className="glass-panel rounded-3xl p-8 flex flex-col gap-6">
               <div>
                 <div className="text-xs font-bold text-[#64748B] uppercase tracking-widest font-mono mb-3">Enterprise</div>
                 <div className="text-4xl font-black text-white font-mono">Custom</div>
@@ -682,13 +687,13 @@ export default function Home() {
       ═══════════════════════════════════════════════════════ */}
       <section id="faq" className="relative py-32 border-t border-white/[0.04] z-10">
         <div className="mx-auto max-w-3xl px-5 sm:px-8 space-y-16">
-          <div className="text-center space-y-5">
+          <div data-gsap="fade-up" className="text-center space-y-5">
             <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">Frequently asked questions.</h2>
             <p className="text-base text-[#94A3B8]">Everything you need to know about InterviewOS AI.</p>
           </div>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <div key={i} className="glass-panel rounded-2xl overflow-hidden">
+              <div key={i} data-gsap="faq-item" className="glass-panel rounded-2xl overflow-hidden">
                 <button
                   onClick={() => setActiveFaq(activeFaq === i ? null : i)}
                   className="w-full flex items-center justify-between p-6 text-left group"
@@ -723,7 +728,7 @@ export default function Home() {
       <section className="relative py-32 border-t border-white/[0.04] z-10 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(255,255,255,0.04)_0%,transparent_70%)] pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_50%,rgba(125,211,252,0.06)_0%,transparent_70%)] pointer-events-none" />
-        <div className="mx-auto max-w-4xl px-5 text-center space-y-8 relative z-10">
+        <div data-gsap="fade-up" className="mx-auto max-w-4xl px-5 text-center space-y-8 relative z-10">
           <div className="text-[10px] font-bold text-[#475569] uppercase tracking-[0.2em] font-mono">Ready to level up?</div>
           <h2 className="text-5xl sm:text-7xl font-black tracking-[-0.04em] text-white leading-[1.02]">
             Land your dream <span className="text-gradient-ice">engineering role.</span>
