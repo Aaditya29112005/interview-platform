@@ -173,7 +173,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#020305] text-[#D7DEE8] overflow-x-hidden pt-16">
+    <div className="relative min-h-screen bg-[#020305] text-[#D7DEE8] overflow-x-hidden">
       {/* Noise overlay */}
       <div className="noise-overlay" />
 

@@ -49,7 +49,7 @@ export default function RootLayout({
         <AuthProvider>
           <CustomCursor />
           <NavBar />
-          <main className="flex-1 flex flex-col">{children}</main>
+          <main className="flex-1 flex flex-col pt-16">{children}</main>
         </AuthProvider>
       </body>
     </html>
