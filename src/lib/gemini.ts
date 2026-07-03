@@ -4,7 +4,7 @@
  */
 
 export async function generateGeminiContent(
-  prompt: string,
+  prompt: string | Array<{ text?: string; inlineData?: { data: string; mimeType: string } }>,
   jsonMode: boolean = false
 ): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -15,15 +15,15 @@ export async function generateGeminiContent(
   // We use the fast and capable gemini-2.5-flash model
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
+  const parts = typeof prompt === 'string' ? [{ text: prompt }] : prompt;
+
   const body: {
-    contents: Array<{ parts: Array<{ text: string }> }>;
+    contents: Array<{ parts: Array<{ text?: string; inlineData?: { data: string; mimeType: string } }> }>;
     generationConfig?: { responseMimeType: string };
   } = {
     contents: [
       {
-        parts: [
-          { text: prompt },
-        ],
+        parts: parts,
       },
     ],
   };

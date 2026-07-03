@@ -73,6 +73,35 @@ export default function DashboardPage() {
   const [jobDescription, setJobDescription] = useState('');
   const [isRecruiterView, setIsRecruiterView] = useState(false);
 
+  // File Upload states
+  const [resumeFile, setResumeFile] = useState<{ base64: string; mimeType: string; fileName: string } | null>(null);
+  const [jdFile, setJdFile] = useState<{ base64: string; mimeType: string; fileName: string } | null>(null);
+  const [resumeInputType, setResumeInputType] = useState<'text' | 'file'>('file');
+  const [jdInputType, setJdInputType] = useState<'text' | 'file'>('file');
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'resume' | 'jd') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        const base64String = reader.result.split(',')[1];
+        const fileData = {
+          base64: base64String,
+          mimeType: file.type,
+          fileName: file.name,
+        };
+        if (type === 'resume') {
+          setResumeFile(fileData);
+        } else {
+          setJdFile(fileData);
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Authentication check
   useEffect(() => {
     if (!loading && !user) {
@@ -120,7 +149,17 @@ export default function DashboardPage() {
       const res = await fetch('/api/interviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, difficulty, company, experience, resume, personality, jobDescription }),
+        body: JSON.stringify({ 
+          role, 
+          difficulty, 
+          company, 
+          experience, 
+          resume, 
+          personality, 
+          jobDescription,
+          resumeFile,
+          jobDescriptionFile: jdFile 
+        }),
       });
 
       const data = await res.json();
@@ -606,37 +645,145 @@ export default function DashboardPage() {
                       onChange={(e) => setExperience(Number(e.target.value))}
                       className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                     />
-                  </div>
-
-                  {/* Job Description Area */}
+                                   {/* Job Description Area */}
                   <div className="space-y-2">
-                    <label htmlFor="jobDescription" className="block text-xs font-semibold text-zinc-400">
-                      Paste Job Description (Optional)
-                    </label>
-                    <textarea
-                      id="jobDescription"
-                      value={jobDescription}
-                      onChange={(e) => setJobDescription(e.target.value)}
-                      rows={3}
-                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
-                      placeholder="Paste target Job Description (JD) to match target required skills and tools."
-                    />
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-semibold text-zinc-400">
+                        Target Job Description (JD)
+                      </label>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setJdInputType('file')}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
+                            jdInputType === 'file' 
+                              ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20' 
+                              : 'text-zinc-500 hover:text-zinc-300'
+                          }`}
+                        >
+                          Upload PDF/TXT
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setJdInputType('text')}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
+                            jdInputType === 'text' 
+                              ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20' 
+                              : 'text-zinc-500 hover:text-zinc-300'
+                          }`}
+                        >
+                          Paste Text
+                        </button>
+                      </div>
+                    </div>
+
+                    {jdInputType === 'file' ? (
+                      <div className="relative border border-dashed border-zinc-800 rounded-xl bg-zinc-950/40 p-4 text-center hover:border-zinc-700 transition">
+                        {jdFile ? (
+                          <div className="flex items-center justify-between text-xs text-zinc-300">
+                            <span className="font-semibold truncate max-w-[80%]">📄 {jdFile.fileName}</span>
+                            <button
+                              type="button"
+                              onClick={() => setJdFile(null)}
+                              className="text-[10px] font-bold text-red-400 hover:underline"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="cursor-pointer block py-4 space-y-1">
+                            <span className="text-xs font-medium text-zinc-400 block">Select PDF or text document</span>
+                            <span className="text-[10px] text-zinc-600 block">Drag & drop or browse</span>
+                            <input
+                              type="file"
+                              accept=".pdf,.txt,.docx"
+                              onChange={(e) => handleFileChange(e, 'jd')}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                      </div>
+                    ) : (
+                      <textarea
+                        id="jobDescription"
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        rows={3}
+                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
+                        placeholder="Paste target Job Description (JD) to match target required skills and tools."
+                      />
+                    )}
                   </div>
 
                   {/* Resume Area */}
                   <div className="space-y-2">
-                    <label htmlFor="resume" className="block text-xs font-semibold text-zinc-400">
-                      Paste Resume / Experience Text (Optional)
-                    </label>
-                    <textarea
-                      id="resume"
-                      value={resume}
-                      onChange={(e) => setResume(e.target.value)}
-                      rows={3}
-                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
-                      placeholder="Paste your resume or relevant experience summary here for personalized questions."
-                    />
-                  </div>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-semibold text-zinc-400">
+                        Candidate Resume / Profile
+                      </label>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setResumeInputType('file')}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
+                            resumeInputType === 'file' 
+                              ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20' 
+                              : 'text-zinc-500 hover:text-zinc-300'
+                          }`}
+                        >
+                          Upload PDF/TXT
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setResumeInputType('text')}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
+                            resumeInputType === 'text' 
+                              ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20' 
+                              : 'text-zinc-500 hover:text-zinc-300'
+                          }`}
+                        >
+                          Paste Text
+                        </button>
+                      </div>
+                    </div>
+
+                    {resumeInputType === 'file' ? (
+                      <div className="relative border border-dashed border-zinc-800 rounded-xl bg-zinc-950/40 p-4 text-center hover:border-zinc-700 transition">
+                        {resumeFile ? (
+                          <div className="flex items-center justify-between text-xs text-zinc-300">
+                            <span className="font-semibold truncate max-w-[80%]">📄 {resumeFile.fileName}</span>
+                            <button
+                              type="button"
+                              onClick={() => setResumeFile(null)}
+                              className="text-[10px] font-bold text-red-400 hover:underline"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="cursor-pointer block py-4 space-y-1">
+                            <span className="text-xs font-medium text-zinc-400 block">Select PDF or text document</span>
+                            <span className="text-[10px] text-zinc-600 block">Drag & drop or browse</span>
+                            <input
+                              type="file"
+                              accept=".pdf,.txt,.docx"
+                              onChange={(e) => handleFileChange(e, 'resume')}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                      </div>
+                    ) : (
+                      <textarea
+                        id="resume"
+                        value={resume}
+                        onChange={(e) => setResume(e.target.value)}
+                        rows={3}
+                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
+                        placeholder="Paste your resume or relevant experience summary here for personalized questions."
+                      />
+                    )}
+                  </div>   </div>
 
                   {/* Action Buttons */}
                   <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">

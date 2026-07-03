@@ -63,7 +63,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { role, difficulty, company, experience, resume, personality, jobDescription } = await request.json();
+    const { 
+      role, 
+      difficulty, 
+      company, 
+      experience, 
+      resume, 
+      personality, 
+      jobDescription,
+      resumeFile,
+      jobDescriptionFile
+    } = await request.json();
 
     if (!role || !difficulty || !company || experience === undefined) {
       return NextResponse.json(
@@ -81,33 +91,39 @@ export async function POST(request: Request) {
 
     const chosenPersonality = personality || 'Google Staff Engineer';
 
-    // Call OpenAI to generate a customized interview plan
-    const systemPrompt = `You are an elite technical recruitment orchestrator and senior interviewer at a top tech company.
-Your task is to generate a custom, structured Interview Plan based on the candidate's target role, experience, target company style, resume, interviewer personality, and target job description.
+    // Call OpenAI/Gemini to generate a customized interview plan
+    const systemPromptText = `You are an elite technical recruitment orchestrator and senior interviewer at a top tech company.
+Your task is to generate a custom, structured Interview Plan based on the candidate's target role, experience, target company style, resume details, interviewer personality, and target job description details.
 
 Role: ${role}
 Years of Experience: ${experience}
 Difficulty Level: ${difficulty}
 Target Company Style: ${company}
 Interviewer Personality: ${chosenPersonality}
-Target Job Description (if provided):
-${jobDescription || 'None provided'}
-Candidate Resume (if provided):
-${resume || 'None provided'}
 
-Based on this information, design a tailored interview strategy. If a Job Description is provided, align the topics and coding goals directly to the required skills and tools from the JD.
-Ensure the difficulty matches the level.
-Integrate the personality style:
+If a Job Description is provided (either as text below or as an attached file), align the topics and coding goals directly to the required skills and tools.
+If a Resume is provided (either as text below or as an attached file), extract relevant projects, tools, and background to tailor questions.
+
+Interviewer Personality Guidance:
 - If 'Google Staff Engineer': Ask tough, algorithmically deep, and architecture-focused topics.
 - If 'Amazon Bar Raiser': Focus heavily on leadership principles, scalability, customer-centric trade-offs, and diving deep.
 - If 'YC Startup Founder': Focus on quick hacking, practical trade-offs, fast pacing, and building capacity.
 - If 'Tough Senior Architect': Adopt an intense, probing style, demanding robust evidence for technical claims.
 - If 'Friendly Mentor': Be educational, encouraging, and hint-supportive.
 
+We have attached the candidate's Resume document and/or Target Job Description document as inline files to this prompt if uploaded.
+Please read them carefully to generate the roadmap objective and topics.
+
+Text Resume:
+${resume || 'None provided'}
+
+Text Job Description:
+${jobDescription || 'None provided'}
+
 You MUST respond with a single JSON object matching this structure. Do not output any markdown headers, tags, or extra text. Output ONLY the JSON.
 
 {
-  "objective": "Detailed paragraph describing the specific interview objective, target company context, selected interviewer personality, and JD alignment.",
+  "objective": "Detailed paragraph describing the specific interview objective, target company context, selected interviewer personality, and alignment to the JD and resume details.",
   "topics": [
     { "name": "Topic Name 1", "status": "pending" },
     { "name": "Topic Name 2", "status": "pending" },
@@ -116,6 +132,28 @@ You MUST respond with a single JSON object matching this structure. Do not outpu
   ],
   "evaluationPlan": "Explanation of the scoring rubric, personality guidelines, and what behaviors/skills the AI interviewer should look for or probe."
 }`;
+
+    const promptParts: Array<{ text?: string; inlineData?: { data: string; mimeType: string } }> = [
+      { text: systemPromptText }
+    ];
+
+    if (resumeFile && resumeFile.base64) {
+      promptParts.push({
+        inlineData: {
+          data: resumeFile.base64,
+          mimeType: resumeFile.mimeType || 'application/pdf'
+        }
+      });
+    }
+
+    if (jobDescriptionFile && jobDescriptionFile.base64) {
+      promptParts.push({
+        inlineData: {
+          data: jobDescriptionFile.base64,
+          mimeType: jobDescriptionFile.mimeType || 'application/pdf'
+        }
+      });
+    }
 
     let planData = {
       objective: `Evaluate candidate for a ${role} position at a ${company} company using ${chosenPersonality} personality.`,
@@ -129,7 +167,7 @@ You MUST respond with a single JSON object matching this structure. Do not outpu
     };
 
     try {
-      const responseText = await generateGeminiContent(systemPrompt, true);
+      const responseText = await generateGeminiContent(promptParts, true);
       if (responseText) {
         const parsed = JSON.parse(responseText);
         if (parsed.objective && parsed.topics) {
@@ -152,7 +190,7 @@ You MUST respond with a single JSON object matching this structure. Do not outpu
         status: 'pending',
         objective: planData.objective,
         topics: planData.topics,
-        jobDescription: jobDescription || null,
+        jobDescription: jobDescriptionFile?.fileName ? `[Uploaded File: ${jobDescriptionFile.fileName}]` : (jobDescription || null),
         cheatingLog: [],
         memory: {
           candidate_strengths: [],
