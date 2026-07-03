@@ -39,6 +39,8 @@ model Interview {
   codeSnippet    String?   @db.Text
   codeLanguage   String?   @default("javascript")
   recruiterReviewed Boolean @default(false)
+  digitalTwin    Json?     // Real-time estimated skill metrics JSON
+  activeAgent    String?   @default("Senior Engineer") // "Senior Engineer", "CTO", "Hiring Manager"
 }
 
 model Message {
@@ -72,4 +74,6 @@ model Score {
   fillerWords   Json?        // Map of filler words, e.g. {"like": 4, "uh": 5}
   vocabScore    Int          @default(70)
   speakingPace  Int          @default(130) // Words per minute
+  genome        Json?        // Skill genome multidimensional radar attributes
+  forecast      Json?        // Target company pass forecasts
 }

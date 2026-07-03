@@ -85,39 +85,43 @@ export async function POST(
     }
 
     // Run the LLM-based Decision and Evaluation Node
-    const systemPrompt = `You are the background reasoning node of an AI Interviewer. Your job is to analyze the candidate's last answer, update their capability memory, progress their interview plan, and generate the next prompt steering instructions.
-
+    const systemPrompt = `You are the background reasoning node of an AI Interviewer. Your job is to analyze the candidate's last answer, update their capability memory, progress their interview plan, detect contradictions, and rotate panel interviewers.
+ 
 Role: ${interview.role}
 Difficulty: ${interview.difficulty}
 Experience Level: ${interview.experience} Years
 Company Style: ${interview.company}
 Interviewer Personality: ${(interview as any).personality || 'Google Staff Engineer'}
 Interview Objective: ${interview.objective || 'N/A'}
-
+ 
 Current Topics List & Statuses:
 ${JSON.stringify(interview.topics)}
-
+ 
 Current Evaluation Memory:
 ${JSON.stringify(interview.memory)}
-
+ 
 Full Conversation History:
 ${messageHistoryText}
-
+ 
 Review the latest exchange:
 Candidate said: "${candidateText}"
 Interviewer said: "${aiText}"
-
+ 
 Analyze:
 1. Did the candidate answer the question satisfactorily?
 2. What strengths or weak areas did they demonstrate?
-3. Update the scores in Communication, Problem Solving, Confidence, Technical Depth, Clarity, Leadership (from 0 to 100).
-4. Assign a specific "turnConfidence" score (from 0 to 100) evaluating the candidate's last answer. High if precise and correct, lower if superficial, incorrect, or hesitant.
-5. Update the memory arrays (strengths, weak areas, repeated mistakes, confidence level, vocabulary, traits).
-6. Review topics: if the current topic has been thoroughly vetted, mark it "completed" and suggest starting the next topic in the "nextFocusInstructions". If they struggled, keep it "in_progress" and instruct the interviewer to push back or drill down.
-7. Generate specific "nextFocusInstructions" for the interviewer. Instruct the interviewer on what to do next: push back on a weak answer, move to the next topic, drill deeper into trade-offs, or offer a hint. Keep these steering instructions action-oriented, clear, and direct.
+3. Update capability scores in Communication, Problem Solving, Confidence, Technical Depth, Clarity, Leadership (from 0 to 100).
+4. Update the live "digitalTwin" knowledge scores for the candidate on a scale of 0 to 100: React, Node, System Design, SQL, Leadership, and Communication.
+5. Assign the active panel agent for the NEXT turn based on the current context:
+   - "Senior Engineer" for algorithms, databases, caching, coding indexes.
+   - "CTO" for architectural business cost, scaling, trade-offs.
+   - "Hiring Manager" for behavioral questions, teamwork, leadership.
+6. Contradiction check: Compare candidate's latest response against the conversation history. If they directly contradicted a prior statement (e.g. saying they prefer SQL earlier, but now saying they have never used databases), write the contradiction explanation in "contradictionAlert". If none found, write null.
+7. Assign a specific "turnConfidence" score (from 0 to 100) evaluating the candidate's last answer.
+8. Generate specific "nextFocusInstructions" for the interviewer. Instruct the interviewer on what to do next.
 
 Output ONLY a JSON object with this exact structure. Do not output any markdown code blocks, formatting, or text outside the JSON.
-
+ 
 {
   "scores": {
     "communication": number,
@@ -140,9 +144,19 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
   "topics": [
     { "name": "Topic Name", "status": "pending | in_progress | completed" }
   ],
-  "nextFocusInstructions": "Instructions for the AI interviewer on how to conduct the next turn."
+  "nextFocusInstructions": "Instructions for the AI interviewer on how to conduct the next turn.",
+  "digitalTwin": {
+    "react": number,
+    "node": number,
+    "systemDesign": number,
+    "sql": number,
+    "leadership": number,
+    "communication": number
+  },
+  "activeAgent": "Senior Engineer | CTO | Hiring Manager",
+  "contradictionAlert": "string | null"
 }`;
-
+ 
     let evaluationResult = {
       scores: {
         communication: 70,
@@ -157,8 +171,18 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
       memory: interview.memory || {},
       topics: interview.topics || [],
       nextFocusInstructions: 'Continue testing the candidate on the current topics.',
+      digitalTwin: {
+        react: 50,
+        node: 50,
+        systemDesign: 50,
+        sql: 50,
+        leadership: 50,
+        communication: 50,
+      },
+      activeAgent: 'Senior Engineer',
+      contradictionAlert: null as string | null,
     };
-
+ 
     try {
       const responseText = await generateGeminiContent(systemPrompt, true);
       if (responseText) {
@@ -170,16 +194,18 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
     } catch (llmError) {
       console.error('Gemini evaluation error:', llmError);
     }
-
+ 
     // Save updated memory and topics to the interview record
     await prisma.interview.update({
       where: { id },
       data: {
         memory: evaluationResult.memory,
         topics: evaluationResult.topics,
+        digitalTwin: evaluationResult.digitalTwin || null,
+        activeAgent: evaluationResult.activeAgent || 'Senior Engineer',
       },
     });
-
+ 
     // Update the timeline
     const nextTurnNum = currentTimeline.length + 1;
     const turnConfidenceVal = evaluationResult.turnConfidence || evaluationResult.scores.confidence || 70;
@@ -189,7 +215,7 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
       question: aiText,
       answer: candidateText,
     });
-
+ 
     // Update or create the Score record in real-time
     const currentScores = evaluationResult.scores;
     await prisma.score.upsert({
@@ -227,14 +253,18 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
 
     const memoryObj = evaluationResult.memory as Record<string, unknown>;
 
-    const updatedSystemPrompt = `You are a senior software engineering interviewer conducting a realistic voice interview.
+    const updatedSystemPrompt = `You are playing the role of the active interviewer agent: **${evaluationResult.activeAgent || 'Senior Engineer'}** in a panel interview.
+Interviewer Agent Persona:
+- If 'Senior Engineer': Highly technical, deep-dives into caching, coding correctness, complexity.
+- If 'CTO': Higher-level focus on engineering values, business costs, scale trade-offs.
+- If 'Hiring Manager': Focused on behavioral traits, collaboration, leadership, conflict resolution.
+
 Target Position: ${interview.role}
 Target Company Style: ${interview.company}
 Experience Level: ${interview.experience} Years of Experience
 Difficulty Level: ${interview.difficulty}
 
-Interview Objective:
-${interview.objective || 'N/A'}
+Current Interview Persona Setup: ${(interview as any).personality || 'Google Staff Engineer'} Style
 
 Topics Statuses:
 ${topicsListString}
@@ -248,12 +278,15 @@ CURRENT MEMORY OF CANDIDATE:
 STEERING DIRECTIVE:
 ${evaluationResult.nextFocusInstructions}
 
-Keep your responses conversational, direct, and under 3-4 sentences. Maintain the interview persona.`;
+Keep your response in character as **${evaluationResult.activeAgent || 'Senior Engineer'}**. Keep it under 2-3 sentences. Ask the highest-value next question to probe the candidate.`;
 
     return NextResponse.json({
       topics: evaluationResult.topics,
       scores: evaluationResult.scores,
       nextInstructions: updatedSystemPrompt,
+      activeAgent: evaluationResult.activeAgent || 'Senior Engineer',
+      contradictionAlert: evaluationResult.contradictionAlert || null,
+      digitalTwin: evaluationResult.digitalTwin || null,
     });
   } catch (error) {
     console.error('Process turn error:', error);

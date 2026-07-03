@@ -72,6 +72,18 @@ export default function InterviewStudioPage() {
   const [isRunningCode, setIsRunningCode] = useState(false);
   const [tabSwitchAlertCount, setTabSwitchAlertCount] = useState(0);
 
+  // Digital Twin, Active Agent, and Contradiction Alert states
+  const [activeAgent, setActiveAgent] = useState<string>('Senior Engineer');
+  const [digitalTwin, setDigitalTwin] = useState<Record<string, number>>({
+    react: 50,
+    node: 50,
+    systemDesign: 50,
+    sql: 50,
+    leadership: 50,
+    communication: 50,
+  });
+  const [contradictionAlert, setContradictionAlert] = useState<string | null>(null);
+
   // WebSocket, WebRTC & Audio References
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const dataChannelRef = useRef<RTCDataChannel | null>(null);
@@ -121,6 +133,12 @@ export default function InterviewStudioPage() {
         if (res.ok) {
           const data = await res.json();
           setInterview(data.interview);
+          if (data.interview.activeAgent) {
+            setActiveAgent(data.interview.activeAgent);
+          }
+          if (data.interview.digitalTwin) {
+            setDigitalTwin(data.interview.digitalTwin as Record<string, number>);
+          }
           if (data.interview.topics) {
             setTopics(data.interview.topics as Topic[]);
           }
@@ -236,6 +254,18 @@ export default function InterviewStudioPage() {
         const data = await res.json();
         if (data.topics) {
           setTopics(data.topics);
+        }
+        if (data.activeAgent) {
+          setActiveAgent(data.activeAgent);
+        }
+        if (data.digitalTwin) {
+          setDigitalTwin(data.digitalTwin);
+        }
+        if (data.contradictionAlert) {
+          setContradictionAlert(data.contradictionAlert);
+          setTimeout(() => {
+            setContradictionAlert((prev) => prev === data.contradictionAlert ? null : prev);
+          }, 15000);
         }
 
         // Send session updates to steer either the WebRTC data channel or the Gemini WebSocket
@@ -942,6 +972,24 @@ export default function InterviewStudioPage() {
       <div className="absolute top-[10%] left-[-15%] h-[500px] w-[500px] rounded-full bg-indigo-500/5 blur-[120px]" />
       <div className="absolute bottom-[10%] right-[-15%] h-[500px] w-[500px] rounded-full bg-purple-500/5 blur-[120px]" />
 
+      {/* AI Contradiction Alert Overlay */}
+      {contradictionAlert && (
+        <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8 w-full z-30">
+          <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 p-4 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-xl backdrop-blur-md">
+            <span className="flex items-center gap-2">
+              <span className="animate-ping h-2 w-2 rounded-full bg-yellow-400 inline-block" />
+              <span><strong>AI Contradiction Detector:</strong> {contradictionAlert}</span>
+            </span>
+            <button 
+              onClick={() => setContradictionAlert(null)} 
+              className="text-[10px] hover:underline font-bold uppercase tracking-wider ml-4 text-yellow-500"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Studio content container */}
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         
@@ -977,7 +1025,18 @@ export default function InterviewStudioPage() {
             {/* AI Thinking Brain HUD */}
             <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 space-y-3 shadow-lg shadow-indigo-500/2">
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
-                <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest">Reasoning Engine HUD</span>
+                <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                  <span>Reasoning Engine HUD</span>
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                    activeAgent === 'CTO' 
+                      ? 'bg-purple-500/15 text-purple-400 border border-purple-500/20' 
+                      : activeAgent === 'Hiring Manager' 
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                        : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20'
+                  }`}>
+                    🎤 Panelist: {activeAgent}
+                  </span>
+                </span>
                 <span className="text-2xs font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
                   {interview?.personality || 'Google Staff Engineer'} Style
                 </span>
@@ -1020,6 +1079,33 @@ export default function InterviewStudioPage() {
                   ⚠️ Integrity violation alerts logged: {tabSwitchAlertCount}
                 </div>
               )}
+            </div>
+
+            {/* AI Digital Twin Knowledge Model */}
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 space-y-3 shadow-lg shadow-indigo-500/2">
+              <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+                <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+                  <Brain className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>AI Digital Twin Candidate Model</span>
+                </span>
+                <span className="text-[9px] font-semibold text-zinc-500 uppercase">Estimated Knowledge</span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 pt-1">
+                {Object.entries(digitalTwin).map(([skill, val]) => (
+                  <div key={skill} className="bg-zinc-900/25 border border-zinc-900/50 rounded-lg p-2 space-y-1">
+                    <div className="text-[9px] font-bold text-zinc-400 capitalize truncate">{skill.replace(/([A-Z])/g, ' $1')}</div>
+                    <div className="flex items-center gap-1">
+                      <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" 
+                          style={{ width: `${val}%` }} 
+                        />
+                      </div>
+                      <span className="text-[10px] font-bold text-white font-mono">{val}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

@@ -133,6 +133,8 @@ You must also output:
   - "Startup Tech Lead Ready"
   - "Junior Engineer Level"
   - "Requires Core Practice"
+- **genome**: Evaluate the candidate's core architectural traits on a scale of 0 to 100: curiosity, thinkingSpeed, tradeOffReasoning, abstraction, decisionMaking, and debugging.
+- **forecast**: Predict target company pass rate probability percentages (0 to 100) based on role/rubric matching: google, amazon, startup, remote.
 
 Output ONLY a valid JSON object matching this structure. Do not output any markdown format tags, headers, or extra text.
 
@@ -160,7 +162,21 @@ Output ONLY a valid JSON object matching this structure. Do not output any markd
   "recommendations": "string",
   "suggestedStudyPlan": "string",
   "recommendedResources": ["string"],
-  "estimatedLevel": "string"
+  "estimatedLevel": "string",
+  "genome": {
+    "curiosity": number,
+    "thinkingSpeed": number,
+    "tradeOffReasoning": number,
+    "abstraction": number,
+    "decisionMaking": number,
+    "debugging": number
+  },
+  "forecast": {
+    "google": number,
+    "amazon": number,
+    "startup": number,
+    "remote": number
+  }
 }
 `;
 
@@ -189,6 +205,20 @@ Output ONLY a valid JSON object matching this structure. Do not output any markd
       suggestedStudyPlan: 'Review technical concepts and practice out-loud mock drills.',
       recommendedResources: ['Prisma Docs', 'Leetcode Systems Design'],
       estimatedLevel: 'Requires Core Practice',
+      genome: {
+        curiosity: 50,
+        thinkingSpeed: 50,
+        tradeOffReasoning: 50,
+        abstraction: 50,
+        decisionMaking: 50,
+        debugging: 50,
+      },
+      forecast: {
+        google: 50,
+        amazon: 50,
+        startup: 50,
+        remote: 50,
+      },
     };
 
     try {
@@ -224,6 +254,8 @@ Output ONLY a valid JSON object matching this structure. Do not output any markd
         fillerWords: reportData.fillerWords,
         vocabScore: reportData.vocabScore,
         speakingPace: reportData.speakingPace,
+        genome: reportData.genome || null,
+        forecast: reportData.forecast || null,
       },
       create: {
         interviewId: id,
@@ -245,6 +277,8 @@ Output ONLY a valid JSON object matching this structure. Do not output any markd
         vocabScore: reportData.vocabScore,
         speakingPace: reportData.speakingPace,
         confidenceTimeline: [],
+        genome: reportData.genome || null,
+        forecast: reportData.forecast || null,
       },
     });
 
