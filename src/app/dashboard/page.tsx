@@ -211,7 +211,7 @@ export default function DashboardPage() {
                 className={`inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
                   isRecruiterView 
                     ? 'bg-[#7DD3FC]/10 border-[#7DD3FC]/30 text-[#7DD3FC]' 
-                    : 'border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white'
+                    : 'border-white/[0.08] bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white'
                 }`}
               >
                 <Brain className="h-4.5 w-4.5" />
@@ -236,7 +236,7 @@ export default function DashboardPage() {
           <>
             {isRecruiterView ? (
               /* Recruiter Console Panel */
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-6">
+              <div className="rounded-2xl border border-white/[0.08] bg-zinc-900/10 p-6 backdrop-blur-sm space-y-6">
                 <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                   <h2 className="text-lg font-bold text-white flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-[#7DD3FC]" />
@@ -294,7 +294,7 @@ export default function DashboardPage() {
                                 {item.status === 'completed' && (
                                   <Link
                                     href={`/interview/${item.id}/report`}
-                                    className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/50 px-2.5 py-1 text-2xs font-semibold text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-white transition"
+                                    className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-zinc-900/50 px-2.5 py-1 text-2xs font-semibold text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-white transition"
                                   >
                                     Review Report
                                   </Link>
@@ -320,7 +320,7 @@ export default function DashboardPage() {
                     onClick={() => setActiveTab('sessions')}
                     className={`pb-2 text-sm font-semibold border-b-2 transition cursor-pointer ${
                       activeTab === 'sessions'
-                        ? 'border-[#4F7CFF] text-white'
+                        ? 'border-[#7DD3FC] text-white'
                         : 'border-transparent text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
@@ -330,7 +330,7 @@ export default function DashboardPage() {
                     onClick={() => setActiveTab('analytics')}
                     className={`pb-2 text-sm font-semibold border-b-2 transition cursor-pointer ${
                       activeTab === 'analytics'
-                        ? 'border-[#4F7CFF] text-white'
+                        ? 'border-[#7DD3FC] text-white'
                         : 'border-transparent text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
@@ -343,9 +343,9 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column: Recent Feedback & Guidelines */}
                     <div className="lg:col-span-1 space-y-6">
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-sm space-y-4">
+                      <div className="rounded-2xl border border-white/[0.08] bg-[#0A1020]/60 p-6 backdrop-blur-sm space-y-4">
                         <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                          <Sparkles className="h-4.5 w-4.5 text-[#4F7CFF]" />
+                          <Sparkles className="h-4.5 w-4.5 text-[#7DD3FC]" />
                           <span>Recent Evaluation Insights</span>
                         </h2>
                         {analytics.recentFeedback.length > 0 ? (
@@ -353,13 +353,13 @@ export default function DashboardPage() {
                             {analytics.recentFeedback.map((feedback) => (
                               <div
                                 key={feedback.id}
-                                className="border-l-2 border-[#4F7CFF]/50 pl-3 py-1 space-y-1.5"
+                                className="border-l-2 border-[#7DD3FC]/50 pl-3 py-1 space-y-1.5"
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs font-semibold text-zinc-300">
                                     {feedback.role} ({feedback.company})
                                   </span>
-                                  <span className="text-xs font-bold text-[#4F7CFF]">
+                                  <span className="text-xs font-bold text-[#7DD3FC]">
                                     {feedback.overall}%
                                   </span>
                                 </div>
@@ -376,7 +376,7 @@ export default function DashboardPage() {
                         )}
                       </div>
 
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-sm space-y-4">
+                      <div className="rounded-2xl border border-white/[0.08] bg-[#0A1020]/60 p-6 backdrop-blur-sm space-y-4">
                         <h3 className="text-sm font-semibold text-white">Directives for Candidates</h3>
                         <ul className="text-xs text-zinc-400 space-y-2 list-disc list-inside">
                           <li>Grant browser microphone access before loading the interview.</li>
@@ -389,7 +389,7 @@ export default function DashboardPage() {
 
                     {/* Right Column: Interviews List */}
                     <div className="lg:col-span-2 space-y-6">
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-sm">
+                      <div className="rounded-2xl border border-white/[0.08] bg-[#0A1020]/60 p-6 backdrop-blur-sm">
                         <h2 className="text-sm font-bold text-white mb-6">Your Interviews</h2>
                         {interviews.length > 0 ? (
                           <div className="divide-y divide-zinc-900/60">
@@ -404,7 +404,7 @@ export default function DashboardPage() {
                                     <span className="inline-flex items-center rounded-md bg-zinc-900 px-2 py-0.5 text-2xs font-medium text-zinc-400">
                                       {interview.company} • {(interview as any).personality || 'Google Staff'}
                                     </span>
-                                    <span className="inline-flex items-center rounded-md bg-[#4F7CFF]/10 px-2 py-0.5 text-2xs font-medium text-[#4F7CFF] border border-[#4F7CFF]/15">
+                                    <span className="inline-flex items-center rounded-md bg-[#7DD3FC]/10 px-2 py-0.5 text-2xs font-medium text-[#7DD3FC] border border-[#7DD3FC]/15">
                                       {(interview as any).memory?.mode || 'Classic'}
                                     </span>
                                     <span className="inline-flex items-center rounded-md bg-zinc-900/40 px-2 py-0.5 text-2xs font-medium text-zinc-400">
@@ -423,12 +423,12 @@ export default function DashboardPage() {
                                 <div className="flex items-center gap-3">
                                   {interview.status === 'completed' ? (
                                     <>
-                                      <span className="text-sm font-bold text-[#4F7CFF]">
+                                      <span className="text-sm font-bold text-[#7DD3FC]">
                                         Score: {interview.scores?.overall}%
                                       </span>
                                       <Link
                                         href={`/interview/${interview.id}/report`}
-                                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-850 hover:text-white"
+                                        className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-zinc-900/50 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-850 hover:text-white"
                                       >
                                         <FileText className="h-3.5 w-3.5" />
                                         <span>Report</span>
@@ -441,7 +441,7 @@ export default function DashboardPage() {
                                       </span>
                                       <Link
                                         href={`/interview/${interview.id}`}
-                                        className="inline-flex items-center gap-1 rounded-lg bg-[#4F7CFF] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#4F7CFF]/90"
+                                        className="inline-flex items-center gap-1 rounded-lg bg-[#7DD3FC] px-3 py-1.5 text-xs font-bold text-[#020305] shadow-sm transition hover:bg-[#93DBFD]"
                                       >
                                         <Play className="h-3.5 w-3.5" />
                                         <span>Resume</span>
@@ -465,7 +465,7 @@ export default function DashboardPage() {
                             </div>
                             <button
                               onClick={() => setIsModalOpen(true)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-[#4F7CFF] px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#4F7CFF]/95"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-[#7DD3FC] px-3.5 py-2 text-xs font-bold text-[#020305] shadow-sm transition hover:bg-[#93DBFD]"
                             >
                               <Plus className="h-4 w-4" />
                               <span>Start First Interview</span>
@@ -481,10 +481,10 @@ export default function DashboardPage() {
                     {/* Stats Summary Cards */}
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                       {/* Card 1: Average Score */}
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-md">
+                      <div className="rounded-2xl border border-white/[0.08] bg-[#0A1020]/60 p-6 backdrop-blur-md">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-semibold text-[#7F8AA6]">Average Score</span>
-                          <Award className="h-5 w-5 text-[#4F7CFF]" />
+                          <Award className="h-5 w-5 text-[#7DD3FC]" />
                         </div>
                         <div className="mt-4 flex items-baseline gap-2">
                           <span className="text-4xl font-bold text-white">
@@ -502,7 +502,7 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Card 2: Completed Interviews */}
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-md">
+                      <div className="rounded-2xl border border-white/[0.08] bg-[#0A1020]/60 p-6 backdrop-blur-md">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-semibold text-[#7F8AA6]">Completed Sessions</span>
                           <Play className="h-5 w-5 text-[#7C6CFF]" />
@@ -516,7 +516,7 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Card 3: Performance Streak */}
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-md">
+                      <div className="rounded-2xl border border-white/[0.08] bg-[#0A1020]/60 p-6 backdrop-blur-md">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-semibold text-[#7F8AA6]">Assessment Streaks</span>
                           <Sparkles className="h-5 w-5 text-[#4DE2FF]" />
@@ -545,7 +545,7 @@ export default function DashboardPage() {
                     )}
 
                     {/* Skill Galaxy Interactive Widget */}
-                    <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-sm">
+                    <div className="rounded-2xl border border-white/[0.08] bg-[#0A1020]/60 p-6 backdrop-blur-sm">
                       <div className="border-b border-zinc-900/60 pb-4 mb-6">
                         <h3 className="text-sm font-bold text-white flex items-center gap-2">
                           <Globe className="h-4.5 w-4.5 text-[#4DE2FF]" />
@@ -580,8 +580,8 @@ export default function DashboardPage() {
                             </g>
 
                             <g className="cursor-pointer group">
-                              <circle cx="320" cy="60" r="14" fill="#4F7CFF" className="opacity-10 group-hover:opacity-25 transition" />
-                              <circle cx="320" cy="60" r="5" fill="#4F7CFF" />
+                              <circle cx="320" cy="60" r="14" fill="#7DD3FC" className="opacity-10 group-hover:opacity-25 transition" />
+                              <circle cx="320" cy="60" r="5" fill="#7DD3FC" />
                               <text x="320" y="85" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">SQL & DB</text>
                             </g>
 
@@ -601,7 +601,7 @@ export default function DashboardPage() {
 
                         <div className="space-y-4">
                           <div className="bg-zinc-950/40 border border-zinc-900 p-4 rounded-xl space-y-2">
-                            <span className="text-[10px] font-bold text-[#4F7CFF] uppercase tracking-wider block">Constellation Health</span>
+                            <span className="text-[10px] font-bold text-[#7DD3FC] uppercase tracking-wider block">Constellation Health</span>
                             <h4 className="text-xs font-bold text-white">SDE-II Benchmark Calibration</h4>
                             <p className="text-2xs text-zinc-400 leading-relaxed">
                               Your database and API nodes are lighting up strongly, showing solid technical depth. Focus on structuring scalability trade-offs in system design to match L4 requirements.
@@ -609,7 +609,7 @@ export default function DashboardPage() {
                           </div>
                           
                           <div className="flex gap-2">
-                            <span className="text-2xs bg-[#4F7CFF]/10 text-[#4F7CFF] px-2 py-1 rounded border border-[#4F7CFF]/20 font-bold uppercase tracking-wider">
+                            <span className="text-2xs bg-[#7DD3FC]/10 text-[#7DD3FC] px-2 py-1 rounded border border-[#7DD3FC]/20 font-bold uppercase tracking-wider">
                               Overall Readiness: 78%
                             </span>
                             <span className="text-2xs bg-[#00E676]/10 text-[#00E676] px-2 py-1 rounded border border-[#00E676]/20 font-bold uppercase tracking-wider">
@@ -645,7 +645,7 @@ export default function DashboardPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl backdrop-blur-md max-h-[90vh] flex flex-col justify-between"
+              className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-900 p-6 shadow-2xl backdrop-blur-md max-h-[90vh] flex flex-col justify-between"
             >
               {isCreating ? (
                 // Full Screen Creating Screen
@@ -664,7 +664,7 @@ export default function DashboardPage() {
               ) : (
                 // Modal Form
                 <form onSubmit={handleStartInterview} className="space-y-6 flex-1 overflow-y-auto pr-1">
-                  <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+                  <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
                       <Sparkles className="h-5 w-5 text-[#7DD3FC]" />
                       <span>Configure New Interview</span>
@@ -680,7 +680,7 @@ export default function DashboardPage() {
                        id="role"
                        value={role}
                        onChange={(e) => setRole(e.target.value)}
-                       className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
+                       className="block w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
                     >
                       <option>Software Engineer</option>
                       <option>Frontend Engineer</option>
@@ -700,7 +700,7 @@ export default function DashboardPage() {
                       id="personality"
                       value={personality}
                       onChange={(e) => setPersonality(e.target.value)}
-                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
+                      className="block w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
                     >
                       <option>Google Staff Engineer</option>
                       <option>Amazon Bar Raiser</option>
@@ -719,7 +719,7 @@ export default function DashboardPage() {
                       id="mode"
                       value={mode}
                       onChange={(e) => setMode(e.target.value)}
-                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
+                      className="block w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
                     >
                       <option>Classic</option>
                       <option>Stress Test</option>
@@ -738,7 +738,7 @@ export default function DashboardPage() {
                         id="company"
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
-                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
+                        className="block w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
                       >
                         <option>Google (Tech Giant / Core Algorithms)</option>
                         <option>Amazon (LP / Systems focus)</option>
@@ -755,7 +755,7 @@ export default function DashboardPage() {
                         id="difficulty"
                         value={difficulty}
                         onChange={(e) => setDifficulty(e.target.value)}
-                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
+                        className="block w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC]"
                       >
                         <option>Easy</option>
                         <option>Medium</option>
@@ -816,7 +816,7 @@ export default function DashboardPage() {
                     </div>
 
                     {jdInputType === 'file' ? (
-                      <div className="relative border border-dashed border-zinc-800 rounded-xl bg-zinc-950/40 p-4 text-center hover:border-zinc-700 transition">
+                      <div className="relative border border-dashed border-white/[0.08] rounded-xl bg-zinc-950/40 p-4 text-center hover:border-zinc-700 transition">
                         {jdFile ? (
                           <div className="flex items-center justify-between text-xs text-zinc-300">
                             <span className="font-semibold truncate max-w-[80%]">📄 {jdFile.fileName}</span>
@@ -847,7 +847,7 @@ export default function DashboardPage() {
                         value={jobDescription}
                         onChange={(e) => setJobDescription(e.target.value)}
                         rows={3}
-                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC] resize-none"
+                        className="block w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC] resize-none"
                         placeholder="Paste target Job Description (JD) to match target required skills and tools."
                       />
                     )}
@@ -886,7 +886,7 @@ export default function DashboardPage() {
                     </div>
 
                     {resumeInputType === 'file' ? (
-                      <div className="relative border border-dashed border-zinc-800 rounded-xl bg-zinc-950/40 p-4 text-center hover:border-zinc-700 transition">
+                      <div className="relative border border-dashed border-white/[0.08] rounded-xl bg-zinc-950/40 p-4 text-center hover:border-zinc-700 transition">
                         {resumeFile ? (
                           <div className="flex items-center justify-between text-xs text-zinc-300">
                             <span className="font-semibold truncate max-w-[80%]">📄 {resumeFile.fileName}</span>
@@ -917,18 +917,18 @@ export default function DashboardPage() {
                         value={resume}
                         onChange={(e) => setResume(e.target.value)}
                         rows={3}
-                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC] resize-none"
+                        className="block w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-[#7DD3FC] focus:ring-1 focus:ring-[#7DD3FC] resize-none"
                         placeholder="Paste your resume or relevant experience summary here for personalized questions."
                       />
                     )}
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+                  <div className="flex justify-end gap-3 pt-4 border-t border-white/[0.08]">
                     <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
-                      className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-2.5 text-sm font-semibold text-zinc-400 transition hover:border-zinc-700 hover:text-white"
+                      className="rounded-xl border border-white/[0.08] bg-zinc-900/50 px-4 py-2.5 text-sm font-semibold text-zinc-400 transition hover:border-zinc-700 hover:text-white"
                     >
                       Cancel
                     </button>
