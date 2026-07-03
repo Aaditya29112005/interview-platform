@@ -19,10 +19,22 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    });
+
+    const isRecruiter = user?.role === 'recruiter';
+
     const interviews = await prisma.interview.findMany({
-      where: { userId: decoded.userId },
+      where: isRecruiter ? {} : { userId: decoded.userId },
       include: {
         scores: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
       orderBy: {
         startedAt: 'desc',
@@ -51,7 +63,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { role, difficulty, company, experience, resume, personality } = await request.json();
+    const { role, difficulty, company, experience, resume, personality, jobDescription } = await request.json();
 
     if (!role || !difficulty || !company || experience === undefined) {
       return NextResponse.json(
@@ -71,17 +83,20 @@ export async function POST(request: Request) {
 
     // Call OpenAI to generate a customized interview plan
     const systemPrompt = `You are an elite technical recruitment orchestrator and senior interviewer at a top tech company.
-Your task is to generate a custom, structured Interview Plan based on the candidate's target role, experience, target company style, resume, and interviewer personality.
+Your task is to generate a custom, structured Interview Plan based on the candidate's target role, experience, target company style, resume, interviewer personality, and target job description.
 
 Role: ${role}
 Years of Experience: ${experience}
 Difficulty Level: ${difficulty}
 Target Company Style: ${company}
 Interviewer Personality: ${chosenPersonality}
+Target Job Description (if provided):
+${jobDescription || 'None provided'}
 Candidate Resume (if provided):
 ${resume || 'None provided'}
 
-Based on this information, design a tailored interview strategy. Ensure the difficulty matches the level.
+Based on this information, design a tailored interview strategy. If a Job Description is provided, align the topics and coding goals directly to the required skills and tools from the JD.
+Ensure the difficulty matches the level.
 Integrate the personality style:
 - If 'Google Staff Engineer': Ask tough, algorithmically deep, and architecture-focused topics.
 - If 'Amazon Bar Raiser': Focus heavily on leadership principles, scalability, customer-centric trade-offs, and diving deep.
@@ -92,7 +107,7 @@ Integrate the personality style:
 You MUST respond with a single JSON object matching this structure. Do not output any markdown headers, tags, or extra text. Output ONLY the JSON.
 
 {
-  "objective": "Detailed paragraph describing the specific interview objective, target company context, and selected interviewer personality.",
+  "objective": "Detailed paragraph describing the specific interview objective, target company context, selected interviewer personality, and JD alignment.",
   "topics": [
     { "name": "Topic Name 1", "status": "pending" },
     { "name": "Topic Name 2", "status": "pending" },
@@ -137,6 +152,8 @@ You MUST respond with a single JSON object matching this structure. Do not outpu
         status: 'pending',
         objective: planData.objective,
         topics: planData.topics,
+        jobDescription: jobDescription || null,
+        cheatingLog: [],
         memory: {
           candidate_strengths: [],
           weak_areas: [],

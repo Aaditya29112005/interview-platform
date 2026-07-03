@@ -56,7 +56,7 @@ export default function ReportPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  const [interview, setInterview] = useState<Record<string, unknown> | null>(null);
+  const [interview, setInterview] = useState<any | null>(null);
   const [score, setScore] = useState<ScoreData | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -541,6 +541,48 @@ export default function ReportPage() {
             </div>
           </div>
         )}
+        {/* Integrity Logs / Anti-Cheating Telemetry */}
+        {interview.cheatingLog && (interview.cheatingLog as any[]).length > 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm print-card space-y-4">
+            <h3 className="text-sm font-bold text-white print-text flex items-center gap-2">
+              <AlertTriangle className="h-4.5 w-4.5 text-red-400" />
+              <span>Assessment Integrity Violations Telemetry</span>
+            </h3>
+            <div className="divide-y divide-zinc-900 border border-zinc-900 rounded-xl overflow-hidden bg-zinc-950/20">
+              {(interview.cheatingLog as any[]).map((violation: any, idx: number) => (
+                <div key={idx} className="p-4 flex items-center justify-between text-xs gap-4">
+                  <div className="space-y-0.5">
+                    <span className="inline-flex items-center rounded-md bg-red-500/10 px-2 py-0.5 text-2xs font-bold text-red-400 border border-red-500/20 capitalize">
+                      {violation.type.replace('_', ' ')}
+                    </span>
+                    <p className="text-zinc-400">{violation.details}</p>
+                  </div>
+                  <span className="text-2xs text-zinc-500">{new Date(violation.timestamp).toLocaleTimeString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Live Coding Sandbox Telemetry */}
+        {interview.codeSnippet && (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm print-card space-y-4">
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+              <h3 className="text-sm font-bold text-white print-text flex items-center gap-2">
+                <Sparkles className="h-4.5 w-4.5 text-indigo-400" />
+                <span>Code Sandbox Workspace Submission</span>
+              </h3>
+              <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest capitalize">
+                {String(interview.codeLanguage || 'javascript')} Sandbox
+              </span>
+            </div>
+            
+            <div className="rounded-xl border border-zinc-900 bg-zinc-950/60 p-5 font-mono text-xs text-zinc-300 whitespace-pre overflow-x-auto leading-normal">
+              {interview.codeSnippet}
+            </div>
+          </div>
+        )}
+
         {/* Mentor Mode Interactive Review */}
         {score.confidenceTimeline && score.confidenceTimeline.length > 0 && (
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm print-card space-y-6 no-print">

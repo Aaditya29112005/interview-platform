@@ -63,6 +63,15 @@ export default function InterviewStudioPage() {
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isEnding, setIsEnding] = useState(false);
 
+  // Live Coding & Integrity States
+  const [code, setCode] = useState('// Write your solutions here...\n\nfunction solve(input) {\n  return input;\n}');
+  const [codeLanguage, setCodeLanguage] = useState('javascript');
+  const [consoleOutput, setConsoleOutput] = useState('Console output will appear here after clicking "Run Code & Tests"...');
+  const [timeComplexity, setTimeComplexity] = useState('');
+  const [spaceComplexity, setSpaceComplexity] = useState('');
+  const [isRunningCode, setIsRunningCode] = useState(false);
+  const [tabSwitchAlertCount, setTabSwitchAlertCount] = useState(0);
+
   // WebSocket, WebRTC & Audio References
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const dataChannelRef = useRef<RTCDataChannel | null>(null);
@@ -843,6 +852,90 @@ export default function InterviewStudioPage() {
     }
   };
 
+  const handleRunCode = async () => {
+    if (!code) return;
+    setIsRunningCode(true);
+    setConsoleOutput('Running compilation and validating test cases...');
+    try {
+      const res = await fetch(`/api/interviews/${id}/run-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, language: codeLanguage }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setConsoleOutput(data.consoleOutput || 'Success');
+        setTimeComplexity(data.complexity?.time || 'O(N)');
+        setSpaceComplexity(data.complexity?.space || 'O(1)');
+      } else {
+        setConsoleOutput(`Error: ${data.error || 'Failed to run code'}`);
+      }
+    } catch (err) {
+      console.error('Run code error:', err);
+      setConsoleOutput('Sandbox connection lost. Execution timed out.');
+    } finally {
+      setIsRunningCode(false);
+    }
+  };
+
+  // Integrity Guardrails
+  useEffect(() => {
+    if (!isConnected) return;
+
+    const handleVisibility = async () => {
+      if (document.hidden) {
+        setTabSwitchAlertCount((prev) => prev + 1);
+        try {
+          await fetch(`/api/interviews/${id}/integrity`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              violationType: 'tab_switch',
+              details: 'Candidate toggled away from the screen.',
+            }),
+          });
+        } catch {}
+        alert('⚠️ Integrity Alert: Focus shift detected. Your activity is reported on the Recruiter Control Panel.');
+      }
+    };
+
+    const handleBlur = async () => {
+      setTabSwitchAlertCount((prev) => prev + 1);
+      try {
+        await fetch(`/api/interviews/${id}/integrity`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            violationType: 'window_blur',
+            details: 'Candidate blurred focus from the studio window.',
+          }),
+        });
+      } catch {}
+    };
+
+    const handleCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      alert('⚠️ Integrity Block: Copy operations are restricted during the assessment.');
+    };
+
+    const handlePaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      alert('⚠️ Integrity Block: Paste operations are restricted during the assessment.');
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleBlur);
+    document.addEventListener('copy', handleCopy);
+    document.addEventListener('paste', handlePaste);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('copy', handleCopy);
+      document.removeEventListener('paste', handlePaste);
+    };
+  }, [isConnected, id]);
+
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between bg-zinc-950 overflow-hidden">
       {/* Decorative Blur Backgrounds */}
@@ -850,216 +943,227 @@ export default function InterviewStudioPage() {
       <div className="absolute bottom-[10%] right-[-15%] h-[500px] w-[500px] rounded-full bg-purple-500/5 blur-[120px]" />
 
       {/* Main Studio content container */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Left Column: Topics Progression Checklist */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm space-y-4 flex-1">
-            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-              <Brain className="h-4.5 w-4.5 text-indigo-400" />
-              <span>Interview Plan</span>
-            </h3>
-
-            {topics.length > 0 ? (
-              <div className="space-y-4 pt-2">
-                {topics.map((topic, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    {/* Status Circle */}
-                    <div className="mt-1 flex items-center justify-center">
-                      {topic.status === 'completed' ? (
-                        <div className="h-4.5 w-4.5 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center">
-                          <div className="h-2 w-2 rounded-full bg-emerald-400" />
-                        </div>
-                      ) : topic.status === 'in_progress' ? (
-                        <div className="h-4.5 w-4.5 rounded-full bg-indigo-500/20 border border-indigo-500 flex items-center justify-center animate-pulse">
-                          <div className="h-2.5 w-2.5 rounded-full bg-indigo-400" />
-                        </div>
-                      ) : (
-                        <div className="h-4.5 w-4.5 rounded-full border border-zinc-800 flex items-center justify-center">
-                          <div className="h-1.5 w-1.5 rounded-full bg-zinc-700" />
-                        </div>
-                      )}
-                    </div>
-                    {/* Topic details */}
-                    <div>
-                      <h4
-                        className={`text-xs font-semibold ${
-                          topic.status === 'completed'
-                            ? 'text-zinc-500 line-through'
-                            : topic.status === 'in_progress'
-                            ? 'text-indigo-300'
-                            : 'text-zinc-400'
-                        }`}
-                      >
-                        {topic.name}
-                      </h4>
-                      <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                        {topic.status === 'in_progress' ? 'Evaluating' : topic.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+        
+        {/* Left Panel: Voice Interview Room, HUD & Checklists */}
+        <div className="space-y-6 flex flex-col justify-between">
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-6">
+            
+            {/* Header parameters */}
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+              <div>
+                <h2 className="text-lg font-bold text-white tracking-tight">AI Voice Interview Room</h2>
+                <p className="text-[10px] text-zinc-550 font-semibold uppercase tracking-wider mt-0.5">
+                  {interview?.role} ({interview?.experience} Years) • {interview?.difficulty}
+                </p>
               </div>
-            ) : (
-              <div className="flex h-32 items-center justify-center text-xs text-zinc-500">
-                Loading roadmap...
-              </div>
-            )}
-          </div>
-
-          {/* Quick Stats/Difficulty indicators */}
-          {interview && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm text-xs space-y-2">
-              <div className="flex justify-between">
-                <span className="text-zinc-500">Role:</span>
-                <span className="font-semibold text-zinc-300">{interview.role}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">Company:</span>
-                <span className="font-semibold text-zinc-300">{interview.company}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">Difficulty:</span>
-                <span className="font-semibold text-indigo-400">{interview.difficulty}</span>
+              <div className="flex items-center gap-2 rounded-xl bg-zinc-900 px-3.5 py-2 border border-zinc-850">
+                <Clock className="h-4 w-4 text-indigo-400" />
+                <span className="text-xs font-bold text-white font-mono">{formatTime(timerSeconds)}</span>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Center: The central Visualizer Orb */}
-        <div className="lg:col-span-2 flex flex-col items-center justify-center py-6 gap-6 relative">
-          {/* Header parameters */}
-          <div className="text-center space-y-1">
-            <h2 className="text-xl font-bold tracking-tight text-white">AI Interview Room</h2>
-            <p className="text-xs text-zinc-400 flex items-center gap-1.5 justify-center">
-              <Clock className="h-3.5 w-3.5" />
-              <span>{formatTime(timerSeconds)}</span>
-            </p>
-          </div>
-
-          {/* AI Thinking Brain HUD */}
-          <div className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900/20 p-4 space-y-3 backdrop-blur-md shadow-lg shadow-indigo-500/2">
-            <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-              <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest">Reasoning Engine</span>
-              <span className="text-2xs font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
-                {interview?.personality || 'Google Staff Engineer'} Style
-              </span>
+            {/* Orb Visualizer Container */}
+            <div className="flex flex-col items-center justify-center py-6 gap-6 relative">
+              <OrbVisualizer state={orbState} />
+              <WaveVisualizer active={orbState === 'listening' || orbState === 'speaking'} />
+              {error && (
+                <p className="text-xs text-red-400 font-medium bg-red-500/5 px-3 py-1.5 rounded-lg border border-red-500/20">
+                  {error}
+                </p>
+              )}
             </div>
-            <div className="space-y-2 text-xs">
-              {/* Listening State */}
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-zinc-300">
-                  <span className={`h-2 w-2 rounded-full transition ${orbState === 'listening' ? 'bg-indigo-400 animate-ping' : 'bg-zinc-800'}`} />
-                  <span>🎤 Listening for response</span>
-                </span>
-                <span className={`text-[10px] font-bold tracking-wide transition ${orbState === 'listening' ? 'text-indigo-400' : 'text-zinc-600'}`}>
-                  {orbState === 'listening' ? 'ACTIVE' : 'STANDBY'}
+
+            {/* AI Thinking Brain HUD */}
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 space-y-3 shadow-lg shadow-indigo-500/2">
+              <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+                <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest">Reasoning Engine HUD</span>
+                <span className="text-2xs font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
+                  {interview?.personality || 'Google Staff Engineer'} Style
                 </span>
               </div>
+              
+              <div className="grid grid-cols-3 gap-3 text-xs pt-1">
+                {/* Listening State */}
+                <div className={`p-2.5 rounded-lg border text-center space-y-1 transition ${
+                  orbState === 'listening' 
+                    ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300' 
+                    : 'bg-zinc-900/40 border-zinc-900/60 text-zinc-500'
+                }`}>
+                  <div className="text-[10px] font-bold uppercase tracking-wider">Listening</div>
+                  <div className="text-[9px] font-mono">{orbState === 'listening' ? 'MIC_ACTIVE' : 'IDLE'}</div>
+                </div>
 
-              {/* Speech Captured / Silence check */}
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-zinc-300">
-                  <span className={`h-2 w-2 rounded-full transition ${orbState !== 'listening' && orbState !== 'idle' ? 'bg-purple-400' : 'bg-zinc-800'}`} />
-                  <span>✓ Speech captured successfully</span>
-                </span>
-                <span className={`text-[10px] font-bold tracking-wide transition ${orbState !== 'listening' && orbState !== 'idle' ? 'text-purple-400' : 'text-zinc-600'}`}>
-                  {orbState !== 'listening' && orbState !== 'idle' ? 'YES' : 'STANDBY'}
-                </span>
+                {/* Thinking State */}
+                <div className={`p-2.5 rounded-lg border text-center space-y-1 transition ${
+                  orbState === 'thinking' 
+                    ? 'bg-pink-500/10 border-pink-500/30 text-pink-300' 
+                    : 'bg-zinc-900/40 border-zinc-900/60 text-zinc-500'
+                }`}>
+                  <div className="text-[10px] font-bold uppercase tracking-wider">Analyzing</div>
+                  <div className="text-[9px] font-mono">{orbState === 'thinking' ? 'PARSING...' : 'STANDBY'}</div>
+                </div>
+
+                {/* Speaking State */}
+                <div className={`p-2.5 rounded-lg border text-center space-y-1 transition ${
+                  orbState === 'speaking' 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' 
+                    : 'bg-zinc-900/40 border-zinc-900/60 text-zinc-500'
+                }`}>
+                  <div className="text-[10px] font-bold uppercase tracking-wider">Speaking</div>
+                  <div className="text-[9px] font-mono">{orbState === 'speaking' ? 'TTS_STREAM' : 'STANDBY'}</div>
+                </div>
               </div>
 
-              {/* Thinking / Evaluating State */}
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-zinc-300">
-                  <span className={`h-2 w-2 rounded-full transition ${orbState === 'thinking' ? 'bg-pink-400 animate-ping' : 'bg-zinc-800'}`} />
-                  <span>🧠 Understanding & evaluation</span>
-                </span>
-                <span className={`text-[10px] font-bold tracking-wide transition ${orbState === 'thinking' ? 'text-pink-400' : 'text-zinc-600'}`}>
-                  {orbState === 'thinking' ? 'THINKING...' : 'STANDBY'}
-                </span>
-              </div>
-
-              {/* Speaking State */}
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-zinc-300">
-                  <span className={`h-2 w-2 rounded-full transition ${orbState === 'speaking' ? 'bg-emerald-400 animate-ping' : 'bg-zinc-800'}`} />
-                  <span>💬 Response synthesis</span>
-                </span>
-                <span className={`text-[10px] font-bold tracking-wide transition ${orbState === 'speaking' ? 'text-emerald-400' : 'text-zinc-600'}`}>
-                  {orbState === 'speaking' ? 'SPEAKING' : 'STANDBY'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Orb Visualizer */}
-          <div className="my-2">
-            <OrbVisualizer state={orbState} />
-          </div>
-
-          {/* Audio Wave Indicator */}
-          <WaveVisualizer active={orbState === 'listening' || orbState === 'speaking'} />
-
-          {/* Display any local permission errors */}
-          {error && <p className="text-xs text-red-400 mt-2 font-medium bg-red-500/5 px-3 py-1.5 rounded-lg border border-red-500/20">{error}</p>}
-        </div>
-
-        {/* Right Column: Live Transcript panel (Toggled or collapsible) */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm flex-1 flex flex-col min-h-[300px]">
-            <button
-              onClick={() => setShowTranscript(!showTranscript)}
-              className="text-sm font-bold text-white flex items-center justify-between w-full hover:opacity-80"
-            >
-              <span className="flex items-center gap-1.5">
-                <MessageSquare className="h-4.5 w-4.5 text-indigo-400" />
-                <span>Transcript Playback</span>
-              </span>
-              {showTranscript ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </button>
-
-            {/* Scrollable text log */}
-            <div className="flex-1 mt-4 overflow-y-auto pr-1 text-xs space-y-4 max-h-[45vh]">
-              {showTranscript ? (
-                messages.length > 0 ? (
-                  messages.map((msg, index) => (
-                    <div
-                      key={index}
-                      className={`space-y-1 ${msg.speaker === 'candidate' ? 'text-right' : 'text-left'}`}
-                    >
-                      <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
-                        {msg.speaker === 'candidate' ? 'You' : 'AI'}
-                      </span>
-                      <p
-                        className={`inline-block max-w-[85%] rounded-xl px-3 py-2 text-zinc-300 text-left ${
-                          msg.speaker === 'candidate'
-                            ? 'bg-indigo-600/10 border border-indigo-500/20'
-                            : 'bg-zinc-850/80 border border-zinc-800'
-                        }`}
-                      >
-                        {msg.text}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex h-full items-center justify-center text-zinc-500">
-                    No transcript recorded yet.
-                  </div>
-                )
-              ) : (
-                <div className="flex h-full flex-col items-center justify-center text-center text-zinc-500 py-12 space-y-2">
-                  <MessageSquare className="h-8 w-8 text-zinc-700" />
-                  <p>Transcript hidden by default to keep you focused on voice.</p>
-                  <button
-                    onClick={() => setShowTranscript(true)}
-                    className="text-2xs text-indigo-400 font-semibold underline hover:text-indigo-300"
-                  >
-                    Show Live Transcript
-                  </button>
+              {tabSwitchAlertCount > 0 && (
+                <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-2.5 text-center text-[10px] font-semibold text-red-400">
+                  ⚠️ Integrity violation alerts logged: {tabSwitchAlertCount}
                 </div>
               )}
             </div>
           </div>
+
+          {/* Topics & Live Transcripts Grid row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Checklist */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm space-y-3">
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5 border-b border-zinc-900 pb-2">
+                <Brain className="h-4 w-4 text-indigo-400" />
+                <span>Roadmap Checklist</span>
+              </h3>
+              <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1">
+                {topics.map((topic, index) => (
+                  <div key={index} className="flex items-start gap-2.5">
+                    <div className="mt-0.5">
+                      {topic.status === 'completed' ? (
+                        <span className="block h-3.5 w-3.5 rounded-full bg-emerald-500/20 border border-emerald-500" />
+                      ) : topic.status === 'in_progress' ? (
+                        <span className="block h-3.5 w-3.5 rounded-full bg-indigo-500/20 border border-indigo-500 animate-pulse" />
+                      ) : (
+                        <span className="block h-3.5 w-3.5 rounded-full border border-zinc-800" />
+                      )}
+                    </div>
+                    <div className="text-2xs">
+                      <p className={`font-semibold ${
+                        topic.status === 'completed' ? 'text-zinc-500 line-through' : 'text-zinc-300'
+                      }`}>{topic.name}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Collapsible Transcript */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm flex flex-col justify-between">
+              <div className="border-b border-zinc-900 pb-2 flex items-center justify-between">
+                <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <MessageSquare className="h-4 w-4 text-indigo-400" />
+                  <span>Dialogue Transcript</span>
+                </h3>
+                <button 
+                  onClick={() => setShowTranscript(!showTranscript)}
+                  className="text-2xs text-indigo-400 font-semibold hover:underline"
+                >
+                  {showTranscript ? 'Hide' : 'Show'}
+                </button>
+              </div>
+
+              <div className="flex-1 mt-2 overflow-y-auto max-h-[140px] text-[10px] space-y-3 pr-1">
+                {showTranscript ? (
+                  messages.length > 0 ? (
+                    messages.map((msg, index) => (
+                      <div key={index} className={msg.speaker === 'candidate' ? 'text-right' : 'text-left'}>
+                        <div className="text-[9px] text-zinc-550 font-bold uppercase">{msg.speaker === 'candidate' ? 'You' : 'AI'}</div>
+                        <p className={`inline-block rounded-lg px-2.5 py-1.5 mt-0.5 text-zinc-300 ${
+                          msg.speaker === 'candidate' ? 'bg-indigo-600/15 text-indigo-300' : 'bg-zinc-900/60'
+                        }`}>{msg.text}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6 text-zinc-650">No voice transcripts recorded yet.</div>
+                  )
+                ) : (
+                  <div className="text-center py-6 text-zinc-650">Click &quot;Show&quot; to inspect dialogue.</div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Right Panel: Monaco-style Code & SQL assessment sandbox */}
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm flex flex-col justify-between min-h-[500px]">
+          
+          {/* Editor Header controls */}
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Interactive Code Sandbox</h3>
+            </div>
+            
+            <div className="flex items-center gap-2.5">
+              <select
+                value={codeLanguage}
+                onChange={(e) => setCodeLanguage(e.target.value)}
+                className="rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1 text-2xs text-zinc-350 outline-none focus:border-indigo-500"
+              >
+                <option value="javascript">JavaScript</option>
+                <option value="python">Python</option>
+                <option value="sql">SQL Query</option>
+                <option value="go">Go Lang</option>
+                <option value="cpp">C++</option>
+              </select>
+
+              <button
+                onClick={handleRunCode}
+                disabled={isRunningCode || !isConnected}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-2xs font-bold text-white hover:bg-indigo-500 disabled:opacity-50 transition"
+              >
+                {isRunningCode ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span>Compiling...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-3 w-3 fill-current" />
+                    <span>Run Code</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Coding Workspace textarea */}
+          <div className="flex-1 my-4 flex relative rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden min-h-[280px]">
+            <div className="w-10 bg-zinc-900/50 border-r border-zinc-800/45 text-right pr-2 py-4 select-none font-mono text-[10px] text-zinc-650 leading-normal space-y-0.5">
+              {Array.from({ length: 15 }).map((_, i) => (
+                <div key={i}>{i + 1}</div>
+              ))}
+            </div>
+            <textarea
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className="flex-1 bg-transparent p-4 outline-none font-mono text-xs text-zinc-200 leading-normal resize-none focus:ring-0"
+              placeholder="// Write your code or query here..."
+            />
+          </div>
+
+          {/* Console / Terminal output */}
+          <div className="rounded-xl border border-zinc-800 bg-zinc-950/80 p-4 space-y-2 font-mono text-2xs">
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-1.5">
+              <span className="font-semibold text-zinc-550 uppercase tracking-widest">Compiler Terminal Console</span>
+              {timeComplexity && (
+                <span className="text-[10px] text-indigo-400">
+                  Complexity: {timeComplexity} Time | {spaceComplexity} Space
+                </span>
+              )}
+            </div>
+            <pre className="text-zinc-400 whitespace-pre-wrap max-h-[100px] overflow-y-auto leading-normal">
+              {consoleOutput}
+            </pre>
+          </div>
+        </div>
+
       </div>
 
       {/* Bottom Control Bar */}
@@ -1100,7 +1204,7 @@ export default function InterviewStudioPage() {
               disabled={!isConnected}
               className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${
                 !isConnected
-                  ? 'border-zinc-800/40 text-zinc-600 cursor-not-allowed'
+                  ? 'border-zinc-800/40 text-zinc-650 cursor-not-allowed'
                   : isMuted
                   ? 'border-red-500/20 bg-red-500/10 text-red-400 hover:border-red-500/30'
                   : 'border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-zinc-700 hover:text-white'
@@ -1116,7 +1220,7 @@ export default function InterviewStudioPage() {
               disabled={!isConnected}
               className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${
                 !isConnected
-                  ? 'border-zinc-800/40 text-zinc-600 cursor-not-allowed'
+                  ? 'border-zinc-800/40 text-zinc-650 cursor-not-allowed'
                   : isAudioOutputMuted
                   ? 'border-red-500/20 bg-red-500/10 text-red-400 hover:border-red-500/30'
                   : 'border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:border-zinc-700 hover:text-white'

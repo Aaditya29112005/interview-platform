@@ -70,6 +70,8 @@ export default function DashboardPage() {
   const [personality, setPersonality] = useState('Google Staff Engineer');
   const [experience, setExperience] = useState(3);
   const [resume, setResume] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
+  const [isRecruiterView, setIsRecruiterView] = useState(false);
 
   // Authentication check
   useEffect(() => {
@@ -118,7 +120,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/interviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, difficulty, company, experience, resume, personality }),
+        body: JSON.stringify({ role, difficulty, company, experience, resume, personality, jobDescription }),
       });
 
       const data = await res.json();
@@ -154,16 +156,33 @@ export default function DashboardPage() {
               Hello, {user.name.split(' ')[0]} 👋
             </h1>
             <p className="mt-1 text-sm text-zinc-400">
-              Welcome back. Let&apos;s review your progress or start a new mock interview session.
+              {user.role === 'recruiter' 
+                ? 'Recruiter Control Room. Monitor candidate progress, cheating telemetry, and code sandbox evaluations.'
+                : 'Welcome back. Let&apos;s review your progress or start a new mock interview session.'}
             </p>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:from-indigo-600 hover:to-purple-700"
-          >
-            <Plus className="h-4.5 w-4.5" />
-            <span>Start New Interview</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {user.role === 'recruiter' && (
+              <button
+                onClick={() => setIsRecruiterView(!isRecruiterView)}
+                className={`inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+                  isRecruiterView 
+                    ? 'bg-indigo-600/10 border-indigo-500/30 text-indigo-400' 
+                    : 'border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white'
+                }`}
+              >
+                <Brain className="h-4.5 w-4.5" />
+                <span>{isRecruiterView ? 'Switch to Candidate view' : 'Recruiter Console'}</span>
+              </button>
+            )}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:from-indigo-600 hover:to-purple-700"
+            >
+              <Plus className="h-4.5 w-4.5" />
+              <span>Start New Interview</span>
+            </button>
+          </div>
         </div>
 
         {dataLoading ? (
@@ -172,199 +191,281 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            {/* Stats Summary Cards */}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {/* Card 1: Average Score */}
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-md">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-zinc-400">Average Score</span>
-                  <Award className="h-5 w-5 text-indigo-400" />
-                </div>
-                <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-white">
-                    {analytics.averageOverall > 0 ? `${analytics.averageOverall}%` : 'N/A'}
-                  </span>
-                  {analytics.averageOverall > 0 && (
-                    <span className="text-xs font-semibold text-emerald-400 flex items-center gap-0.5">
-                      <TrendingUp className="h-3 w-3" /> Ready
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Target: 80%+ to unlock major tech standards
-                </p>
-              </div>
-
-              {/* Card 2: Completed Interviews */}
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-md">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-zinc-400">Completed Sessions</span>
-                  <Play className="h-5 w-5 text-purple-400" />
-                </div>
-                <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-white">{analytics.totalInterviews}</span>
-                </div>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Total voice simulations completed successfully
-                </p>
-              </div>
-
-              {/* Card 3: Experience Focus */}
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-md">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-zinc-400">Adaptive Intelligence</span>
-                  <Brain className="h-5 w-5 text-pink-400" />
-                </div>
-                <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-white">Dynamic</span>
-                </div>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Steered dynamically by background evaluation loops
-                </p>
-              </div>
-            </div>
-
-            {/* Analytics Charts */}
-            {interviews.length > 0 && (
-              <DashboardCharts
-                radarData={analytics.radarData}
-                trendData={analytics.trendData}
-              />
-            )}
-
-            {/* Main Content Layout (Grid) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left Column: Recent Feedback & Guidelines */}
-              <div className="lg:col-span-1 space-y-6">
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-4">
+            {isRecruiterView ? (
+              /* Recruiter Console Panel */
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-6">
+                <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                   <h2 className="text-lg font-bold text-white flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-indigo-400" />
-                    <span>Recent Evaluation Insights</span>
+                    <span>Candidate Alignment & Integrity Panel</span>
                   </h2>
-                  {analytics.recentFeedback.length > 0 ? (
-                    <div className="space-y-4">
-                      {analytics.recentFeedback.map((feedback) => (
-                        <div
-                          key={feedback.id}
-                          className="border-l-2 border-indigo-500/50 pl-3 py-1 space-y-1.5"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-zinc-300">
-                              {feedback.role} ({feedback.company})
-                            </span>
-                            <span className="text-xs font-bold text-indigo-400">
-                              {feedback.overall}%
-                            </span>
-                          </div>
-                          <p className="text-xs text-zinc-400 line-clamp-2">
-                            {feedback.recommendation}
-                          </p>
-                        </div>
-                      ))}
+                  <span className="text-2xs text-zinc-500 uppercase tracking-wider font-bold">Admin Recruiter Dashboard</span>
+                </div>
+
+                {interviews.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-zinc-900 text-zinc-500 uppercase tracking-wider font-bold text-[10px]">
+                          <th className="pb-3 pl-2">Candidate</th>
+                          <th className="pb-3">Assessment Target</th>
+                          <th className="pb-3">Overall Score</th>
+                          <th className="pb-3">Language</th>
+                          <th className="pb-3">Integrity Violations</th>
+                          <th className="pb-3">Calibrated Level</th>
+                          <th className="pb-3 pr-2 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-900/40">
+                        {interviews.map((item: any) => {
+                          const cheatCount = item.cheatingLog ? (item.cheatingLog as any[]).length : 0;
+                          return (
+                            <tr key={item.id} className="hover:bg-zinc-900/10 transition">
+                              <td className="py-4 pl-2 font-semibold text-white">
+                                {item.user?.name || 'Anonymous User'}
+                                <div className="text-[10px] text-zinc-500 font-normal mt-0.5">{item.user?.email}</div>
+                              </td>
+                              <td className="py-4 font-semibold text-zinc-300">
+                                {item.role}
+                                <div className="text-[10px] text-zinc-550 font-normal mt-0.5">{item.company} • {item.personality} Style</div>
+                              </td>
+                              <td className="py-4 font-bold text-indigo-400">
+                                {item.status === 'completed' ? `${item.scores?.overall}%` : 'In Progress'}
+                              </td>
+                              <td className="py-4 font-medium text-zinc-400 capitalize">
+                                {item.codeLanguage || 'javascript'}
+                              </td>
+                              <td className="py-4">
+                                <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-2xs font-bold ${
+                                  cheatCount > 0 
+                                    ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
+                                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                }`}>
+                                  {cheatCount} {cheatCount === 1 ? 'alert' : 'alerts'}
+                                </span>
+                              </td>
+                              <td className="py-4 text-zinc-300 font-semibold">
+                                {item.scores?.estimatedLevel || 'Evaluating'}
+                              </td>
+                              <td className="py-4 pr-2 text-right">
+                                {item.status === 'completed' && (
+                                  <Link
+                                    href={`/interview/${item.id}/report`}
+                                    className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/50 px-2.5 py-1 text-2xs font-semibold text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-white transition"
+                                  >
+                                    Review Report
+                                  </Link>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-xs text-zinc-500">
+                    No candidate interview sessions recorded in the system yet.
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Stats Summary Cards */}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                  {/* Card 1: Average Score */}
+                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-md">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-zinc-400">Average Score</span>
+                      <Award className="h-5 w-5 text-indigo-400" />
                     </div>
-                  ) : (
-                    <p className="text-xs text-zinc-500">
-                      No feedback insights yet. Complete your first voice interview to analyze your performance!
+                    <div className="mt-4 flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-white">
+                        {analytics.averageOverall > 0 ? `${analytics.averageOverall}%` : 'N/A'}
+                      </span>
+                      {analytics.averageOverall > 0 && (
+                        <span className="text-xs font-semibold text-emerald-400 flex items-center gap-0.5">
+                          <TrendingUp className="h-3 w-3" /> Ready
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Target: 80%+ to unlock major tech standards
                     </p>
-                  )}
+                  </div>
+
+                  {/* Card 2: Completed Interviews */}
+                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-md">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-zinc-400">Completed Sessions</span>
+                      <Play className="h-5 w-5 text-purple-400" />
+                    </div>
+                    <div className="mt-4 flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-white">{analytics.totalInterviews}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Total voice simulations completed successfully
+                    </p>
+                  </div>
+
+                  {/* Card 3: Adaptive Experience */}
+                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-md">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-zinc-400">Adaptive Intelligence</span>
+                      <Brain className="h-5 w-5 text-pink-400" />
+                    </div>
+                    <div className="mt-4 flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-white">Dynamic</span>
+                    </div>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Steered dynamically by background evaluation loops
+                    </p>
+                  </div>
                 </div>
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-4">
-                  <h3 className="text-sm font-semibold text-white">Directives for Candidates</h3>
-                  <ul className="text-xs text-zinc-400 space-y-2 list-disc list-inside">
-                    <li>Grant browser microphone access before loading the interview.</li>
-                    <li>Avoid chat elements; speak clearly to the AI like a real panel.</li>
-                    <li>Provide specific metrics (e.g. &quot;reduced CLS by 40%&quot;) to trigger harder scaling questions.</li>
-                    <li>If you struggle, clarify assumptions or ask for hints.</li>
-                  </ul>
-                </div>
-              </div>
+                {/* Analytics Charts */}
+                {interviews.length > 0 && (
+                  <DashboardCharts
+                    radarData={analytics.radarData}
+                    trendData={analytics.trendData}
+                  />
+                )}
 
-              {/* Right Column: Interviews List */}
-              <div className="lg:col-span-2 space-y-6">
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm">
-                  <h2 className="text-lg font-bold text-white mb-6">Your Interviews</h2>
-                  {interviews.length > 0 ? (
-                    <div className="divide-y divide-zinc-900">
-                      {interviews.map((interview) => (
-                        <div
-                          key={interview.id}
-                          className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 first:pt-0 last:pb-0"
-                        >
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2.5">
-                              <h3 className="text-sm font-bold text-white">{interview.role}</h3>
-                              <span className="inline-flex items-center rounded-md bg-zinc-800 px-2 py-0.5 text-2xs font-medium text-zinc-400">
-                                {interview.company} • {(interview as any).personality || 'Google Staff'}
-                              </span>
-                              <span className="inline-flex items-center rounded-md bg-zinc-800/40 px-2 py-0.5 text-2xs font-medium text-zinc-400">
-                                {interview.difficulty}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-4 text-2xs text-zinc-500">
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3.5 w-3.5" />
-                                {new Date(interview.startedAt).toLocaleDateString()}
-                              </span>
-                              <span>• {interview.experience} Years Exp.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                            {interview.status === 'completed' ? (
-                              <>
-                                <span className="text-sm font-bold text-indigo-400">
-                                  Score: {interview.scores?.overall}%
+                {/* Main Content Layout (Grid) */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Left Column: Recent Feedback & Guidelines */}
+                  <div className="lg:col-span-1 space-y-6">
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-4">
+                      <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-indigo-400" />
+                        <span>Recent Evaluation Insights</span>
+                      </h2>
+                      {analytics.recentFeedback.length > 0 ? (
+                        <div className="space-y-4">
+                          {analytics.recentFeedback.map((feedback) => (
+                            <div
+                              key={feedback.id}
+                              className="border-l-2 border-indigo-500/50 pl-3 py-1 space-y-1.5"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-semibold text-zinc-300">
+                                  {feedback.role} ({feedback.company})
                                 </span>
-                                <Link
-                                  href={`/interview/${interview.id}/report`}
-                                  className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-800 hover:text-white"
-                                >
-                                  <FileText className="h-3.5 w-3.5" />
-                                  <span>Report</span>
-                                </Link>
-                              </>
-                            ) : (
-                              <>
-                                <span className="inline-flex items-center rounded-md bg-yellow-500/10 px-2 py-1 text-2xs font-medium text-yellow-400 ring-1 ring-inset ring-yellow-500/20">
-                                  {interview.status === 'active' ? 'Active' : 'Created'}
+                                <span className="text-xs font-bold text-indigo-400">
+                                  {feedback.overall}%
                                 </span>
-                                <Link
-                                  href={`/interview/${interview.id}`}
-                                  className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500"
-                                >
-                                  <Play className="h-3.5 w-3.5" />
-                                  <span>Resume</span>
-                                </Link>
-                              </>
-                            )}
-                          </div>
+                              </div>
+                              <p className="text-xs text-zinc-400 line-clamp-2">
+                                {feedback.recommendation}
+                              </p>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 space-y-4">
-                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-zinc-900 text-zinc-500">
-                        <Clock className="h-6 w-6" />
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-bold text-white">No interviews found</h3>
+                      ) : (
                         <p className="text-xs text-zinc-500">
-                          Launch your first real-time voice interview session to begin.
+                          No feedback insights yet. Complete your first voice interview to analyze your performance!
                         </p>
-                      </div>
-                      <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span>Start First Interview</span>
-                      </button>
+                      )}
                     </div>
-                  )}
+
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-4">
+                      <h3 className="text-sm font-semibold text-white">Directives for Candidates</h3>
+                      <ul className="text-xs text-zinc-400 space-y-2 list-disc list-inside">
+                        <li>Grant browser microphone access before loading the interview.</li>
+                        <li>Avoid chat elements; speak clearly to the AI like a real panel.</li>
+                        <li>Provide specific metrics (e.g. &quot;reduced CLS by 40%&quot;) to trigger harder scaling questions.</li>
+                        <li>If you struggle, clarify assumptions or ask for hints.</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Interviews List */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm">
+                      <h2 className="text-lg font-bold text-white mb-6">Your Interviews</h2>
+                      {interviews.length > 0 ? (
+                        <div className="divide-y divide-zinc-900">
+                          {interviews.map((interview) => (
+                            <div
+                              key={interview.id}
+                              className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 first:pt-0 last:pb-0"
+                            >
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2.5">
+                                  <h3 className="text-sm font-bold text-white">{interview.role}</h3>
+                                  <span className="inline-flex items-center rounded-md bg-zinc-800 px-2 py-0.5 text-2xs font-medium text-zinc-400">
+                                    {interview.company} • {(interview as any).personality || 'Google Staff'}
+                                  </span>
+                                  <span className="inline-flex items-center rounded-md bg-zinc-800/40 px-2 py-0.5 text-2xs font-medium text-zinc-400">
+                                    {interview.difficulty}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-4 text-2xs text-zinc-500">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    {new Date(interview.startedAt).toLocaleDateString()}
+                                  </span>
+                                  <span>• {interview.experience} Years Exp.</span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3">
+                                {interview.status === 'completed' ? (
+                                  <>
+                                    <span className="text-sm font-bold text-indigo-400">
+                                      Score: {interview.scores?.overall}%
+                                    </span>
+                                    <Link
+                                      href={`/interview/${interview.id}/report`}
+                                      className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-800 hover:text-white"
+                                    >
+                                      <FileText className="h-3.5 w-3.5" />
+                                      <span>Report</span>
+                                    </Link>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="inline-flex items-center rounded-md bg-yellow-500/10 px-2 py-1 text-2xs font-medium text-yellow-400 ring-1 ring-inset ring-yellow-500/20">
+                                      {interview.status === 'active' ? 'Active' : 'Created'}
+                                    </span>
+                                    <Link
+                                      href={`/interview/${interview.id}`}
+                                      className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+                                    >
+                                      <Play className="h-3.5 w-3.5" />
+                                      <span>Resume</span>
+                                    </Link>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 space-y-4">
+                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-zinc-900 text-zinc-500">
+                            <Clock className="h-6 w-6" />
+                          </div>
+                          <div className="space-y-1">
+                            <h3 className="text-sm font-bold text-white">No interviews found</h3>
+                            <p className="text-xs text-zinc-500">
+                              Launch your first real-time voice interview session to begin.
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+                          >
+                            <Plus className="h-4 w-4" />
+                            <span>Start First Interview</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </>
         )}
       </div>
@@ -507,6 +608,21 @@ export default function DashboardPage() {
                     />
                   </div>
 
+                  {/* Job Description Area */}
+                  <div className="space-y-2">
+                    <label htmlFor="jobDescription" className="block text-xs font-semibold text-zinc-400">
+                      Paste Job Description (Optional)
+                    </label>
+                    <textarea
+                      id="jobDescription"
+                      value={jobDescription}
+                      onChange={(e) => setJobDescription(e.target.value)}
+                      rows={3}
+                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
+                      placeholder="Paste target Job Description (JD) to match target required skills and tools."
+                    />
+                  </div>
+
                   {/* Resume Area */}
                   <div className="space-y-2">
                     <label htmlFor="resume" className="block text-xs font-semibold text-zinc-400">
@@ -516,7 +632,7 @@ export default function DashboardPage() {
                       id="resume"
                       value={resume}
                       onChange={(e) => setResume(e.target.value)}
-                      rows={4}
+                      rows={3}
                       className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
                       placeholder="Paste your resume or relevant experience summary here for personalized questions."
                     />

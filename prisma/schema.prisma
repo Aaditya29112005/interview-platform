@@ -12,6 +12,7 @@ model User {
   name       String
   email      String      @unique
   password   String
+  role       String      @default("candidate") // "candidate" or "recruiter"
   createdAt  DateTime    @default(now())
   interviews Interview[]
 }
@@ -33,6 +34,11 @@ model Interview {
   memory         Json?     // Running memory JSON (strengths, weaknesses, etc.)
   messages       Message[]
   scores         Score?
+  jobDescription String?   @db.Text
+  cheatingLog    Json?     // Array of focus shifts, blur counts, copy/paste warnings
+  codeSnippet    String?   @db.Text
+  codeLanguage   String?   @default("javascript")
+  recruiterReviewed Boolean @default(false)
 }
 
 model Message {
