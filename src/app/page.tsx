@@ -29,6 +29,7 @@ import {
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { OrbVisualizer } from '@/components/orb-visualizer';
 import { useGSAPAnimations } from '@/hooks/use-gsap-animations';
+import { StreamVisualizer } from '@/components/stream-visualizer';
 
 // ─── Background Particles ───────────────────────────────────────
 function BackgroundParticles() {
@@ -192,6 +193,7 @@ export default function Home() {
           <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(125,211,252,0.04)_0%,transparent_70%)] blur-3xl" />
         </div>
         <BackgroundParticles />
+        <StreamVisualizer />
 
         {/* Content */}
         <div className="relative z-10 max-w-5xl mx-auto space-y-8 pt-20 pb-12">
