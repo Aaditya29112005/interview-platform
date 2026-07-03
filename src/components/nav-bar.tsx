@@ -8,16 +8,16 @@ export function NavBar() {
   const { user, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-zinc-950/60 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-900/65 bg-[#050816]/70 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <Link href={user ? '/dashboard' : '/'} className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-lg shadow-purple-500/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#6C7DFF] via-[#7F5AF0] to-[#00D9FF] shadow-lg shadow-[#6C7DFF]/20">
               <Bot className="h-5 w-5 text-white" />
             </div>
             <span className="bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-xl font-bold tracking-tight text-transparent">
-              Mentorque<span className="text-indigo-400">AI</span>
+              InterviewOS<span className="text-[#00D9FF]">AI</span>
             </span>
           </Link>
         </div>
@@ -59,7 +59,7 @@ export function NavBar() {
               </Link>
               <Link
                 href="/signup"
-                className="rounded-lg bg-white px-3.5 py-2 text-sm font-semibold text-zinc-950 shadow-sm transition hover:bg-zinc-200"
+                className="rounded-xl bg-gradient-to-r from-[#6C7DFF] to-[#7F5AF0] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#6C7DFF]/15 transition hover:brightness-110"
               >
                 Sign Up
               </Link>
