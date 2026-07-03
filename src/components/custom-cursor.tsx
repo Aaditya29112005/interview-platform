@@ -60,20 +60,23 @@ export function CustomCursor() {
     <>
       {/* Lag-smoothed ambient blob light */}
       <div
-        className="pointer-events-none fixed z-50 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 blur-[10px] transition-transform duration-300 ease-out hidden md:block"
+        className="pointer-events-none fixed z-50 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-[#6C7DFF]/25 to-[#7F5AF0]/25 blur-[12px] transition-transform duration-300 ease-out hidden md:block"
         style={{
           left: `${trail.x}px`,
           top: `${trail.y}px`,
-          transform: `translate(-50%, -50%) scale(${isHovered ? 2.5 : 1})`,
+          transform: `translate(-50%, -50%) scale(${isHovered ? 2.8 : 1})`,
         }}
       />
-      {/* Precision cursor tip */}
+      {/* Precision cursor tip: stretches to capsule on hover */}
       <div
-        className="pointer-events-none fixed z-50 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-400 mix-blend-screen transition-transform duration-100 ease-out hidden md:block"
+        className="pointer-events-none fixed z-50 rounded-full bg-[#6C7DFF] mix-blend-screen transition-all duration-200 ease-out hidden md:block"
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,
-          transform: `translate(-50%, -50%) scale(${isHovered ? 1.8 : 1})`,
+          width: isHovered ? '24px' : '8px',
+          height: isHovered ? '8px' : '8px',
+          transform: `translate(-50%, -50%)`,
+          borderRadius: isHovered ? '4px' : '50%',
         }}
       />
     </>

@@ -3,11 +3,12 @@
 :root {
   --background: #050816;
   --foreground: #ffffff;
-  --surface: #0B1020;
-  --primary: #5B8CFF;
-  --accent: #7C3AED;
-  --highlight: #00E5FF;
-  --secondary: #A0AEC0;
+  --surface: #0E1225;
+  --primary: #6C7DFF;
+  --accent: #7F5AF0;
+  --cyan: #00D9FF;
+  --success: #00E676;
+  --secondary: #A1A9C0;
 }
 
 body {
