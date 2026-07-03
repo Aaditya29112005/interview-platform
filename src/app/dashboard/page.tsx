@@ -179,14 +179,14 @@ export default function DashboardPage() {
 
   if (loading || !user) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-zinc-950">
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#050816]">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-zinc-950 pb-16 pt-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-[#050816] pb-16 pt-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Welcome Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-6">

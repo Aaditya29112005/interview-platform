@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "Experience dynamic, adaptive technical and behavioral voice interviews powered by advanced AI.",
 };
 
+import { CustomCursor } from "@/components/custom-cursor";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,8 +32,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
       style={{ colorScheme: 'dark' }}
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+      <body className="min-h-full flex flex-col bg-[#050816] text-[#FFFFFF] font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
         <AuthProvider>
+          <CustomCursor />
           <NavBar />
           <main className="flex-1 flex flex-col">{children}</main>
         </AuthProvider>

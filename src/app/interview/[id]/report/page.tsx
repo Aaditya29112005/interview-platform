@@ -142,7 +142,7 @@ export default function ReportPage() {
 
   if (loading || !user || dataLoading) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-zinc-950">
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#050816]">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
@@ -150,7 +150,7 @@ export default function ReportPage() {
 
   if (!interview || !score) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-zinc-950 text-center space-y-4">
+      <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-[#050816] text-center space-y-4">
         <AlertTriangle className="h-12 w-12 text-yellow-500" />
         <h2 className="text-xl font-bold text-white">Report Not Found</h2>
         <p className="text-sm text-zinc-400">
@@ -182,7 +182,7 @@ export default function ReportPage() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-zinc-950 pb-16 pt-8 print:bg-white print:text-black">
+    <div className="min-h-[calc(100vh-4rem)] bg-[#050816] pb-16 pt-8 print:bg-white print:text-black">
       {/* Print-specific style adjustments */}
       <style jsx global>{`
         @media print {
@@ -535,6 +535,107 @@ export default function ReportPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Living Interview Universe (Constellation Map) */}
+        <div className="rounded-2xl border border-zinc-800 bg-[#0B1020]/60 p-6 backdrop-blur-sm space-y-4 print-card relative overflow-hidden">
+          <div className="absolute inset-0 bg-radial-gradient from-indigo-500/5 to-transparent blur-[60px]" />
+          
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-4 relative z-10">
+            <div>
+              <h3 className="text-sm font-bold text-white print-text flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#00E5FF] animate-pulse" />
+                <span>Living Interview Universe Constellation Map</span>
+              </h3>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Explore your skill stars. Stronger skills burn brighter; weaker areas appear dim.</p>
+            </div>
+            <span className="inline-flex items-center rounded-md bg-indigo-500/10 px-2 py-0.5 text-2xs font-bold text-indigo-400 border border-indigo-500/20 uppercase tracking-wider">
+              Constellation Map
+            </span>
+          </div>
+
+          <div className="relative h-64 w-full bg-[#050816]/80 rounded-xl border border-zinc-900 overflow-hidden flex items-center justify-center">
+            {/* Stars background overlay */}
+            <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
+            
+            <svg className="w-full h-full min-h-[250px] relative z-10" viewBox="0 0 500 250">
+              <defs>
+                <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#00E5FF" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#00E5FF" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id="accentGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#7C3AED" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#7C3AED" stopOpacity="0" />
+                </radialGradient>
+              </defs>
+
+              {/* Constellation Link Lines */}
+              <line x1="80" y1="60" x2="250" y2="40" stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="250" y1="40" x2="420" y2="70" stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="420" y1="70" x2="350" y2="180" stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="350" y1="180" x2="150" y2="190" stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="150" y1="190" x2="80" y2="60" stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="250" y1="40" x2="250" y2="125" stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="150" y1="190" x2="250" y2="125" stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="350" y1="180" x2="250" y2="125" stroke="#1f2937" strokeWidth="1" strokeDasharray="3 3" />
+
+              {/* Skill Stars */}
+              {[
+                { name: 'Technical Depth', x: 250, y: 40, val: score.technicalDepth, glow: 'glow' },
+                { name: 'Problem Solving', x: 80, y: 60, val: score.problemSolving, glow: 'accentGlow' },
+                { name: 'Communication', x: 420, y: 70, val: score.communication, glow: 'glow' },
+                { name: 'Confidence', x: 150, y: 190, val: score.confidence, glow: 'accentGlow' },
+                { name: 'Clarity', x: 350, y: 180, val: score.clarity, glow: 'glow' },
+                { name: 'Leadership', x: 250, y: 125, val: score.leadership, glow: 'accentGlow' },
+              ].map((star, idx) => {
+                const brightnessRadius = (star.val / 100) * 16 + 4;
+                return (
+                  <g key={idx} className="cursor-pointer group">
+                    {/* Glowing halo */}
+                    <circle 
+                      cx={star.x} 
+                      cy={star.y} 
+                      r={brightnessRadius + 12} 
+                      fill={`url(#${star.glow})`} 
+                      className="opacity-45 animate-pulse" 
+                    />
+                    {/* Star core */}
+                    <circle 
+                      cx={star.x} 
+                      cy={star.y} 
+                      r={brightnessRadius / 3 + 2} 
+                      fill="#FFFFFF" 
+                      className="stroke-2 stroke-indigo-400 group-hover:fill-[#00E5FF] transition-all" 
+                    />
+                    {/* Labels */}
+                    <text 
+                      x={star.x} 
+                      y={star.y - (brightnessRadius / 2 + 10)} 
+                      textAnchor="middle" 
+                      fill="#A0AEC0" 
+                      fontSize="9" 
+                      fontWeight="bold"
+                      className="group-hover:fill-white transition-colors"
+                    >
+                      {star.name}
+                    </text>
+                    <text 
+                      x={star.x} 
+                      y={star.y + (brightnessRadius / 2 + 12)} 
+                      textAnchor="middle" 
+                      fill="#ffffff" 
+                      fontSize="8" 
+                      fontWeight="extrabold"
+                      className="opacity-80 font-mono"
+                    >
+                      {star.val}%
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
           </div>
         </div>
 

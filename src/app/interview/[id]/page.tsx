@@ -967,7 +967,7 @@ export default function InterviewStudioPage() {
   }, [isConnected, id]);
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between bg-zinc-950 overflow-hidden">
+    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between bg-[#050816] overflow-hidden">
       {/* Decorative Blur Backgrounds */}
       <div className="absolute top-[10%] left-[-15%] h-[500px] w-[500px] rounded-full bg-indigo-500/5 blur-[120px]" />
       <div className="absolute bottom-[10%] right-[-15%] h-[500px] w-[500px] rounded-full bg-purple-500/5 blur-[120px]" />
