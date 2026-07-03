@@ -967,9 +967,9 @@ export default function InterviewStudioPage() {
   }, [isConnected, id]);
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between bg-[#050816] overflow-hidden">
+    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between bg-[#020305] overflow-hidden">
       {/* Decorative Blur Backgrounds */}
-      <div className="absolute top-[10%] left-[-15%] h-[500px] w-[500px] rounded-full bg-indigo-500/5 blur-[120px]" />
+      <div className="absolute top-[10%] left-[-15%] h-[500px] w-[500px] rounded-full bg-[#5B7CFF]/5 blur-[120px]" />
       <div className="absolute bottom-[10%] right-[-15%] h-[500px] w-[500px] rounded-full bg-purple-500/5 blur-[120px]" />
 
       {/* AI Contradiction Alert Overlay */}
@@ -1006,7 +1006,7 @@ export default function InterviewStudioPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2 rounded-xl bg-zinc-900 px-3.5 py-2 border border-zinc-850">
-                <Clock className="h-4 w-4 text-indigo-400" />
+                <Clock className="h-4 w-4 text-[#5B7CFF]" />
                 <span className="text-xs font-bold text-white font-mono">{formatTime(timerSeconds)}</span>
               </div>
             </div>
@@ -1023,7 +1023,7 @@ export default function InterviewStudioPage() {
             </div>
 
             {/* AI Thinking Brain HUD */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 space-y-3 shadow-lg shadow-indigo-500/2">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 space-y-3 shadow-lg shadow-[#5B7CFF]/2">
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
                 <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                   <span>Reasoning Engine HUD</span>
@@ -1032,12 +1032,12 @@ export default function InterviewStudioPage() {
                       ? 'bg-purple-500/15 text-purple-400 border border-purple-500/20' 
                       : activeAgent === 'Hiring Manager' 
                         ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20'
+                        : 'bg-[#5B7CFF]/15 text-[#5B7CFF] border border-[#5B7CFF]/20'
                   }`}>
                     🎤 Panelist: {activeAgent}
                   </span>
                 </span>
-                <span className="text-2xs font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
+                <span className="text-2xs font-semibold text-[#5B7CFF] bg-[#5B7CFF]/10 px-2 py-0.5 rounded">
                   {interview?.personality || 'Google Staff Engineer'} Style
                 </span>
               </div>
@@ -1046,7 +1046,7 @@ export default function InterviewStudioPage() {
                 {/* Listening State */}
                 <div className={`p-2.5 rounded-lg border text-center space-y-1 transition ${
                   orbState === 'listening' 
-                    ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300' 
+                    ? 'bg-[#5B7CFF]/10 border-[#5B7CFF]/30 text-[#5B7CFF]' 
                     : 'bg-zinc-900/40 border-zinc-900/60 text-zinc-500'
                 }`}>
                   <div className="text-[10px] font-bold uppercase tracking-wider">Listening</div>
@@ -1080,12 +1080,12 @@ export default function InterviewStudioPage() {
                 </div>
               )}
             </div>
-
+            
             {/* AI Digital Twin Knowledge Model */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 space-y-3 shadow-lg shadow-indigo-500/2">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 space-y-3 shadow-lg shadow-[#5B7CFF]/2">
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
                 <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
-                  <Brain className="h-3.5 w-3.5 text-indigo-400" />
+                  <Brain className="h-3.5 w-3.5 text-[#5B7CFF]" />
                   <span>AI Digital Twin Candidate Model</span>
                 </span>
                 <span className="text-[9px] font-semibold text-zinc-500 uppercase">Estimated Knowledge</span>
@@ -1097,7 +1097,7 @@ export default function InterviewStudioPage() {
                     <div className="flex items-center gap-1">
                       <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" 
+                          className="h-full bg-gradient-to-r from-[#5B7CFF] to-[#8B5CF6] rounded-full transition-all duration-500" 
                           style={{ width: `${val}%` }} 
                         />
                       </div>
@@ -1114,7 +1114,7 @@ export default function InterviewStudioPage() {
             {/* Checklist */}
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm space-y-3">
               <h3 className="text-xs font-bold text-white flex items-center gap-1.5 border-b border-zinc-900 pb-2">
-                <Brain className="h-4 w-4 text-indigo-400" />
+                <Brain className="h-4 w-4 text-[#5B7CFF]" />
                 <span>Roadmap Checklist</span>
               </h3>
               <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1">
@@ -1124,7 +1124,7 @@ export default function InterviewStudioPage() {
                       {topic.status === 'completed' ? (
                         <span className="block h-3.5 w-3.5 rounded-full bg-emerald-500/20 border border-emerald-500" />
                       ) : topic.status === 'in_progress' ? (
-                        <span className="block h-3.5 w-3.5 rounded-full bg-indigo-500/20 border border-indigo-500 animate-pulse" />
+                        <span className="block h-3.5 w-3.5 rounded-full bg-[#5B7CFF]/20 border border-[#5B7CFF] animate-pulse" />
                       ) : (
                         <span className="block h-3.5 w-3.5 rounded-full border border-zinc-800" />
                       )}
@@ -1143,12 +1143,12 @@ export default function InterviewStudioPage() {
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm flex flex-col justify-between">
               <div className="border-b border-zinc-900 pb-2 flex items-center justify-between">
                 <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <MessageSquare className="h-4 w-4 text-indigo-400" />
+                  <MessageSquare className="h-4 w-4 text-[#5B7CFF]" />
                   <span>Dialogue Transcript</span>
                 </h3>
                 <button 
                   onClick={() => setShowTranscript(!showTranscript)}
-                  className="text-2xs text-indigo-400 font-semibold hover:underline"
+                  className="text-2xs text-[#5B7CFF] font-semibold hover:underline"
                 >
                   {showTranscript ? 'Hide' : 'Show'}
                 </button>
@@ -1161,7 +1161,7 @@ export default function InterviewStudioPage() {
                       <div key={index} className={msg.speaker === 'candidate' ? 'text-right' : 'text-left'}>
                         <div className="text-[9px] text-zinc-550 font-bold uppercase">{msg.speaker === 'candidate' ? 'You' : 'AI'}</div>
                         <p className={`inline-block rounded-lg px-2.5 py-1.5 mt-0.5 text-zinc-300 ${
-                          msg.speaker === 'candidate' ? 'bg-indigo-600/15 text-indigo-300' : 'bg-zinc-900/60'
+                          msg.speaker === 'candidate' ? 'bg-[#5B7CFF]/15 text-[#5B7CFF]' : 'bg-zinc-900/60'
                         }`}>{msg.text}</p>
                       </div>
                     ))
@@ -1182,7 +1182,7 @@ export default function InterviewStudioPage() {
           {/* Editor Header controls */}
           <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-[#5B7CFF] animate-pulse" />
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">Interactive Code Sandbox</h3>
             </div>
             
@@ -1190,7 +1190,7 @@ export default function InterviewStudioPage() {
               <select
                 value={codeLanguage}
                 onChange={(e) => setCodeLanguage(e.target.value)}
-                className="rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1 text-2xs text-zinc-350 outline-none focus:border-indigo-500"
+                className="rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1 text-2xs text-zinc-350 outline-none focus:border-[#5B7CFF]"
               >
                 <option value="javascript">JavaScript</option>
                 <option value="python">Python</option>
@@ -1202,7 +1202,7 @@ export default function InterviewStudioPage() {
               <button
                 onClick={handleRunCode}
                 disabled={isRunningCode || !isConnected}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-2xs font-bold text-white hover:bg-indigo-500 disabled:opacity-50 transition"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#5B7CFF] px-3 py-1.5 text-2xs font-bold text-white hover:bg-[#5B7CFF]/90 disabled:opacity-50 transition"
               >
                 {isRunningCode ? (
                   <>
@@ -1239,7 +1239,7 @@ export default function InterviewStudioPage() {
             <div className="flex items-center justify-between border-b border-zinc-900 pb-1.5">
               <span className="font-semibold text-zinc-550 uppercase tracking-widest">Compiler Terminal Console</span>
               {timeComplexity && (
-                <span className="text-[10px] text-indigo-400">
+                <span className="text-[10px] text-[#5B7CFF]">
                   Complexity: {timeComplexity} Time | {spaceComplexity} Space
                 </span>
               )}
@@ -1260,7 +1260,7 @@ export default function InterviewStudioPage() {
               <button
                 onClick={connectSession}
                 disabled={isConnecting || isEnding}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B7CFF] to-[#8B5CF6] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#5B7CFF]/10 transition hover:brightness-110 cursor-pointer disabled:opacity-50"
               >
                 {isConnecting ? (
                   <>

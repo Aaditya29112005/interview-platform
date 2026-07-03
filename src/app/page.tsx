@@ -29,6 +29,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { OrbVisualizer } from '@/components/orb-visualizer';
 
 // Canvas-based dynamic background particle generator
 function BackgroundParticles() {
@@ -335,16 +336,19 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* SECTION 2: Muted Logo Marquee */}
-      <section className="relative py-12 border-y border-[rgba(255,255,255,0.06)] bg-[#020305]/75 z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex flex-wrap items-center justify-center gap-x-16 gap-y-6 opacity-35 grayscale contrast-125">
-            <span className="text-md font-bold tracking-tight text-white font-mono">GOOGLE</span>
-            <span className="text-md font-bold tracking-tight text-white font-mono">AMAZON</span>
-            <span className="text-md font-bold tracking-tight text-white font-mono">STRIPE</span>
-            <span className="text-md font-bold tracking-tight text-white font-mono">VERCEL</span>
-            <span className="text-md font-bold tracking-tight text-white font-mono">OPENAI</span>
-            <span className="text-md font-bold tracking-tight text-white font-mono">LINEAR</span>
+      {/* SECTION 2: Trusted Partners Gallery */}
+      <section className="relative py-8 z-10">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="glass-panel py-6 px-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-white/[0.06] bg-zinc-950/20 shadow-2xl">
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Trusted by innovative teams</span>
+            <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-50 contrast-125">
+              <span className="text-xs font-black tracking-widest text-white font-mono">MICROSOFT</span>
+              <span className="text-xs font-black tracking-widest text-white font-mono">GOOGLE</span>
+              <span className="text-xs font-black tracking-widest text-white font-mono">STRIPE</span>
+              <span className="text-xs font-black tracking-widest text-white font-mono">NOTION</span>
+              <span className="text-xs font-black tracking-widest text-white font-mono">VERCEL</span>
+              <span className="text-xs font-black tracking-widest text-white font-mono">AIRBNB</span>
+            </div>
           </div>
         </div>
       </section>
@@ -370,39 +374,11 @@ export default function Home() {
         {/* Floating Orb visualizer card */}
         <div className="flex items-center justify-center relative w-full h-[380px] bg-zinc-950/20 border border-zinc-900 rounded-3xl overflow-hidden glass-panel">
           <div className="absolute inset-0 bg-gradient-to-tr from-[#5B7CFF]/5 to-transparent blur-[80px]" />
-          <div className="absolute top-4 right-4 text-[10px] text-zinc-550 font-mono uppercase tracking-widest bg-zinc-950/80 px-3 py-1 rounded-full border border-zinc-900">
+          <div className="absolute top-4 right-4 text-[10px] text-zinc-550 font-mono uppercase tracking-widest bg-zinc-950/80 px-3 py-1 rounded-full border border-zinc-900 z-30">
             {orbState === 'idle' ? 'AI Orb: Standby' : `AI Orb: ${orbState}`}
           </div>
           
-          <div className="relative flex items-center justify-center h-72 w-72">
-            <div className="absolute inset-0 rounded-full border border-dashed border-[#5B7CFF]/15 animate-[spin_50s_linear_infinite]" />
-            <div className="absolute inset-4 rounded-full border border-dashed border-[#8B5CF6]/15 animate-[spin_30s_linear_infinite_reverse]" />
-
-            <div className={`absolute inset-10 rounded-full blur-2xl opacity-40 transition-all duration-1000 ${
-              orbState === 'listening' ? 'bg-[#4DE2FF]' :
-              orbState === 'thinking' ? 'bg-[#8B5CF6]' :
-              orbState === 'speaking' ? 'bg-[#5B7CFF]' :
-              orbState === 'challenging' ? 'bg-red-500' :
-              'bg-[#5B7CFF]/40'
-            }`} />
-
-            <motion.div
-              animate={{
-                scale: orbState === 'listening' ? [1, 1.06, 1] :
-                       orbState === 'thinking' ? [1, 0.94, 1.06, 1] :
-                       orbState === 'speaking' ? [1, 1.1, 0.96, 1.08, 1] :
-                       orbState === 'challenging' ? [1, 1.15, 0.92, 1.18, 1] :
-                       [1, 1.02, 1]
-              }}
-              transition={{ duration: orbState === 'challenging' ? 0.8 : 2.2, repeat: Infinity }}
-              className={`h-40 w-40 rounded-full border border-white/20 bg-[radial-gradient(circle_at_center,#FFFFFF_0%,#F8FAFC_20%,#5B7CFF_50%,#8B5CF6_80%,transparent_100%)] flex items-center justify-center shadow-2xl relative transition-all duration-700`}
-            >
-              <div className="absolute flex flex-col items-center justify-center text-center space-y-1 z-10">
-                <Brain className="h-8 w-8 text-[#020305] drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]" />
-                <span className="text-[8px] font-black tracking-widest text-[#020305] uppercase font-mono">{orbState}</span>
-              </div>
-            </motion.div>
-          </div>
+          <OrbVisualizer state={orbState} />
         </div>
       </section>
 

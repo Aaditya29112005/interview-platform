@@ -183,14 +183,14 @@ export default function DashboardPage() {
 
   if (loading || !user) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#050816]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#020305]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#5B7CFF]" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#050816] pb-16 pt-8">
+    <div className="min-h-[calc(100vh-4rem)] bg-[#020305] pb-16 pt-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Welcome Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-6">
@@ -210,7 +210,7 @@ export default function DashboardPage() {
                 onClick={() => setIsRecruiterView(!isRecruiterView)}
                 className={`inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
                   isRecruiterView 
-                    ? 'bg-indigo-600/10 border-indigo-500/30 text-indigo-400' 
+                    ? 'bg-[#5B7CFF]/10 border-[#5B7CFF]/30 text-[#5B7CFF]' 
                     : 'border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white'
                 }`}
               >
@@ -220,7 +220,7 @@ export default function DashboardPage() {
             )}
             <button
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:from-indigo-600 hover:to-purple-700"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#5B7CFF] to-[#8B5CF6] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#5B7CFF]/10 transition hover:brightness-110 cursor-pointer"
             >
               <Plus className="h-4.5 w-4.5" />
               <span>Start New Interview</span>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
 
         {dataLoading ? (
           <div className="flex h-64 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#5B7CFF]" />
           </div>
         ) : (
           <>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-6">
                 <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                   <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-indigo-400" />
+                    <Sparkles className="h-5 w-5 text-[#5B7CFF]" />
                     <span>Candidate Alignment & Integrity Panel</span>
                   </h2>
                   <span className="text-2xs text-zinc-500 uppercase tracking-wider font-bold">Admin Recruiter Dashboard</span>
@@ -272,7 +272,7 @@ export default function DashboardPage() {
                                 {item.role}
                                 <div className="text-[10px] text-zinc-550 font-normal mt-0.5">{item.company} • {item.personality} Style</div>
                               </td>
-                              <td className="py-4 font-bold text-indigo-400">
+                              <td className="py-4 font-bold text-[#5B7CFF]">
                                 {item.status === 'completed' ? `${item.scores?.overall}%` : 'In Progress'}
                               </td>
                               <td className="py-4 font-medium text-zinc-400 capitalize">
@@ -651,8 +651,8 @@ export default function DashboardPage() {
                 // Full Screen Creating Screen
                 <div className="py-12 flex flex-col items-center justify-center text-center space-y-6">
                   <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-indigo-500/20 blur-xl animate-pulse" />
-                    <Loader2 className="h-16 w-16 animate-spin text-indigo-500 relative z-10" />
+                    <div className="absolute inset-0 rounded-full bg-[#5B7CFF]/20 blur-xl animate-pulse" />
+                    <Loader2 className="h-16 w-16 animate-spin text-[#5B7CFF] relative z-10" />
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-lg font-bold text-white">Generating Interview Plan...</h3>
@@ -666,7 +666,7 @@ export default function DashboardPage() {
                 <form onSubmit={handleStartInterview} className="space-y-6 flex-1 overflow-y-auto pr-1">
                   <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-indigo-400" />
+                      <Sparkles className="h-5 w-5 text-[#5B7CFF]" />
                       <span>Configure New Interview</span>
                     </h3>
                   </div>
@@ -680,7 +680,7 @@ export default function DashboardPage() {
                       id="role"
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
-                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#5B7CFF] focus:ring-1 focus:ring-[#5B7CFF]"
                     >
                       <option>Software Engineer</option>
                       <option>Frontend Engineer</option>
@@ -700,7 +700,7 @@ export default function DashboardPage() {
                       id="personality"
                       value={personality}
                       onChange={(e) => setPersonality(e.target.value)}
-                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#5B7CFF] focus:ring-1 focus:ring-[#5B7CFF]"
                     >
                       <option>Google Staff Engineer</option>
                       <option>Amazon Bar Raiser</option>
@@ -719,7 +719,7 @@ export default function DashboardPage() {
                       id="mode"
                       value={mode}
                       onChange={(e) => setMode(e.target.value)}
-                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#5B7CFF] focus:ring-1 focus:ring-[#5B7CFF]"
                     >
                       <option>Classic</option>
                       <option>Stress Test</option>
@@ -738,7 +738,7 @@ export default function DashboardPage() {
                         id="company"
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
-                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#5B7CFF] focus:ring-1 focus:ring-[#5B7CFF]"
                       >
                         <option>Google (Tech Giant / Core Algorithms)</option>
                         <option>Amazon (LP / Systems focus)</option>
@@ -755,7 +755,7 @@ export default function DashboardPage() {
                         id="difficulty"
                         value={difficulty}
                         onChange={(e) => setDifficulty(e.target.value)}
-                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#5B7CFF] focus:ring-1 focus:ring-[#5B7CFF]"
                       >
                         <option>Easy</option>
                         <option>Medium</option>
@@ -770,7 +770,7 @@ export default function DashboardPage() {
                       <label htmlFor="experience" className="block text-xs font-semibold text-zinc-400">
                         Years of Experience
                       </label>
-                      <span className="text-xs font-bold text-indigo-400">{experience} Years</span>
+                      <span className="text-xs font-bold text-[#5B7CFF]">{experience} Years</span>
                     </div>
                     <input
                       id="experience"
@@ -779,9 +779,11 @@ export default function DashboardPage() {
                       max="15"
                       value={experience}
                       onChange={(e) => setExperience(Number(e.target.value))}
-                      className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                      className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#5B7CFF]"
                     />
-                                   {/* Job Description Area */}
+                  </div>
+
+                  {/* Job Description Area */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="block text-xs font-semibold text-zinc-400">
@@ -793,7 +795,7 @@ export default function DashboardPage() {
                           onClick={() => setJdInputType('file')}
                           className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
                             jdInputType === 'file' 
-                              ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20' 
+                              ? 'bg-[#5B7CFF]/15 text-[#5B7CFF] border border-[#5B7CFF]/20' 
                               : 'text-zinc-500 hover:text-zinc-300'
                           }`}
                         >
@@ -804,7 +806,7 @@ export default function DashboardPage() {
                           onClick={() => setJdInputType('text')}
                           className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
                             jdInputType === 'text' 
-                              ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20' 
+                              ? 'bg-[#5B7CFF]/15 text-[#5B7CFF] border border-[#5B7CFF]/20' 
                               : 'text-zinc-500 hover:text-zinc-300'
                           }`}
                         >
@@ -845,7 +847,7 @@ export default function DashboardPage() {
                         value={jobDescription}
                         onChange={(e) => setJobDescription(e.target.value)}
                         rows={3}
-                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
+                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-[#5B7CFF] focus:ring-1 focus:ring-[#5B7CFF] resize-none"
                         placeholder="Paste target Job Description (JD) to match target required skills and tools."
                       />
                     )}
@@ -863,7 +865,7 @@ export default function DashboardPage() {
                           onClick={() => setResumeInputType('file')}
                           className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
                             resumeInputType === 'file' 
-                              ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20' 
+                              ? 'bg-[#5B7CFF]/15 text-[#5B7CFF] border border-[#5B7CFF]/20' 
                               : 'text-zinc-500 hover:text-zinc-300'
                           }`}
                         >
@@ -874,7 +876,7 @@ export default function DashboardPage() {
                           onClick={() => setResumeInputType('text')}
                           className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
                             resumeInputType === 'text' 
-                              ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20' 
+                              ? 'bg-[#5B7CFF]/15 text-[#5B7CFF] border border-[#5B7CFF]/20' 
                               : 'text-zinc-500 hover:text-zinc-300'
                           }`}
                         >
@@ -915,11 +917,11 @@ export default function DashboardPage() {
                         value={resume}
                         onChange={(e) => setResume(e.target.value)}
                         rows={3}
-                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
+                        className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-[#5B7CFF] focus:ring-1 focus:ring-[#5B7CFF] resize-none"
                         placeholder="Paste your resume or relevant experience summary here for personalized questions."
                       />
                     )}
-                  </div>   </div>
+                  </div>
 
                   {/* Action Buttons */}
                   <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
@@ -932,7 +934,7 @@ export default function DashboardPage() {
                     </button>
                     <button
                       type="submit"
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:from-indigo-600 hover:to-purple-700"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#5B7CFF] to-[#8B5CF6] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#5B7CFF]/10 transition hover:brightness-110 cursor-pointer"
                     >
                       <Play className="h-4 w-4" />
                       <span>Start Interview</span>

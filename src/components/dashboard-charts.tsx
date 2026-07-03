@@ -72,7 +72,7 @@ export function DashboardCharts({ radarData, trendData }: ChartData) {
                         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3 shadow-xl">
                           <p className="text-xs text-zinc-400">{data.date}</p>
                           <p className="text-sm font-bold text-white mt-1">Score: {data.score}</p>
-                          <p className="text-xs text-indigo-400 font-medium mt-0.5">{data.role}</p>
+                          <p className="text-xs text-[#5B7CFF] font-medium mt-0.5">{data.role}</p>
                         </div>
                       );
                     }
@@ -84,14 +84,14 @@ export function DashboardCharts({ radarData, trendData }: ChartData) {
                   dataKey="score"
                   stroke="url(#line-grad)"
                   strokeWidth={3}
-                  dot={{ r: 4, stroke: '#6E7DFF', strokeWidth: 2, fill: '#050816' }}
+                  dot={{ r: 4, stroke: '#5B7CFF', strokeWidth: 2, fill: '#020305' }}
                   activeDot={{ r: 6 }}
                 />
                 <defs>
                   <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#6E7DFF" />
+                    <stop offset="0%" stopColor="#5B7CFF" />
                     <stop offset="50%" stopColor="#8B5CF6" />
-                    <stop offset="100%" stopColor="#00D9FF" />
+                    <stop offset="100%" stopColor="#4DE2FF" />
                   </linearGradient>
                 </defs>
               </LineChart>
@@ -105,7 +105,7 @@ export function DashboardCharts({ radarData, trendData }: ChartData) {
       </div>
 
       {/* Radar Chart: Skill Breakdown */}
-      <div className="rounded-2xl border border-zinc-800 bg-[#0A1022]/60 p-6 backdrop-blur-sm">
+      <div className="rounded-2xl border border-zinc-800 bg-[#0D111B]/60 p-6 backdrop-blur-sm">
         <h3 className="text-sm font-semibold text-zinc-300 mb-4">Competency Map</h3>
         <div className="h-64 w-full flex items-center justify-center">
           {hasData ? (
@@ -127,7 +127,7 @@ export function DashboardCharts({ radarData, trendData }: ChartData) {
                 <Radar
                   name="Candidate"
                   dataKey="A"
-                  stroke="#6E7DFF"
+                  stroke="#5B7CFF"
                   fill="#8B5CF6"
                   fillOpacity={0.2}
                   strokeWidth={2.5}
