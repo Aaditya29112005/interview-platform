@@ -105,7 +105,7 @@ Objective: ${interview.objective}
 Conversation Transcript:
 ${messageHistoryText}
 
-Your task is to grade the candidate on our key rubrics (0 to 100):
+Grade the candidate on our key rubrics (0 to 100):
 1. Communication (Expressing ideas clearly, structural hierarchy, speaking pace)
 2. Problem Solving (Conceptual understanding, logical reasoning, structured approach)
 3. Confidence (Acknowledge gaps without panic, self-assured answers, pacing)
@@ -113,6 +113,11 @@ Your task is to grade the candidate on our key rubrics (0 to 100):
 5. Clarity (Conciseness, avoiding buzzword salad, crisp answers)
 6. Leadership (Owner mindset, taking accountability, mentoring, behavioral fit)
 7. Overall Score (Weighted average representing hiring bar matching)
+
+You must also analyze the speech characteristics of the candidate:
+- **fillerWords**: Count total occurrences of standard conversational filler words ("like", "um", "uh", "so", "basically", "you know") in the candidate's text.
+- **vocabScore**: Evaluate technical vocabulary richness on a scale of 0 to 100.
+- **speakingPace**: Estimate average speaking pace in words per minute (WPM). Normal conversation is typically 110-150 WPM.
 
 You must also output:
 - A list of candidate strengths (3-5 items)
@@ -139,6 +144,16 @@ Output ONLY a valid JSON object matching this structure. Do not output any markd
   "clarity": number,
   "leadership": number,
   "overall": number,
+  "fillerWords": {
+    "like": number,
+    "um": number,
+    "uh": number,
+    "so": number,
+    "basically": number,
+    "youKnow": number
+  },
+  "vocabScore": number,
+  "speakingPace": number,
   "strengths": ["string"],
   "weaknesses": ["string"],
   "struggledQuestions": ["string"],
@@ -146,7 +161,8 @@ Output ONLY a valid JSON object matching this structure. Do not output any markd
   "suggestedStudyPlan": "string",
   "recommendedResources": ["string"],
   "estimatedLevel": "string"
-}`;
+}
+`;
 
     let reportData = {
       communication: 65,
@@ -156,6 +172,16 @@ Output ONLY a valid JSON object matching this structure. Do not output any markd
       clarity: 65,
       leadership: 65,
       overall: 65,
+      fillerWords: {
+        like: 0,
+        um: 0,
+        uh: 0,
+        so: 0,
+        basically: 0,
+        youKnow: 0,
+      },
+      vocabScore: 70,
+      speakingPace: 130,
       strengths: ['Participated in the interview.'],
       weaknesses: ['Requires additional depth.'],
       struggledQuestions: ['System architecture questions'],
@@ -195,6 +221,9 @@ Output ONLY a valid JSON object matching this structure. Do not output any markd
         suggestedStudyPlan: reportData.suggestedStudyPlan,
         recommendedResources: reportData.recommendedResources,
         estimatedLevel: reportData.estimatedLevel,
+        fillerWords: reportData.fillerWords,
+        vocabScore: reportData.vocabScore,
+        speakingPace: reportData.speakingPace,
       },
       create: {
         interviewId: id,
@@ -212,6 +241,10 @@ Output ONLY a valid JSON object matching this structure. Do not output any markd
         suggestedStudyPlan: reportData.suggestedStudyPlan,
         recommendedResources: reportData.recommendedResources,
         estimatedLevel: reportData.estimatedLevel,
+        fillerWords: reportData.fillerWords,
+        vocabScore: reportData.vocabScore,
+        speakingPace: reportData.speakingPace,
+        confidenceTimeline: [],
       },
     });
 

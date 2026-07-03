@@ -42,6 +42,7 @@ interface InterviewDetail {
   status: string;
   startedAt: string;
   objective: string | null;
+  personality?: string;
 }
 
 export default function InterviewStudioPage() {
@@ -933,6 +934,61 @@ export default function InterviewStudioPage() {
               <Clock className="h-3.5 w-3.5" />
               <span>{formatTime(timerSeconds)}</span>
             </p>
+          </div>
+
+          {/* AI Thinking Brain HUD */}
+          <div className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900/20 p-4 space-y-3 backdrop-blur-md shadow-lg shadow-indigo-500/2">
+            <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
+              <span className="text-2xs font-bold text-zinc-500 uppercase tracking-widest">Reasoning Engine</span>
+              <span className="text-2xs font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
+                {interview?.personality || 'Google Staff Engineer'} Style
+              </span>
+            </div>
+            <div className="space-y-2 text-xs">
+              {/* Listening State */}
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-zinc-300">
+                  <span className={`h-2 w-2 rounded-full transition ${orbState === 'listening' ? 'bg-indigo-400 animate-ping' : 'bg-zinc-800'}`} />
+                  <span>🎤 Listening for response</span>
+                </span>
+                <span className={`text-[10px] font-bold tracking-wide transition ${orbState === 'listening' ? 'text-indigo-400' : 'text-zinc-600'}`}>
+                  {orbState === 'listening' ? 'ACTIVE' : 'STANDBY'}
+                </span>
+              </div>
+
+              {/* Speech Captured / Silence check */}
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-zinc-300">
+                  <span className={`h-2 w-2 rounded-full transition ${orbState !== 'listening' && orbState !== 'idle' ? 'bg-purple-400' : 'bg-zinc-800'}`} />
+                  <span>✓ Speech captured successfully</span>
+                </span>
+                <span className={`text-[10px] font-bold tracking-wide transition ${orbState !== 'listening' && orbState !== 'idle' ? 'text-purple-400' : 'text-zinc-600'}`}>
+                  {orbState !== 'listening' && orbState !== 'idle' ? 'YES' : 'STANDBY'}
+                </span>
+              </div>
+
+              {/* Thinking / Evaluating State */}
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-zinc-300">
+                  <span className={`h-2 w-2 rounded-full transition ${orbState === 'thinking' ? 'bg-pink-400 animate-ping' : 'bg-zinc-800'}`} />
+                  <span>🧠 Understanding & evaluation</span>
+                </span>
+                <span className={`text-[10px] font-bold tracking-wide transition ${orbState === 'thinking' ? 'text-pink-400' : 'text-zinc-600'}`}>
+                  {orbState === 'thinking' ? 'THINKING...' : 'STANDBY'}
+                </span>
+              </div>
+
+              {/* Speaking State */}
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-zinc-300">
+                  <span className={`h-2 w-2 rounded-full transition ${orbState === 'speaking' ? 'bg-emerald-400 animate-ping' : 'bg-zinc-800'}`} />
+                  <span>💬 Response synthesis</span>
+                </span>
+                <span className={`text-[10px] font-bold tracking-wide transition ${orbState === 'speaking' ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                  {orbState === 'speaking' ? 'SPEAKING' : 'STANDBY'}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Orb Visualizer */}

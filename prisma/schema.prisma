@@ -23,6 +23,7 @@ model Interview {
   role           String
   difficulty     String
   company        String
+  personality    String    @default("Google Staff Engineer")
   experience     Int       @default(1)
   status         String    @default("pending") // pending, active, completed
   startedAt      DateTime  @default(now())
@@ -61,4 +62,8 @@ model Score {
   suggestedStudyPlan String @db.Text
   recommendedResources String[] @default([])
   estimatedLevel String  @default("L3")
+  confidenceTimeline Json?    // Array of turn scores, e.g. [{"turn": 1, "score": 85}]
+  fillerWords   Json?        // Map of filler words, e.g. {"like": 4, "uh": 5}
+  vocabScore    Int          @default(70)
+  speakingPace  Int          @default(130) // Words per minute
 }

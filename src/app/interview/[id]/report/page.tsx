@@ -15,8 +15,20 @@ import {
   ListTodo,
   ExternalLink,
   BookOpen,
+  MessageSquare,
+  Volume2,
+  Brain,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+} from 'recharts';
 
 interface ScoreData {
   communication: number;
@@ -33,6 +45,10 @@ interface ScoreData {
   suggestedStudyPlan: string;
   recommendedResources: string[];
   estimatedLevel: string;
+  confidenceTimeline?: Array<{ turn: number; score: number; question?: string; answer?: string }>;
+  fillerWords?: Record<string, number> | null;
+  vocabScore?: number;
+  speakingPace?: number;
 }
 
 export default function ReportPage() {
@@ -43,6 +59,39 @@ export default function ReportPage() {
   const [interview, setInterview] = useState<Record<string, unknown> | null>(null);
   const [score, setScore] = useState<ScoreData | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
+
+  // Mentor Mode States
+  const [selectedTurn, setSelectedTurn] = useState<any>(null);
+  const [mentorCritique, setMentorCritique] = useState<any>(null);
+  const [mentorLoading, setMentorLoading] = useState(false);
+
+  const handleLoadMentorFeedback = async (turn: any) => {
+    setSelectedTurn(turn);
+    setMentorCritique(null);
+    setMentorLoading(true);
+    try {
+      const res = await fetch(`/api/interviews/${id}/mentor-turn`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionText: turn.question,
+          answerText: turn.answer,
+          role: interview?.role,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMentorCritique(data);
+      } else {
+        alert('Failed to load mentor feedback.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load mentor feedback.');
+    } finally {
+      setMentorLoading(false);
+    }
+  };
 
   // Authentication check
   useEffect(() => {
@@ -263,6 +312,122 @@ export default function ReportPage() {
           </div>
         </div>
 
+        {/* Advanced Speech Analytics & Confidence Timeline */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
+          {/* Card 1: Speech Telemetry */}
+          <div className="md:col-span-1 rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-6 print-card flex flex-col justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-white print-text mb-4 flex items-center gap-2">
+                <Volume2 className="h-4.5 w-4.5 text-indigo-400" />
+                <span>Speech Telemetry</span>
+              </h3>
+              <div className="space-y-4">
+                {/* Speaking Pace */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-400">Speaking Pace</span>
+                    <span className="font-bold text-zinc-200">{score.speakingPace || 130} WPM</span>
+                  </div>
+                  <div className="text-[10px] text-zinc-500">
+                    {(score.speakingPace || 130) < 110 ? 'Slow / Hesitant' : (score.speakingPace || 130) > 150 ? 'Rushed / Fast' : 'Optimal Pace (110 - 150 WPM)'}
+                  </div>
+                </div>
+
+                {/* Vocabulary Richness */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-400">Vocabulary Richness</span>
+                    <span className="font-bold text-zinc-200">{score.vocabScore || 70}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${score.vocabScore || 70}%` }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filler Words Badge Grid */}
+            <div className="pt-4 border-t border-zinc-900/60 space-y-2">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Filler Word Counter</span>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                {Object.entries(score.fillerWords || { like: 0, um: 0, uh: 0, so: 0, basically: 0, youKnow: 0 }).map(([word, val]) => (
+                  <div key={word} className="rounded-lg bg-zinc-950/40 border border-zinc-900 py-1 px-1.5">
+                    <div className="text-[10px] text-zinc-500 capitalize">{word === 'youKnow' ? 'you know' : word}</div>
+                    <div className="text-xs font-bold text-zinc-300">{Number(val)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Confidence Timeline Chart */}
+          <div className="md:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm space-y-4 print-card">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white print-text flex items-center gap-2">
+                <Brain className="h-4.5 w-4.5 text-pink-400" />
+                <span>Confidence & Depth Timeline</span>
+              </h3>
+              <span className="text-2xs text-zinc-500">Turn-by-turn Calibration</span>
+            </div>
+
+            {score.confidenceTimeline && score.confidenceTimeline.length > 0 ? (
+              <div className="h-48 w-full text-xs">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={score.confidenceTimeline}
+                    onClick={(data: any) => {
+                      if (data && data.activePayload && data.activePayload.length > 0) {
+                        handleLoadMentorFeedback(data.activePayload[0].payload);
+                      }
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" opacity={0.3} />
+                    <XAxis
+                      dataKey="turn"
+                      stroke="#4b5563"
+                      tickLine={false}
+                      label={{ value: 'Interview Question Turn', position: 'insideBottom', offset: -5, fill: '#6b7280' }}
+                    />
+                    <YAxis
+                      domain={[30, 100]}
+                      stroke="#4b5563"
+                      tickLine={false}
+                      label={{ value: 'Confidence Score', angle: -90, position: 'insideLeft', fill: '#6b7280' }}
+                    />
+                    <RechartsTooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 p-3 shadow-xl backdrop-blur-sm max-w-xs space-y-1.5 text-2xs">
+                              <p className="font-bold text-indigo-400">Turn {data.turn}: {data.score}%</p>
+                              <p className="text-zinc-400 line-clamp-2"><span className="text-zinc-500 font-semibold">Q:</span> {data.question}</p>
+                              <p className="text-zinc-400 line-clamp-2"><span className="text-zinc-500 font-semibold">A:</span> {data.answer}</p>
+                              <p className="text-[10px] text-zinc-500 italic mt-1">Click dot to open in Mentor Mode below</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="score"
+                      stroke="#6366f1"
+                      strokeWidth={2.5}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="flex h-48 items-center justify-center text-xs text-zinc-500 bg-zinc-950/20 border border-zinc-900 rounded-xl">
+                Timeline telemetry was not recorded for this session.
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Detailed Category Progress bars */}
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm print-card">
           <h2 className="text-base font-bold text-white print-text mb-6">Competency Breakdown</h2>
@@ -374,6 +539,104 @@ export default function ReportPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+        {/* Mentor Mode Interactive Review */}
+        {score.confidenceTimeline && score.confidenceTimeline.length > 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-6 backdrop-blur-sm print-card space-y-6 no-print">
+            <div className="flex items-center justify-between border-b border-zinc-850 pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Brain className="h-4.5 w-4.5 text-indigo-400" />
+                <span>Interactive Mentor Mode Review</span>
+              </h3>
+              <span className="text-2xs text-zinc-500">Select any question turn to examine</span>
+            </div>
+
+            {/* List of Turns */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 shrink-0">
+              {score.confidenceTimeline.map((turn, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleLoadMentorFeedback(turn)}
+                  className={`px-3 py-2 text-xs font-semibold rounded-xl border transition shrink-0 ${
+                    selectedTurn?.turn === turn.turn
+                      ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/10'
+                      : 'bg-zinc-900/40 border-zinc-850 text-zinc-400 hover:border-zinc-700 hover:text-white'
+                  }`}
+                >
+                  Turn {turn.turn} ({turn.score}%)
+                </button>
+              ))}
+            </div>
+
+            {/* Active Turn Critique Output */}
+            {selectedTurn ? (
+              <div className="rounded-xl border border-zinc-850 bg-zinc-950/40 p-5 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Interviewer Prompt</span>
+                    <p className="text-xs text-zinc-300 bg-zinc-900/40 border border-zinc-850 rounded-lg p-3 leading-relaxed">
+                      {selectedTurn.question}
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Your Response</span>
+                    <p className="text-xs text-zinc-300 bg-zinc-900/40 border border-zinc-850 rounded-lg p-3 leading-relaxed">
+                      {selectedTurn.answer}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-zinc-900">
+                  {mentorLoading ? (
+                    <div className="py-6 flex items-center justify-center gap-2 text-xs text-zinc-400">
+                      <Loader2 className="h-4.5 w-4.5 animate-spin text-indigo-400" />
+                      <span>Mentor is analyzing your answer...</span>
+                    </div>
+                  ) : mentorCritique ? (
+                    <div className="space-y-4">
+                      {/* Critique */}
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Critique & Analysis</span>
+                        <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-line">
+                          {mentorCritique.critique}
+                        </p>
+                      </div>
+
+                      {/* Ideal Response */}
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Ideal Answer Guide</span>
+                        <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-line bg-indigo-950/5 border border-indigo-900/10 rounded-lg p-3">
+                          {mentorCritique.idealAnswer}
+                        </p>
+                      </div>
+
+                      {/* Practice Tip */}
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-pink-400 uppercase tracking-widest font-bold">Actionable Practice Tip</span>
+                        <p className="text-xs text-zinc-300 leading-relaxed italic">
+                          💡 {mentorCritique.practiceTip}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-2 text-center">
+                      <button
+                        onClick={() => handleLoadMentorFeedback(selectedTurn)}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        <span>Generate Mentor Feedback</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="py-8 text-center text-xs text-zinc-500 bg-zinc-950/20 border border-zinc-900 rounded-xl">
+                💡 Select a question turn from the list or click a data point on the chart to generate expert AI feedback.
+              </div>
+            )}
           </div>
         )}
       </div>

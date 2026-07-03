@@ -67,6 +67,7 @@ export default function DashboardPage() {
   const [role, setRole] = useState('Software Engineer');
   const [difficulty, setDifficulty] = useState('Medium');
   const [company, setCompany] = useState('Startup');
+  const [personality, setPersonality] = useState('Google Staff Engineer');
   const [experience, setExperience] = useState(3);
   const [resume, setResume] = useState('');
 
@@ -117,7 +118,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/interviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, difficulty, company, experience, resume }),
+        body: JSON.stringify({ role, difficulty, company, experience, resume, personality }),
       });
 
       const data = await res.json();
@@ -294,7 +295,7 @@ export default function DashboardPage() {
                             <div className="flex items-center gap-2.5">
                               <h3 className="text-sm font-bold text-white">{interview.role}</h3>
                               <span className="inline-flex items-center rounded-md bg-zinc-800 px-2 py-0.5 text-2xs font-medium text-zinc-400">
-                                {interview.company}
+                                {interview.company} • {(interview as any).personality || 'Google Staff'}
                               </span>
                               <span className="inline-flex items-center rounded-md bg-zinc-800/40 px-2 py-0.5 text-2xs font-medium text-zinc-400">
                                 {interview.difficulty}
@@ -429,6 +430,25 @@ export default function DashboardPage() {
                       <option>Fullstack Developer</option>
                       <option>ML Engineer</option>
                       <option>Data Scientist</option>
+                    </select>
+                  </div>
+
+                  {/* Personality Style Selector */}
+                  <div className="space-y-2">
+                    <label htmlFor="personality" className="block text-xs font-semibold text-zinc-400">
+                      AI Interviewer Persona
+                    </label>
+                    <select
+                      id="personality"
+                      value={personality}
+                      onChange={(e) => setPersonality(e.target.value)}
+                      className="block w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option>Google Staff Engineer</option>
+                      <option>Amazon Bar Raiser</option>
+                      <option>YC Startup Founder</option>
+                      <option>Tough Senior Architect</option>
+                      <option>Friendly Mentor</option>
                     </select>
                   </div>
 

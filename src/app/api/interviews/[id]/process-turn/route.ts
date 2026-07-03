@@ -72,6 +72,18 @@ export async function POST(
       .map((m) => `${m.speaker === 'candidate' ? 'Candidate' : 'Interviewer'}: ${m.text}`)
       .join('\n');
 
+    // Fetch current Score to get existing confidenceTimeline
+    const existingScore = await prisma.score.findUnique({
+      where: { interviewId: id },
+    });
+
+    let currentTimeline: any[] = [];
+    if (existingScore && existingScore.confidenceTimeline) {
+      try {
+        currentTimeline = existingScore.confidenceTimeline as any[];
+      } catch {}
+    }
+
     // Run the LLM-based Decision and Evaluation Node
     const systemPrompt = `You are the background reasoning node of an AI Interviewer. Your job is to analyze the candidate's last answer, update their capability memory, progress their interview plan, and generate the next prompt steering instructions.
 
@@ -79,6 +91,7 @@ Role: ${interview.role}
 Difficulty: ${interview.difficulty}
 Experience Level: ${interview.experience} Years
 Company Style: ${interview.company}
+Interviewer Personality: ${(interview as any).personality || 'Google Staff Engineer'}
 Interview Objective: ${interview.objective || 'N/A'}
 
 Current Topics List & Statuses:
@@ -98,9 +111,10 @@ Analyze:
 1. Did the candidate answer the question satisfactorily?
 2. What strengths or weak areas did they demonstrate?
 3. Update the scores in Communication, Problem Solving, Confidence, Technical Depth, Clarity, Leadership (from 0 to 100).
-4. Update the memory arrays (strengths, weak areas, repeated mistakes, confidence level, vocabulary, traits).
-5. Review topics: if the current topic has been thoroughly vetted, mark it "completed" and suggest starting the next topic in the "nextFocusInstructions". If they struggled, keep it "in_progress" and instruct the interviewer to push back or drill down.
-6. Generate specific "nextFocusInstructions" for the interviewer. Instruct the interviewer on what to do next: push back on a weak answer, move to the next topic, drill deeper into trade-offs, or offer a hint. Keep these steering instructions action-oriented, clear, and direct.
+4. Assign a specific "turnConfidence" score (from 0 to 100) evaluating the candidate's last answer. High if precise and correct, lower if superficial, incorrect, or hesitant.
+5. Update the memory arrays (strengths, weak areas, repeated mistakes, confidence level, vocabulary, traits).
+6. Review topics: if the current topic has been thoroughly vetted, mark it "completed" and suggest starting the next topic in the "nextFocusInstructions". If they struggled, keep it "in_progress" and instruct the interviewer to push back or drill down.
+7. Generate specific "nextFocusInstructions" for the interviewer. Instruct the interviewer on what to do next: push back on a weak answer, move to the next topic, drill deeper into trade-offs, or offer a hint. Keep these steering instructions action-oriented, clear, and direct.
 
 Output ONLY a JSON object with this exact structure. Do not output any markdown code blocks, formatting, or text outside the JSON.
 
@@ -114,6 +128,7 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
     "leadership": number,
     "overall": number
   },
+  "turnConfidence": number,
   "memory": {
     "candidate_strengths": ["strength1", "strength2"],
     "weak_areas": ["weakness1", "weakness2"],
@@ -138,6 +153,7 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
         leadership: 70,
         overall: 70,
       },
+      turnConfidence: 70,
       memory: interview.memory || {},
       topics: interview.topics || [],
       nextFocusInstructions: 'Continue testing the candidate on the current topics.',
@@ -164,6 +180,16 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
       },
     });
 
+    // Update the timeline
+    const nextTurnNum = currentTimeline.length + 1;
+    const turnConfidenceVal = evaluationResult.turnConfidence || evaluationResult.scores.confidence || 70;
+    currentTimeline.push({
+      turn: nextTurnNum,
+      score: turnConfidenceVal,
+      question: aiText,
+      answer: candidateText,
+    });
+
     // Update or create the Score record in real-time
     const currentScores = evaluationResult.scores;
     await prisma.score.upsert({
@@ -176,6 +202,7 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
         clarity: currentScores.clarity,
         leadership: currentScores.leadership,
         overall: currentScores.overall,
+        confidenceTimeline: currentTimeline,
       },
       create: {
         interviewId: id,
@@ -186,6 +213,7 @@ Output ONLY a JSON object with this exact structure. Do not output any markdown 
         clarity: currentScores.clarity,
         leadership: currentScores.leadership,
         overall: currentScores.overall,
+        confidenceTimeline: currentTimeline,
         recommendations: 'Session in progress.',
         suggestedStudyPlan: 'Session in progress.',
       },

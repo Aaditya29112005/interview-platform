@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { role, difficulty, company, experience, resume } = await request.json();
+    const { role, difficulty, company, experience, resume, personality } = await request.json();
 
     if (!role || !difficulty || !company || experience === undefined) {
       return NextResponse.json(
@@ -67,36 +67,43 @@ export async function POST(request: Request) {
       );
     }
 
+    const chosenPersonality = personality || 'Google Staff Engineer';
+
     // Call OpenAI to generate a customized interview plan
     const systemPrompt = `You are an elite technical recruitment orchestrator and senior interviewer at a top tech company.
-Your task is to generate a custom, structured Interview Plan based on the candidate's target role, experience, target company style, and resume.
+Your task is to generate a custom, structured Interview Plan based on the candidate's target role, experience, target company style, resume, and interviewer personality.
 
 Role: ${role}
 Years of Experience: ${experience}
 Difficulty Level: ${difficulty}
 Target Company Style: ${company}
+Interviewer Personality: ${chosenPersonality}
 Candidate Resume (if provided):
 ${resume || 'None provided'}
 
 Based on this information, design a tailored interview strategy. Ensure the difficulty matches the level.
-For example, for Amazon, emphasize customer obsession and LPs alongside system architecture. For startups, focus on fast iterations, execution, and full-stack capacity.
-For senior levels (5+ YOE), focus on design, trade-offs, scalability, and technical depth. For junior levels (0-2 YOE), focus on core programming, loops/structures, and debugging.
+Integrate the personality style:
+- If 'Google Staff Engineer': Ask tough, algorithmically deep, and architecture-focused topics.
+- If 'Amazon Bar Raiser': Focus heavily on leadership principles, scalability, customer-centric trade-offs, and diving deep.
+- If 'YC Startup Founder': Focus on quick hacking, practical trade-offs, fast pacing, and building capacity.
+- If 'Tough Senior Architect': Adopt an intense, probing style, demanding robust evidence for technical claims.
+- If 'Friendly Mentor': Be educational, encouraging, and hint-supportive.
 
 You MUST respond with a single JSON object matching this structure. Do not output any markdown headers, tags, or extra text. Output ONLY the JSON.
 
 {
-  "objective": "Detailed paragraph describing the specific interview objective and candidate background focus.",
+  "objective": "Detailed paragraph describing the specific interview objective, target company context, and selected interviewer personality.",
   "topics": [
-    { "name": "Topic Name 1 (e.g., React Core Principles)", "status": "pending" },
-    { "name": "Topic Name 2 (e.g., Scalable System Design)", "status": "pending" },
-    { "name": "Topic Name 3 (e.g., Performance & Optimization)", "status": "pending" },
-    { "name": "Topic Name 4 (e.g., Behavioral / Leadership)", "status": "pending" }
+    { "name": "Topic Name 1", "status": "pending" },
+    { "name": "Topic Name 2", "status": "pending" },
+    { "name": "Topic Name 3", "status": "pending" },
+    { "name": "Topic Name 4", "status": "pending" }
   ],
-  "evaluationPlan": "Explanation of the scoring rubric and what behaviors/skills the AI interviewer should look for or probe."
+  "evaluationPlan": "Explanation of the scoring rubric, personality guidelines, and what behaviors/skills the AI interviewer should look for or probe."
 }`;
 
     let planData = {
-      objective: `Evaluate candidate for a ${role} position at a ${company} company.`,
+      objective: `Evaluate candidate for a ${role} position at a ${company} company using ${chosenPersonality} personality.`,
       topics: [
         { name: 'Core Capabilities', status: 'pending' },
         { name: 'Technical Depth', status: 'pending' },
@@ -125,6 +132,7 @@ You MUST respond with a single JSON object matching this structure. Do not outpu
         role,
         difficulty,
         company,
+        personality: chosenPersonality,
         experience: Number(experience),
         status: 'pending',
         objective: planData.objective,

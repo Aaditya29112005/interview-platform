@@ -54,15 +54,50 @@ export async function POST(
         .join('\n');
     }
 
+    // Fetch personality style mapping
+    let personalityPrompt = '';
+    const personality = (interview as any).personality || 'Google Staff Engineer';
+
+    if (personality === 'Google Staff Engineer') {
+      personalityPrompt = `
+- Style: Google Staff Engineer.
+- Persona: Highly technical, algorithmic, focused on complexity (Big-O), system architecture, and deep engineering trade-offs.
+- Behavioral rule: Prompt candidate to explain technical design and scalability choices. Push back on simple solutions.`;
+    } else if (personality === 'Amazon Bar Raiser') {
+      personalityPrompt = `
+- Style: Amazon Bar Raiser.
+- Persona: Demands candidate dive deep. Evaluates technical capacity while probing for Amazon Leadership Principles (Customer Obsession, Ownership, Bias for Action, Deliver Results).
+- Behavioral rule: Incorporate behavioral follow-ups alongside system technical design questions (e.g. "Tell me about a time you had to make a fast trade-off under pressure...").`;
+    } else if (personality === 'YC Startup Founder') {
+      personalityPrompt = `
+- Style: YC Startup Founder.
+- Persona: Practical, fast-paced, execution-focused. Prone to practical coding trade-offs over academic algorithms.
+- Behavioral rule: Ask about execution speed, simple architectures that ship fast, customer validation, and pragmatic coding solutions.`;
+    } else if (personality === 'Tough Senior Architect') {
+      personalityPrompt = `
+- Style: Tough Senior Architect.
+- Persona: Intense, analytical, highly critical of unproven claims.
+- Behavioral rule: Demands candidate prove their optimization metrics. If they claim a speedup, challenge them: "How did you measure that? How do you ensure it doesn't fail under 10x scale?"`;
+    } else if (personality === 'Friendly Mentor') {
+      personalityPrompt = `
+- Style: Friendly Mentor.
+- Persona: Empathetic, supportive, instructional.
+- Behavioral rule: Guide candidate if they struggle. Provide small conceptual hints, and maintain an encouraging, collaborative learning pace.`;
+    }
+
     // Build the system prompt steering the interviewer
     const systemPrompt = `You are a senior software engineering interviewer conducting a realistic voice interview.
 Target Position: ${interview.role}
 Target Company Style: ${interview.company}
+Interviewer Personality Profile: ${personality}
 Experience Level: ${interview.experience} Years of Experience
 Difficulty Level: ${interview.difficulty}
 
 Interview Objective:
 ${interview.objective || 'N/A'}
+
+Selected Personality Guidelines:
+${personalityPrompt}
 
 Topics to Cover:
 ${topicsList}
@@ -78,7 +113,7 @@ Rules & Persona:
 8. Keep your verbal responses relatively concise (usually 2-4 sentences max) to maintain a natural conversation flow. Do not output walls of text.
 
 GREETING:
-Briefly introduce yourself and welcome the candidate. State the role and company style you are interviewing for, and ask them to briefly introduce their background.`;
+Briefly introduce yourself and welcome the candidate. State the role, company, and your personality style, and ask them to briefly introduce their background.`;
 
     // Make request to OpenAI Sessions API (using GA client_secrets endpoint) with fallback
     let clientToken = null;
