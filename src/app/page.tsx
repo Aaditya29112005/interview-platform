@@ -740,13 +740,87 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="w-full border-t border-[rgba(255,255,255,0.05)] bg-[#050816] py-12 text-center text-2xs text-zinc-550 z-10 relative">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4">
-          <p>© {new Date().getFullYear()} InterviewOS AI. Designed with Apple & Stripe level mechanics.</p>
-          <div className="flex justify-center gap-6 text-[#7F8AA6]">
-            <Link href="/design-system" className="hover:text-white transition">Design System Library</Link>
+      <footer className="w-full border-t border-[rgba(255,255,255,0.05)] bg-[#050816] pt-24 pb-12 z-10 relative overflow-hidden">
+        {/* Upper Call to Action section */}
+        <div className="max-w-4xl mx-auto text-center px-4 space-y-6">
+          <p className="text-sm font-semibold text-[#7F8AA6]">
+            Everything your team needs, in one simple workspace. Stay focused, stay in sync.
+          </p>
+          <div className="relative inline-block">
+            {/* Ambient radial glow under the button */}
+            <div className="absolute inset-0 rounded-full bg-[#4F7CFF]/50 blur-xl opacity-60 scale-125 pointer-events-none" />
+            <Link
+              href="/signup"
+              className="relative inline-flex items-center justify-center rounded-full bg-zinc-950 border border-zinc-800 px-6 py-3 text-xs font-bold text-white shadow-2xl transition hover:border-[#4F7CFF]/50 hover:bg-[#0A1020] cursor-pointer"
+            >
+              Get Started
+            </Link>
+          </div>
+        </div>
+
+        {/* Large CosmoQ style text backdrop with multi-color mesh gradient */}
+        <div className="relative w-full h-[15vw] flex items-center justify-center overflow-hidden my-16 pointer-events-none select-none">
+          {/* Vibrant multi-color background gradient strip */}
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-amber-500/25 via-rose-500/25 via-[#7C6CFF]/25 via-[#4F7CFF]/25 to-emerald-400/20 opacity-60 blur-[70px]" />
+          
+          <div className="relative text-white font-black text-[11vw] tracking-tighter leading-none uppercase mix-blend-overlay opacity-80 select-none">
+            INTERVIEWOS
+          </div>
+        </div>
+
+        {/* Links Grid & Brand Details */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-[rgba(255,255,255,0.05)] pt-12">
+          {/* Column 1 */}
+          <div className="space-y-4 text-left">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Navigation</h4>
+            <ul className="space-y-2 text-2xs text-[#7F8AA6]">
+              <li><Link href="/" className="hover:text-white transition">Home</Link></li>
+              <li><Link href="/login" className="hover:text-white transition">Sign In</Link></li>
+              <li><Link href="/signup" className="hover:text-white transition">Create Account</Link></li>
+              <li><Link href="/design-system" className="hover:text-white transition">Design Library</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 2 */}
+          <div className="space-y-4 text-left">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Documentation</h4>
+            <ul className="space-y-2 text-2xs text-[#7F8AA6]">
+              <li><a href="#" className="hover:text-white transition">Blogs</a></li>
+              <li><a href="#" className="hover:text-white transition">Changelog</a></li>
+              <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
+              <li><a href="#" className="hover:text-white transition">Terms & Conditions</a></li>
+            </ul>
+          </div>
+
+          {/* Column 3 */}
+          <div className="space-y-4 text-left">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Other Pages</h4>
+            <ul className="space-y-2 text-2xs text-[#7F8AA6]">
+              <li><Link href="/dashboard" className="hover:text-white transition">Command Center</Link></li>
+              <li><span className="text-zinc-650 italic">Launcher Mode (Soon...)</span></li>
+              <li><a href="#" className="hover:text-white transition">404 Error Preview</a></li>
+            </ul>
+          </div>
+
+          {/* Column 4 */}
+          <div className="space-y-4 text-left">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Social Connect</h4>
+            <ul className="space-y-2 text-2xs text-[#7F8AA6]">
+              <li><a href="https://github.com/Aaditya29112005/interview-platform" target="_blank" rel="noreferrer" className="hover:text-white transition">GitHub Repo</a></li>
+              <li><a href="#" className="hover:text-white transition">X / Twitter</a></li>
+              <li><a href="#" className="hover:text-white transition">LinkedIn</a></li>
+              <li><a href="#" className="hover:text-white transition">Discord Guild</a></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom copyright details bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-[rgba(255,255,255,0.03)] flex flex-col sm:flex-row items-center justify-between text-2xs text-zinc-500 gap-4">
+          <p>© {new Date().getFullYear()} InterviewOS. Designed with high-fidelity Apple & Stripe level mechanics.</p>
+          <div className="flex gap-4">
+            <Link href="/design-system" className="hover:text-zinc-400 transition">Design System Library</Link>
             <span>•</span>
-            <Link href="/dashboard" className="hover:text-white transition">Command Center</Link>
+            <Link href="/dashboard" className="hover:text-zinc-400 transition">Command Center</Link>
           </div>
         </div>
       </footer>
