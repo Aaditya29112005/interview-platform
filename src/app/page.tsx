@@ -1,36 +1,38 @@
 'use client';
 
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth-context';
-import { 
-  ArrowRight, 
-  Mic, 
-  Sparkles, 
-  Award, 
-  TrendingUp, 
-  Cpu, 
-  Globe, 
-  Database, 
-  Terminal, 
-  Shield, 
-  Brain, 
-  Code, 
-  Zap, 
-  Check, 
-  Star,
+import {
+  Plus,
   Play,
-  Pause,
-  ChevronDown,
-  ChevronUp,
+  FileText,
+  Clock,
+  Sparkles,
+  Award,
+  Loader2,
+  TrendingUp,
+  Brain,
+  Globe,
+  Database,
+  Code,
   Heart,
-  Volume2
+  Check,
+  ChevronUp,
+  ChevronDown,
+  ArrowRight,
+  ArrowUpRight,
+  Star,
+  Mic,
+  Cpu,
+  Layers,
+  Activity,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
 
-// Live Custom Particle Canvas for premium background layer
+// Canvas-based dynamic background particle generator
 function BackgroundParticles() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -38,9 +40,9 @@ function BackgroundParticles() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationFrameId: number;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
+    let animationFrameId: number;
 
     const particles: Array<{
       x: number;
@@ -119,6 +121,9 @@ export default function Home() {
     { speaker: 'ai', text: 'Welcome to your technical review. Let us start with system design. How would you handle a sudden peak of 100k requests/sec?' }
   ]);
 
+  // All-in-one features tabs
+  const [activeTab, setActiveTab] = useState<'usage' | 'technology' | 'data'>('usage');
+
   // Demo play step timeline simulation
   useEffect(() => {
     if (!isPlayingDemo) return;
@@ -168,7 +173,7 @@ export default function Home() {
     ]);
   };
 
-  const headlineWords = "The Future of Technical Interviews.".split(" ");
+  const headlineWords = "Next-gen enterprise with AI Agents".split(" ");
 
   const faqs = [
     {
@@ -208,7 +213,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#050816] text-[#C8D1E8] selection:bg-[#4F7CFF]/30 selection:text-white overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#050816] text-[#C8D1E8] selection:bg-[#4F7CFF]/30 selection:text-white overflow-x-hidden pt-20">
       {/* Background Noise Layer */}
       <div className="noise-overlay" />
 
@@ -221,84 +226,156 @@ export default function Home() {
       <div className="absolute top-[35%] right-[-10%] h-[700px] w-[700px] rounded-full bg-gradient-to-br from-[#7C6CFF]/10 to-[#4DE2FF]/5 blur-[160px] pointer-events-none z-0" />
       <div className="absolute bottom-[8%] left-[-10%] h-[650px] w-[650px] rounded-full bg-gradient-to-tr from-[#4F7CFF]/10 to-[#00E676]/5 blur-[150px] pointer-events-none z-0" />
 
+      {/* Persistent Navigation Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between backdrop-blur-md bg-zinc-950/20 border-b border-zinc-900/60 max-w-7xl mx-auto rounded-b-2xl">
+        <div className="text-md font-black tracking-tight text-white flex items-center gap-2">
+          <Sparkles className="h-4.5 w-4.5 text-[#4DE2FF] animate-pulse" />
+          <span>INTERVIEWOS</span>
+        </div>
+        <div className="hidden md:flex items-center gap-1.5 border border-zinc-800 bg-[#0A1020]/80 px-5 py-2 rounded-full backdrop-blur-md">
+          <a href="#about" className="text-2xs font-semibold text-[#7F8AA6] hover:text-white transition px-3">AI Solutions</a>
+          <a href="#exceptionalities" className="text-2xs font-semibold text-[#7F8AA6] hover:text-white transition px-3">About</a>
+          <a href="#features" className="text-2xs font-semibold text-[#7F8AA6] hover:text-white transition px-3">Pricing</a>
+          <a href="#pricing" className="text-2xs font-semibold text-[#7F8AA6] hover:text-white transition px-3">Contact</a>
+        </div>
+        <div>
+          <Link
+            href={user ? "/dashboard" : "/signup"}
+            className="glow-button px-5 py-2.5 text-2xs text-white shadow-xl flex items-center justify-center font-bold tracking-wider"
+          >
+            {user ? "Command Center" : "Get Started"}
+          </Link>
+        </div>
+      </header>
+
       {/* SECTION 1: Hero Section */}
-      <section className="relative min-h-[92vh] mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-12 justify-center z-10">
-        <div className="flex-1 text-left space-y-8 max-w-xl">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-4 py-1.5 text-xs font-semibold text-[#4F7CFF] shadow-[0_0_15px_rgba(79,124,255,0.1)] backdrop-blur-md"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-[#4DE2FF] animate-pulse" />
-            <span>InterviewOS AI • Apple & CosmoQ Design Standard</span>
-          </motion.div>
+      <section className="relative min-h-[92vh] mx-auto max-w-7xl px-4 pt-20 pb-28 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center z-10 space-y-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-[#0A1020]/65 px-4 py-1.5 text-xs font-semibold text-[#4F7CFF] shadow-[0_0_15px_rgba(79,124,255,0.1)] backdrop-blur-md"
+        >
+          <span>Beta Version is launching on 12th September</span>
+        </motion.div>
 
-          <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[1.05] flex flex-wrap gap-x-3 gap-y-1">
-            {headlineWords.map((word, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.06 }}
-                className={word.includes("Technical") || word.includes("Interviews") ? "bg-gradient-to-r from-[#4F7CFF] via-[#7C6CFF] to-[#4DE2FF] bg-clip-text text-transparent" : ""}
-              >
-                {word}
-              </motion.span>
-            ))}
-          </h1>
+        <h1 className="text-5xl sm:text-7xl font-black tracking-tighter leading-[1.02] max-w-3xl mx-auto text-white">
+          {headlineWords.map((word, i) => (
+            <motion.span
+              key={i}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.06 }}
+              className={word === "AI" || word === "Agents" ? "bg-gradient-to-r from-[#4F7CFF] via-[#7C6CFF] to-[#4DE2FF] bg-clip-text text-transparent ml-2.5 mr-1 animate-pulse" : ""}
+            >
+              {word}{' '}
+            </motion.span>
+          ))}
+        </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="text-lg text-[#7F8AA6] leading-relaxed"
-          >
-            Not scripted. Not chatbots. Real AI Conversations. Experience a multi-agent recruiter panel that listens, analyzes live code execution, tracks anti-cheat telemetry, and maps your knowledge model dynamically.
-          </motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="text-md sm:text-lg text-[#7F8AA6] leading-relaxed max-w-2xl mx-auto"
+        >
+          Accelerate the speed of hiring loops with the InterviewOS platform and our AI solutions for work, code, service, and telemetry.
+        </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex flex-wrap items-center gap-4"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="flex flex-wrap items-center justify-center gap-4"
+        >
+          <Link
+            href="/signup"
+            className="group glow-button inline-flex items-center gap-2 rounded-xl px-7 py-4 text-xs font-bold text-white shadow-xl cursor-pointer"
           >
-            {user ? (
-              <Link
-                href="/dashboard"
-                className="group glow-button inline-flex items-center gap-2 rounded-xl px-6 py-4 text-sm font-semibold text-white shadow-xl"
-              >
-                Start Your Interview →
-              </Link>
-            ) : (
-              <>
-                <Link
-                  href="/signup"
-                  className="group glow-button inline-flex items-center gap-2 rounded-xl px-6 py-4 text-sm font-semibold text-white shadow-xl"
-                >
-                  Start Your Interview
-                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-                </Link>
-                <Link
-                  href="/login"
-                  className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-6 py-4 text-sm font-semibold text-[#FFFFFF] transition hover:border-[#4F7CFF]/40 hover:bg-[#070B1A] backdrop-blur-md"
-                >
-                  Sign In
-                </Link>
-              </>
-            )}
-          </motion.div>
+            Get Started
+          </Link>
+        </motion.div>
+
+        {/* CSS Planetary Eclipse Horizon */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[160%] aspect-[2/1] rounded-t-full bg-gradient-to-t from-[#4F7CFF]/15 via-[#7C6CFF]/5 to-transparent blur-[80px] border-t border-[#4F7CFF]/10 z-0 pointer-events-none translate-y-[20%]" />
+
+        {/* Dashboard Mockup emerges from horizon */}
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.7 }}
+          className="w-full max-w-4xl mx-auto mt-16 glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl relative z-10 border border-zinc-800/80 bg-zinc-950/40"
+        >
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-3 mb-4 text-[10px] text-zinc-550">
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500/50" />
+              <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/50" />
+              <span className="h-2.5 w-2.5 rounded-full bg-green-500/50" />
+              <span className="ml-2 font-mono text-zinc-500">interviewos.com/dashboard</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Sparkles className="h-3 w-3 text-[#4DE2FF]" />
+              <span className="font-bold text-white uppercase tracking-wider">Candidate Hub</span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 text-left">
+            <div className="col-span-2 bg-[#050816]/60 border border-zinc-900 rounded-xl p-4 space-y-3">
+              <span className="text-[9px] font-bold text-[#4DE2FF] uppercase tracking-wider block">Real-time Performance</span>
+              <h4 className="text-xs font-bold text-white">Technical Readiness Index</h4>
+              <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-[#4F7CFF] to-[#7C6CFF] w-[82%]" />
+              </div>
+              <p className="text-[10px] text-zinc-400">Excellent metrics matching React Hooks, Kafka pipelines, and custom SQL runtimes.</p>
+            </div>
+            <div className="col-span-1 bg-[#050816]/60 border border-zinc-900 rounded-xl p-4 flex flex-col justify-between">
+              <span className="text-[9px] font-bold text-[#7C6CFF] uppercase tracking-wider block font-mono">Calibrated Grade</span>
+              <span className="text-3xl font-extrabold text-white font-mono">L4 <span className="text-2xs text-[#7F8AA6] font-normal">SDE-II</span></span>
+              <span className="text-[10px] text-[#00E676] font-semibold">92% Match</span>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* SECTION 2: Muted Logo Marquee */}
+      <section className="relative py-12 border-y border-[rgba(255,255,255,0.06)] bg-[#050816]/75 z-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-x-16 gap-y-6 opacity-35 grayscale contrast-125">
+            <span className="text-md font-bold tracking-tight text-white font-mono">GOOGLE</span>
+            <span className="text-md font-bold tracking-tight text-white font-mono">AMAZON</span>
+            <span className="text-md font-bold tracking-tight text-white font-mono">STRIPE</span>
+            <span className="text-md font-bold tracking-tight text-white font-mono">VERCEL</span>
+            <span className="text-md font-bold tracking-tight text-white font-mono">OPENAI</span>
+            <span className="text-md font-bold tracking-tight text-white font-mono">LINEAR</span>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 3: Split AI Orb Description */}
+      <section id="about" className="relative py-28 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="space-y-6 text-left">
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+            We help engineering loop builders scale loop speed.
+          </h2>
+          <p className="text-base text-[#7F8AA6] leading-relaxed font-medium">
+            Unlock loops automation with InterviewOS AI. Real-time voice recruiters, interactive capability grids, and automated report calibration. We help teams evaluate architectural depth, analyze sandboxed code, and map telemetry instantly.
+          </p>
+          <button
+            onClick={handleResetDemo}
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#4F7CFF] to-[#7C6CFF] px-6 py-3.5 text-xs font-bold text-white shadow-lg transition hover:brightness-110 cursor-pointer"
+          >
+            <Play className="h-4 w-4 fill-white" />
+            <span>Play AI Interview Demo</span>
+          </button>
         </div>
 
-        {/* Right Floating AI Core Orb */}
-        <div className="flex-1 flex items-center justify-center relative w-full min-h-[380px]">
-          <div className="absolute inset-0 bg-radial-gradient from-[#4F7CFF]/5 to-transparent blur-[80px]" />
+        {/* Floating Orb visualizer card */}
+        <div className="flex items-center justify-center relative w-full h-[380px] bg-zinc-950/20 border border-zinc-900 rounded-3xl overflow-hidden glass-panel">
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#4F7CFF]/5 to-transparent blur-[80px]" />
+          <div className="absolute top-4 right-4 text-[10px] text-zinc-550 font-mono uppercase tracking-widest bg-zinc-950/80 px-3 py-1 rounded-full border border-zinc-900">
+            {orbState === 'idle' ? 'AI Orb: Standby' : `AI Orb: ${orbState}`}
+          </div>
           
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative flex items-center justify-center h-80 w-80 cursor-pointer"
-            whileHover={{ scale: 1.05 }}
-          >
+          <div className="relative flex items-center justify-center h-72 w-72">
             <div className="absolute inset-0 rounded-full border border-dashed border-[#4F7CFF]/15 animate-[spin_50s_linear_infinite]" />
             <div className="absolute inset-4 rounded-full border border-dashed border-[#7C6CFF]/15 animate-[spin_30s_linear_infinite_reverse]" />
 
@@ -319,7 +396,7 @@ export default function Home() {
                        [1, 1.02, 1]
               }}
               transition={{ duration: orbState === 'challenging' ? 0.8 : 2.2, repeat: Infinity }}
-              className={`h-48 w-48 rounded-full border bg-gradient-to-br flex items-center justify-center shadow-2xl relative transition-all duration-700 ${
+              className={`h-40 w-40 rounded-full border bg-gradient-to-br flex items-center justify-center shadow-2xl relative transition-all duration-700 ${
                 orbState === 'listening' ? 'from-[#0A1020] to-[#4DE2FF]/20 border-[#4DE2FF] shadow-[#4DE2FF]/20' :
                 orbState === 'thinking' ? 'from-[#0A1020] to-[#7C6CFF]/20 border-[#7C6CFF] shadow-[#7C6CFF]/20' :
                 orbState === 'speaking' ? 'from-[#0A1020] to-[#4F7CFF]/20 border-[#4F7CFF] shadow-[#4F7CFF]/20' :
@@ -328,274 +405,308 @@ export default function Home() {
               }`}
             >
               <div className="absolute flex flex-col items-center justify-center text-center space-y-1 z-10">
-                <Brain className={`h-10 w-10 transition-colors duration-700 ${
+                <Brain className={`h-8 w-8 transition-colors duration-700 ${
                   orbState === 'listening' ? 'text-[#4DE2FF]' :
                   orbState === 'thinking' ? 'text-[#7C6CFF]' :
                   orbState === 'speaking' ? 'text-[#4F7CFF]' :
                   orbState === 'challenging' ? 'text-red-500' :
                   'text-[#7F8AA6]'
                 }`} />
-                <span className="text-[9px] font-black tracking-widest text-[#7F8AA6] uppercase">{orbState === 'idle' ? 'Ready' : orbState}</span>
+                <span className="text-[8px] font-black tracking-widest text-[#7F8AA6] uppercase font-mono">{orbState}</span>
               </div>
-              <div className="absolute inset-2 rounded-full bg-gradient-to-b from-white/10 to-transparent blur-[1px]" />
             </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* SECTION 2: Trusted Companies */}
-      <section className="relative py-12 border-y border-[rgba(255,255,255,0.06)] bg-[#050816]/70 z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-2xs font-extrabold uppercase tracking-widest text-[#7F8AA6] mb-6">Inspired by Standards of Global Tech Teams</p>
-          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-40 grayscale contrast-125">
-            <span className="text-base font-bold tracking-tight text-white font-mono">GOOGLE</span>
-            <span className="text-base font-bold tracking-tight text-white font-mono">AMAZON</span>
-            <span className="text-base font-bold tracking-tight text-white font-mono">STRIPE</span>
-            <span className="text-base font-bold tracking-tight text-white font-mono">VERCEL</span>
-            <span className="text-base font-bold tracking-tight text-white font-mono">OPENAI</span>
-            <span className="text-base font-bold tracking-tight text-white font-mono">LINEAR</span>
           </div>
         </div>
       </section>
 
-      {/* SECTION 3: AI Voice Demo (Interactive Simulator) */}
-      <section className="relative py-24 z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      {/* SECTION 4: Exceptionalities Section (Capabilities Cards) */}
+      <section id="exceptionalities" className="relative py-28 border-t border-zinc-900 bg-[#050816] z-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#4F7CFF]/10 px-3 py-1 text-2xs font-bold text-[#4F7CFF] border border-[#4F7CFF]/20">
-              <Mic className="h-3 w-3" />
-              <span>Voice Room Simulator</span>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-zinc-900 pb-8">
+            <div className="space-y-4 text-left">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#4F7CFF]/10 px-3.5 py-1.5 text-[10px] font-bold text-[#4F7CFF] border border-[#4F7CFF]/25 tracking-wider uppercase font-mono">
+                <Cpu className="h-3 w-3" />
+                <span>EXCEPTIONALITIES</span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">What sets InterviewOS apart</h2>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              Talk naturally. <br />
-              The AI listens and challenges.
-            </h2>
-            <p className="text-base text-[#7F8AA6] leading-relaxed">
-              No lag, no multiple choice questions. Powered by low-latency streams, our interviewer senses verbal delays, probes follow-ups on vague designs, and switches agents automatically.
+            <p className="text-[#7F8AA6] text-xs max-w-xs text-left leading-relaxed">
+              Smarter, faster, and more adaptive than traditional coding mocks. Experience loop orchestration calibrated to candidate project outlines.
             </p>
-            
-            <button
-              onClick={handleResetDemo}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#4F7CFF] to-[#7C6CFF] px-5 py-3 text-xs font-bold text-white shadow-lg transition hover:brightness-110"
-            >
-              <Play className="h-4 w-4 fill-white" />
-              <span>Play AI Interview Simulation</span>
-            </button>
           </div>
 
-          {/* Holographic Voice Simulation card */}
-          <motion.div 
-            whileHover={{ rotate: 1, scale: 1.01 }}
-            className="glass-panel rounded-2xl p-6 space-y-6 relative overflow-hidden transition-all duration-300"
-          >
-            <div className="absolute top-0 right-0 h-24 w-24 bg-gradient-to-bl from-[#4DE2FF]/5 to-transparent rounded-bl-full" />
-            <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.06)] pb-3">
-              <span className="text-2xs font-bold text-zinc-400 uppercase tracking-wider">Voice Room Stream</span>
-              <span className="flex items-center gap-1.5">
-                <span className="text-[10px] font-mono text-[#00E676] bg-[#00E676]/10 px-2 py-0.5 rounded uppercase font-bold">
-                  {isPlayingDemo ? orbState : 'Idle'}
-                </span>
-                <span className={`h-2.5 w-2.5 rounded-full ${isPlayingDemo ? 'bg-[#00E676] animate-ping' : 'bg-zinc-600'}`} />
-              </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Speed Card */}
+            <div className="glass-panel p-8 space-y-6 flex flex-col justify-between overflow-hidden relative group cursor-pointer border border-zinc-800 hover:border-[#4F7CFF]/45 transition-colors duration-300">
+              <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition duration-300 pointer-events-none">
+                {/* SVG gravity orbit background */}
+                <svg className="w-full h-full" viewBox="0 0 200 200">
+                  <circle cx="100" cy="100" r="80" fill="none" stroke="#4F7CFF" strokeWidth="1" strokeDasharray="4 4" />
+                  <circle cx="100" cy="100" r="50" fill="none" stroke="#7C6CFF" strokeWidth="1" strokeDasharray="3 3" />
+                  <circle cx="100" cy="100" r="3" fill="#4F7CFF" />
+                  <line x1="100" y1="100" x2="160" y2="40" stroke="#7C6CFF" strokeWidth="1" strokeDasharray="2 2" />
+                </svg>
+              </div>
+              <div className="space-y-2 z-10 text-left">
+                <h3 className="text-lg font-bold text-white">Speed</h3>
+                <p className="text-2xs text-[#7F8AA6] leading-relaxed">
+                  Faster time-to-value with our automated pipeline and instant grading metrics framework.
+                </p>
+              </div>
             </div>
-            
-            {/* Conversation Log preview */}
-            <div className="space-y-4 min-h-[160px] max-h-[220px] overflow-y-auto pr-2">
-              {demoTranscript.map((msg, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: msg.speaker === 'ai' ? -10 : 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={`flex gap-3 text-xs ${msg.speaker === 'candidate' ? 'justify-end' : ''}`}
-                >
-                  <div className={`p-3 rounded-2xl max-w-[85%] ${
-                    msg.speaker === 'ai' 
-                      ? 'bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.05)] text-zinc-150' 
-                      : 'bg-[#4F7CFF]/15 border border-[#4F7CFF]/25 text-white'
-                  }`}>
-                    <div className="font-extrabold text-[9px] uppercase tracking-wider mb-1 opacity-70">
-                      {msg.speaker === 'ai' ? 'AI Recruiter (Panel)' : 'You (Candidate)'}
+
+            {/* Deep Capabilities Card */}
+            <div className="glass-panel p-8 space-y-6 flex flex-col justify-between overflow-hidden relative group cursor-pointer border border-zinc-800 hover:border-[#7C6CFF]/45 transition-colors duration-300">
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#7C6CFF]/5 via-[#4DE2FF]/5 to-transparent opacity-40 blur-[40px] pointer-events-none" />
+              <div className="space-y-2 z-10 text-left">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-bold text-white">Deep Capabilities</h3>
+                  <Brain className="h-5 w-5 text-[#7C6CFF] opacity-40 group-hover:opacity-100 transition duration-300" />
+                </div>
+                <p className="text-2xs text-[#7F8AA6] leading-relaxed">
+                  An agent platform with the depth to adapt to every answer profile, candidate projection, and evaluation rubric.
+                </p>
+              </div>
+            </div>
+
+            {/* Control Card */}
+            <div className="glass-panel p-8 space-y-6 flex flex-col justify-between overflow-hidden relative group cursor-pointer border border-zinc-800 hover:border-[#4DE2FF]/45 transition-colors duration-300">
+              <div className="space-y-4 z-10 text-left w-full">
+                <h3 className="text-lg font-bold text-white">Control</h3>
+                <p className="text-2xs text-[#7F8AA6] leading-relaxed mb-4">
+                  The power of a standardized platform built for the demands of high-scale enterprise teams.
+                </p>
+                {/* 3 interactive vertical sliders visual mockup */}
+                <div className="flex gap-6 h-20 items-end justify-center pt-2">
+                  {[40, 75, 55].map((val, idx) => (
+                    <div key={idx} className="w-1.5 h-full bg-zinc-900 rounded-full relative overflow-hidden">
+                      <div 
+                        className="absolute bottom-0 w-full bg-gradient-to-t from-[#4F7CFF] to-[#7C6CFF]" 
+                        style={{ height: `${val}%` }}
+                      />
+                      <div 
+                        className="absolute w-3.5 h-3.5 rounded-full bg-white border border-[#4F7CFF] -translate-x-1/3 shadow"
+                        style={{ bottom: `calc(${val}% - 7px)` }}
+                      />
                     </div>
-                    <div>{msg.text}</div>
-                  </div>
-                </motion.div>
-              ))}
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Dynamic Soundwaves */}
-            <div className="flex justify-center border-t border-[rgba(255,255,255,0.06)] pt-4">
-              <div className="flex items-end gap-2 h-10">
-                {[1, 2, 3, 4, 5, 4, 3, 2, 1, 2, 3, 4, 3, 2, 1].map((h, i) => (
-                  <motion.span 
-                    key={i}
-                    animate={{ 
-                      height: isPlayingDemo 
-                        ? (orbState === 'listening' ? [6, h * 3, 6] : orbState === 'speaking' ? [6, h * 7, 6] : orbState === 'challenging' ? [6, h * 9, 6] : [6, 8, 6])
-                        : [6, 6, 6] 
-                    }}
-                    transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.05 }}
-                    className={`w-1 rounded-full ${
-                      orbState === 'challenging' ? 'bg-red-500' : 'bg-gradient-to-t from-[#4F7CFF] to-[#4DE2FF]'
+            {/* Flexibility Card */}
+            <div className="glass-panel p-8 space-y-6 flex flex-col justify-between overflow-hidden relative group cursor-pointer border border-zinc-800 hover:border-emerald-500/40 transition-colors duration-300">
+              <div className="space-y-2 z-10 text-left w-full">
+                <h3 className="text-lg font-bold text-white">Flexibility</h3>
+                <p className="text-2xs text-[#7F8AA6] leading-relaxed">
+                  Our design approach is ecosystem agnostic, allowing you to choose standard environments, databases, and telemetry runtimes.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-4 justify-center">
+                  {['NextJS', 'SQL', 'TypeScript', 'NodeJS', 'Python', 'Kafka'].map((tech, idx) => (
+                    <span 
+                      key={idx} 
+                      className="bg-[#4F7CFF]/15 text-[#4F7CFF] border border-[#4F7CFF]/20 text-[9px] px-2.5 py-1 rounded font-mono uppercase tracking-wider font-bold"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* CTA exceptionalities box */}
+            <div className="col-span-1 md:col-span-2 glass-panel p-8 flex flex-col sm:flex-row items-center justify-between border border-zinc-800 gap-6">
+              <div className="text-left space-y-2">
+                <h3 className="text-lg font-bold text-white">Ready to get started?</h3>
+                <p className="text-2xs text-[#7F8AA6]">Let us make this happen. We are ready when you are.</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <Link href="/signup" className="glow-button px-6 py-3 text-2xs text-white shadow-xl cursor-pointer">
+                  Get Started
+                </Link>
+                <a href="#" className="text-2xs font-bold text-white hover:text-[#4F7CFF] transition underline">Get in touch</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 5: Features Section (Vertical Tabs System) */}
+      <section id="features" className="relative py-28 border-t border-zinc-900 bg-[#050816]/70 z-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-zinc-900 pb-8">
+            <div className="space-y-4 text-left">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#4DE2FF]/10 px-3.5 py-1.5 text-[10px] font-bold text-[#4DE2FF] border border-[#4DE2FF]/25 tracking-wider uppercase font-mono">
+                <Layers className="h-3 w-3" />
+                <span>FEATURES</span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">All-in-one AI for enterprise</h2>
+            </div>
+            <p className="text-[#7F8AA6] text-xs max-w-xs text-left leading-relaxed">
+              Simplify, accelerate, and transform candidate evaluation screens with one connected AI platform layout.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            {/* Left side: vertical tabs links menu */}
+            <div className="lg:col-span-1 space-y-3">
+              {[
+                { id: 'usage', label: 'Usage', icon: Activity, desc: 'Real-time phone and audio evaluations.' },
+                { id: 'technology', label: 'Technology', icon: Cpu, desc: 'Gemini WebSocket loop configurations.' },
+                { id: 'data', label: 'Data', icon: Database, desc: 'Candidate capability constellations mapping.' },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isSelected = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`w-full text-left p-4 rounded-xl border transition-all duration-300 flex items-center gap-4 cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#0A1020] border-zinc-800 text-white shadow-xl shadow-[#4F7CFF]/5'
+                        : 'border-transparent text-[#7F8AA6] hover:text-white'
                     }`}
-                  />
-                ))}
-              </div>
+                  >
+                    <div className={`p-2 rounded-lg border ${
+                      isSelected 
+                        ? 'bg-[#4F7CFF]/10 border-[#4F7CFF]/20 text-[#4F7CFF]' 
+                        : 'bg-zinc-950/40 border-zinc-900 text-zinc-500'
+                    }`}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <h4 className="text-xs font-bold">{tab.label}</h4>
+                      <p className="text-[10px] text-zinc-550">{tab.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-          </motion.div>
 
-        </div>
-      </section>
-
-      {/* SECTION 4: Resume Intelligence */}
-      <section className="relative py-24 border-t border-[rgba(255,255,255,0.05)] z-10 bg-[#050816]/30">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          
-          <div className="order-2 lg:order-1 relative">
-            <motion.div 
-              whileHover={{ rotate: -1, scale: 1.01 }}
-              className="glass-panel rounded-2xl p-6 space-y-4"
-            >
-              <div className="flex justify-between items-center text-xs border-b border-[rgba(255,255,255,0.06)] pb-3">
-                <span className="font-extrabold tracking-wider text-zinc-400 uppercase">Resume Parser Node</span>
-                <span className="text-[#4DE2FF] font-semibold flex items-center gap-1">
-                  <Database className="h-3 w-3" />
-                  <span>Parsed & Calibrated</span>
-                </span>
-              </div>
-              <div className="space-y-3">
-                <div className="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.05)] rounded-xl p-3.5 text-2xs space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-[#7F8AA6] font-medium">Extracted Target Level</span>
-                    <span className="text-white font-bold">L4 SDE-II</span>
-                  </div>
-                  <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#4F7CFF] to-[#7C6CFF] w-[75%]" />
-                  </div>
-                </div>
-                
-                <div className="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.05)] rounded-xl p-3.5 text-2xs space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-[#7F8AA6] font-medium">Extracted Keywords Matching</span>
-                    <span className="text-[#00E676] font-bold">92% Align</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {['ReactHooks', 'NextJS15', 'PostgreSQL', 'SystemDesign', 'Kafka'].map((tag, i) => (
-                      <span key={i} className="bg-[#00E676]/10 text-[#00E676] text-[9px] px-2 py-0.5 rounded border border-[#00E676]/20 font-mono">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          <div className="order-1 lg:order-2 space-y-6">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#7C6CFF]/10 px-3 py-1 text-2xs font-bold text-[#7C6CFF] border border-[#7C6CFF]/20">
-              <Database className="h-3 w-3" />
-              <span>Resume Intelligence</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              Instant Document <br />
-              Intelligence & Alignment.
-            </h2>
-            <p className="text-base text-[#7F8AA6] leading-relaxed">
-              Upload your Resume and Target Job Description directly. Our Gemini multimodal parser extracts key architectural projects, evaluates matches, and crafts an outline mapped precisely to the job spec.
-            </p>
-          </div>
-
-        </div>
-      </section>
-
-      {/* SECTION 5: Live Coding Arena */}
-      <section className="relative py-24 border-t border-[rgba(255,255,255,0.05)] z-10 bg-[#050816]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#4DE2FF]/10 px-3 py-1 text-2xs font-bold text-[#4DE2FF] border border-[#4DE2FF]/20">
-              <Code className="h-3 w-3" />
-              <span>Coding Sandbox</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              Collaborative Live Code <br />
-              & SQL Sandbox.
-            </h2>
-            <p className="text-base text-[#7F8AA6] leading-relaxed">
-              Solve complex algorithms or query custom SQL databases side-by-side with your active voice call. The AI reviews logic flows, tests edge cases, and provides instant evaluation logs.
-            </p>
-          </div>
-
-          <div className="order-2 lg:order-1 relative">
-            <motion.div 
-              whileHover={{ rotate: 1, scale: 1.01 }}
-              className="rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[#0A1020] p-5 font-mono text-xs space-y-3 shadow-2xl"
-            >
-              <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.06)] pb-2 text-[10px] text-zinc-400">
-                <span className="font-semibold text-[#7F8AA6]">solution.js</span>
-                <span className="text-[#4DE2FF]">TypeScript Arena</span>
-              </div>
-              <pre className="text-zinc-300 text-2xs overflow-x-auto py-2 leading-relaxed">
-                <div><span className="text-[#7C6CFF]">export function</span> <span className="text-[#4F7CFF]">cacheInvalidation</span>(keys: string[]) &#123;</div>
-                <div className="pl-4 text-zinc-500">// Check eviction thresholds</div>
-                <div className="pl-4"><span className="text-[#7C6CFF]">const</span> expired = keys.filter(k =&gt; isStale(k));</div>
-                <div className="pl-4"><span className="text-[#7C6CFF]">return</span> db.evictMany(expired);</div>
-                <div>&#125;</div>
-              </pre>
-              <div className="flex justify-between items-center pt-2 border-t border-[rgba(255,255,255,0.06)] text-[9px]">
-                <span className="text-zinc-500 font-medium">Status: Idle standby</span>
-                <span className="text-[#00E676] bg-[#00E676]/10 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Test Suite Passed</span>
-              </div>
-            </motion.div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* SECTION 6: Analytics & Skill Galaxy Preview */}
-      <section className="relative py-24 border-t border-[rgba(255,255,255,0.05)] bg-[#050816]/70 z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <div className="max-w-xl mx-auto space-y-4">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#4DE2FF]/10 px-3 py-1 text-2xs font-bold text-[#4DE2FF] border border-[#4DE2FF]/20">
-              <Globe className="h-3 w-3" />
-              <span>Skill Constellations</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-              The Living Skill Constellation Map.
-            </h2>
-            <p className="text-base text-[#7F8AA6]">
-              We evaluate you across dozens of parameters. Watch your skills light up like star networks as you speak and solve challenges.
-            </p>
-          </div>
-          <div className="max-w-2xl mx-auto glass-panel rounded-2xl p-6 relative h-56 flex items-center justify-center overflow-hidden">
-            <svg className="w-full h-full opacity-80" viewBox="0 0 400 150">
-              <line x1="80" y1="30" x2="200" y2="20" stroke="rgba(79,124,255,0.25)" strokeWidth="1.5" strokeDasharray="3 3" />
-              <line x1="200" y1="20" x2="320" y2="40" stroke="rgba(79,124,255,0.25)" strokeWidth="1.5" strokeDasharray="3 3" />
-              <line x1="320" y1="40" x2="250" y2="120" stroke="rgba(79,124,255,0.25)" strokeWidth="1.5" strokeDasharray="3 3" />
-              <line x1="250" y1="120" x2="120" y2="100" stroke="rgba(79,124,255,0.25)" strokeWidth="1.5" strokeDasharray="3 3" />
-              <line x1="120" y1="100" x2="80" y2="30" stroke="rgba(79,124,255,0.25)" strokeWidth="1.5" strokeDasharray="3 3" />
+            {/* Right side: tab content panel */}
+            <div className="lg:col-span-2 glass-panel p-6 sm:p-8 border border-zinc-800 bg-[#0A1020]/60 min-h-[300px] flex flex-col justify-between relative overflow-hidden">
+              <div className="absolute top-0 right-0 h-48 w-48 bg-gradient-to-bl from-[#7C6CFF]/5 to-transparent rounded-bl-full pointer-events-none" />
               
-              <circle cx="80" cy="30" r="14" fill="#4DE2FF" className="opacity-15 animate-ping" />
-              <circle cx="80" cy="30" r="5" fill="#4DE2FF" />
-              <text x="80" y="52" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">React & Next.js</text>
+              <AnimatePresence mode="wait">
+                {activeTab === 'usage' && (
+                  <motion.div
+                    key="usage-panel"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6 text-left"
+                  >
+                    <div className="space-y-2">
+                      <span className="text-[9px] font-bold text-[#4DE2FF] uppercase tracking-wider block font-mono">Loop Orchestration</span>
+                      <h3 className="text-lg font-bold text-white">AI Agent for work</h3>
+                      <p className="text-2xs text-[#7F8AA6] leading-relaxed">
+                        Connect to your technical hiring workflows, understand candidate project portfolios, and activate live agentic interviews with custom-trained interviewer personalities.
+                      </p>
+                    </div>
 
-              <circle cx="200" cy="20" r="18" fill="#7C6CFF" className="opacity-15 animate-ping" />
-              <circle cx="200" cy="20" r="6" fill="#7C6CFF" />
-              <text x="200" y="44" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">System Design</text>
+                    <div className="flex flex-wrap gap-2">
+                      {['Healthcare', 'Tech Assistance', 'Support', 'Marketer'].map((badge, idx) => (
+                        <span 
+                          key={idx} 
+                          className="bg-zinc-950/40 text-zinc-300 border border-zinc-900 text-[10px] px-3 py-1 rounded-lg font-medium"
+                        >
+                          {badge}
+                        </span>
+                      ))}
+                    </div>
 
-              <circle cx="320" cy="40" r="12" fill="#4F7CFF" className="opacity-15 animate-ping" />
-              <circle cx="320" cy="40" r="4" fill="#4F7CFF" />
-              <text x="320" y="62" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">Databases & SQL</text>
+                    <div className="pt-4">
+                      <button className="glow-button px-5 py-2.5 text-2xs text-white shadow">
+                        See Uses
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
 
-              <circle cx="250" cy="120" r="16" fill="#00E676" className="opacity-15 animate-ping" />
-              <circle cx="250" cy="120" r="5" fill="#00E676" />
-              <text x="250" y="140" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">Node.js API</text>
-            </svg>
+                {activeTab === 'technology' && (
+                  <motion.div
+                    key="tech-panel"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6 text-left"
+                  >
+                    <div className="space-y-2">
+                      <span className="text-[9px] font-bold text-[#7C6CFF] uppercase tracking-wider block font-mono">Orchestration Nodes</span>
+                      <h3 className="text-lg font-bold text-white">Alpha Technology</h3>
+                      <p className="text-2xs text-[#7F8AA6] leading-relaxed">
+                        Deploy real-time speech-to-speech loops on sandboxed environments. Gemini integration detects micro-hesitations and automatically rotates hiring panels based on topic checklists.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {['WebSockets', 'WebRTC Voice', 'Sandboxed Code', 'Contradiction Detector'].map((badge, idx) => (
+                        <span 
+                          key={idx} 
+                          className="bg-zinc-950/40 text-zinc-300 border border-zinc-900 text-[10px] px-3 py-1 rounded-lg font-medium"
+                        >
+                          {badge}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="pt-4">
+                      <button className="glow-button px-5 py-2.5 text-2xs text-white shadow">
+                        Explore Tech
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {activeTab === 'data' && (
+                  <motion.div
+                    key="data-panel"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6 text-left"
+                  >
+                    <div className="space-y-2">
+                      <span className="text-[9px] font-bold text-[#4DE2FF] uppercase tracking-wider block font-mono">Capability Matrix</span>
+                      <h3 className="text-lg font-bold text-white">Intellectual Database</h3>
+                      <p className="text-2xs text-[#7F8AA6] leading-relaxed">
+                        Map candidate responses instantly into a unified skill matrix database. Detect plagiarized logic, calculate overall technical index thresholds, and forecast candidate fit.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {['Constellation Map', 'Weekly Streaks', 'Pass Rate Index', 'JD Alignment Matrix'].map((badge, idx) => (
+                        <span 
+                          key={idx} 
+                          className="bg-zinc-950/40 text-zinc-300 border border-zinc-900 text-[10px] px-3 py-1 rounded-lg font-medium"
+                        >
+                          {badge}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="pt-4">
+                      <button className="glow-button px-5 py-2.5 text-2xs text-white shadow">
+                        Review Database
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            
           </div>
         </div>
       </section>
 
-      {/* SECTION 7: Testimonials */}
+      {/* SECTION 6: Testimonials */}
       <section className="relative py-24 border-t border-[rgba(255,255,255,0.05)] bg-[#050816] z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-12">
           <div className="max-w-xl mx-auto space-y-4">
@@ -632,7 +743,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 8: Pricing */}
+      {/* SECTION 7: Pricing */}
       <section className="relative py-24 border-t border-[rgba(255,255,255,0.05)] bg-[#050816]/60 z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-12">
           <div className="max-w-xl mx-auto space-y-4">
@@ -699,7 +810,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 9: FAQs */}
+      {/* SECTION 8: FAQs */}
       <section className="relative py-24 border-t border-[rgba(255,255,255,0.05)] bg-[#050816] z-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-4">
@@ -815,7 +926,7 @@ export default function Home() {
         </div>
 
         {/* Bottom copyright details bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-[rgba(255,255,255,0.03)] flex flex-col sm:flex-row items-center justify-between text-2xs text-zinc-500 gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-[rgba(255,255,255,0.03)] flex flex-col sm:flex-row items-center justify-between text-2xs text-zinc-550 gap-4">
           <p>© {new Date().getFullYear()} InterviewOS. Designed with high-fidelity Apple & Stripe level mechanics.</p>
           <div className="flex gap-4">
             <Link href="/design-system" className="hover:text-zinc-400 transition">Design System Library</Link>
