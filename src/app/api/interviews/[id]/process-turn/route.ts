@@ -84,6 +84,9 @@ export async function POST(
       } catch {}
     }
 
+    const memoryData = interview.memory as any || {};
+    const mode = memoryData.mode || 'Classic';
+
     // Run the LLM-based Decision and Evaluation Node
     const systemPrompt = `You are the background reasoning node of an AI Interviewer. Your job is to analyze the candidate's last answer, update their capability memory, progress their interview plan, detect contradictions, and rotate panel interviewers.
  
@@ -93,6 +96,7 @@ Experience Level: ${interview.experience} Years
 Company Style: ${interview.company}
 Interviewer Personality: ${(interview as any).personality || 'Google Staff Engineer'}
 Interview Objective: ${interview.objective || 'N/A'}
+Interview Mode: ${mode}
  
 Current Topics List & Statuses:
 ${JSON.stringify(interview.topics)}
@@ -119,6 +123,9 @@ Analyze:
 6. Contradiction check: Compare candidate's latest response against the conversation history. If they directly contradicted a prior statement (e.g. saying they prefer SQL earlier, but now saying they have never used databases), write the contradiction explanation in "contradictionAlert". If none found, write null.
 7. Assign a specific "turnConfidence" score (from 0 to 100) evaluating the candidate's last answer.
 8. Generate specific "nextFocusInstructions" for the interviewer. Instruct the interviewer on what to do next.
+   - If mode is **Stress Test**: demand metric proofs, probe logic gaps, push limit cases.
+   - If mode is **Mentor Mode**: guide them collaborative, instruct the interviewer to offer simple conceptual clues if they struggle.
+   - If mode is **Speed Run**: focus on rapid high level, short responses.
 
 Output ONLY a JSON object with this exact structure. Do not output any markdown code blocks, formatting, or text outside the JSON.
  

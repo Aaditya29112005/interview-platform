@@ -20,7 +20,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 
-type OrbState = 'idle' | 'listening' | 'thinking' | 'speaking';
+type OrbState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'challenging';
 
 interface Topic {
   name: string;

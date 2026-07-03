@@ -54,7 +54,7 @@ export async function POST(
         .join('\n');
     }
 
-    // Fetch personality style mapping
+    // Fetch personality style mapping & Interview Mode
     let personalityPrompt = '';
     const personality = (interview as any).personality || 'Google Staff Engineer';
 
@@ -85,6 +85,28 @@ export async function POST(
 - Behavioral rule: Guide candidate if they struggle. Provide small conceptual hints, and maintain an encouraging, collaborative learning pace.`;
     }
 
+    const memoryObj = interview.memory as any || {};
+    const mode = memoryObj.mode || 'Classic';
+    
+    let modePrompt = '';
+    if (mode === 'Stress Test') {
+      modePrompt = `
+- Selected Mode: **STRESS TEST**
+- Mode Directive: Maintain an intense, highly challenging technical grill. Interrupt or probe deeply if answers are vague, demand metric proofs, and push the candidate to their absolute limits on concurrency, database scaling, system trade-offs, and failure states. Do not offer friendly helpers. Try to challenge them on design gaps.`;
+    } else if (mode === 'Mentor Mode') {
+      modePrompt = `
+- Selected Mode: **MENTOR MODE**
+- Mode Directive: Maintain a highly supportive, educational tone. If the candidate makes an error or struggles, kindly point it out and provide conceptual suggestions or hints. Do not grill them. Keep it a collaborative pair-programming experience.`;
+    } else if (mode === 'Speed Run') {
+      modePrompt = `
+- Selected Mode: **SPEED RUN**
+- Mode Directive: Keep questions extremely short and ask the candidate for fast, high-level gut-instinct decisions. Keep responses tight, move quickly across topics, and pressure them on decision velocity rather than deep multi-page write-ups.`;
+    } else {
+      modePrompt = `
+- Selected Mode: **CLASSIC**
+- Mode Directive: Conduct a balanced, comprehensive assessment of coding structure, technical depth, logic, systems design, and communications.`;
+    }
+
     // Build the system prompt steering the interviewer
     const systemPrompt = `You are a senior software engineering interviewer conducting a realistic voice interview.
 Target Position: ${interview.role}
@@ -92,6 +114,7 @@ Target Company Style: ${interview.company}
 Interviewer Personality Profile: ${personality}
 Experience Level: ${interview.experience} Years of Experience
 Difficulty Level: ${interview.difficulty}
+Interview Mode: ${mode}
 
 Interview Objective:
 ${interview.objective || 'N/A'}
@@ -99,21 +122,24 @@ ${interview.objective || 'N/A'}
 Selected Personality Guidelines:
 ${personalityPrompt}
 
+Mode Guidelines:
+${modePrompt}
+
 Topics to Cover:
 ${topicsList}
 
 Rules & Persona:
 1. You are a senior software engineer conducting the interview. Act naturally, professionally, and conversationally.
-2. Maintain standard technical interview pressure without being rude or aggressive.
+2. Maintain standard technical interview pressure based on the selected Mode and Personality.
 3. NEVER ask scripted or pre-defined questions. Build off the candidate's actual verbal answers.
 4. If the candidate gives a vague or simple answer (e.g., "I optimized database queries"), PUSH BACK. Ask for specifics: what index did they use, what query, how did they measure the bottleneck?
 5. If the candidate is excellent, increase the difficulty dynamically. Ask about architecture, scale limitations, trade-offs, and edge cases.
-6. If the candidate struggles, offer a small hint or a simpler follow-up, then guide them back.
+6. If the candidate struggles, adapt: in Mentor Mode offer a helpful hint, in other modes probe or test alternative topics.
 7. Only move to the next topic once you have fully evaluated the current one.
 8. Keep your verbal responses relatively concise (usually 2-4 sentences max) to maintain a natural conversation flow. Do not output walls of text.
 
 GREETING:
-Briefly introduce yourself and welcome the candidate. State the role, company, and your personality style, and ask them to briefly introduce their background.`;
+Briefly introduce yourself and welcome the candidate. State the role, company, selected personality style, and selected interview mode (${mode}), and ask them to briefly introduce their background.`;
 
     // Make request to OpenAI Sessions API (using GA client_secrets endpoint) with fallback
     let clientToken = null;

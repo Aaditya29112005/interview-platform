@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-type OrbState = 'idle' | 'listening' | 'thinking' | 'speaking';
+type OrbState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'challenging';
 
 interface OrbVisualizerProps {
   state: OrbState;
@@ -19,24 +19,32 @@ export function OrbVisualizer({ state }: OrbVisualizerProps) {
   switch (state) {
     case 'listening':
       // Calm, slow breathing pulse in teal/cyan
-      orbClass = 'bg-gradient-to-tr from-cyan-500 via-emerald-400 to-indigo-500';
-      shadowColor = 'shadow-cyan-500/30';
+      orbClass = 'bg-gradient-to-tr from-[#00D9FF] via-emerald-400 to-[#6E7DFF]';
+      shadowColor = 'shadow-[#00D9FF]/30';
       scale = [1, 1.08, 1];
       break;
 
     case 'thinking':
       // Fast, morphing pulse in indigo/purple/violet
-      orbClass = 'bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500';
-      shadowColor = 'shadow-purple-500/40';
+      orbClass = 'bg-gradient-to-tr from-[#6E7DFF] via-[#8B5CF6] to-pink-500';
+      shadowColor = 'shadow-[#8B5CF6]/40';
       scale = [1, 0.95, 1.05, 1];
       rotate = 360;
       break;
 
     case 'speaking':
       // Highly active, expanding and contracting soundwave scale in rose/pink
-      orbClass = 'bg-gradient-to-tr from-indigo-500 via-pink-500 to-rose-400';
+      orbClass = 'bg-gradient-to-tr from-[#6E7DFF] via-pink-500 to-rose-400';
       shadowColor = 'shadow-pink-500/40';
       scale = [1, 1.2, 0.95, 1.15, 1];
+      break;
+
+    case 'challenging':
+      // Erratic, deep red/crimson intense pulse for CTO/Bar Raiser challenge
+      orbClass = 'bg-gradient-to-tr from-red-600 via-rose-500 to-[#8B5CF6]';
+      shadowColor = 'shadow-red-600/50';
+      scale = [1, 1.18, 0.88, 1.25, 0.95, 1];
+      rotate = -180;
       break;
 
     case 'idle':
@@ -56,10 +64,10 @@ export function OrbVisualizer({ state }: OrbVisualizerProps) {
           key={`halo-1-${state}`}
           className={`absolute inset-0 rounded-full blur-3xl opacity-20 ${orbClass}`}
           animate={{
-            scale: state === 'speaking' ? [1, 1.4, 1] : [1, 1.15, 1],
+            scale: state === 'speaking' || state === 'challenging' ? [1, 1.4, 1] : [1, 1.15, 1],
           }}
           transition={{
-            duration: state === 'thinking' ? 1.5 : 3,
+            duration: state === 'thinking' ? 1.5 : state === 'challenging' ? 1 : 3,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
@@ -68,10 +76,10 @@ export function OrbVisualizer({ state }: OrbVisualizerProps) {
           key={`halo-2-${state}`}
           className={`absolute h-64 w-64 rounded-full blur-2xl opacity-35 ${orbClass}`}
           animate={{
-            scale: state === 'speaking' ? [1, 1.3, 1] : [1, 1.1, 1],
+            scale: state === 'speaking' || state === 'challenging' ? [1, 1.3, 1] : [1, 1.1, 1],
           }}
           transition={{
-            duration: state === 'thinking' ? 1.2 : 2.5,
+            duration: state === 'thinking' ? 1.2 : state === 'challenging' ? 0.8 : 2.5,
             repeat: Infinity,
             ease: 'easeInOut',
             delay: 0.2,
@@ -86,7 +94,7 @@ export function OrbVisualizer({ state }: OrbVisualizerProps) {
           rotate: rotate,
         }}
         transition={{
-          duration: state === 'thinking' ? 2 : state === 'speaking' ? 0.9 : 3,
+          duration: state === 'thinking' ? 2 : state === 'speaking' ? 0.9 : state === 'challenging' ? 0.7 : 3,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
@@ -97,26 +105,26 @@ export function OrbVisualizer({ state }: OrbVisualizerProps) {
         
         {/* Subtle Text indicator */}
         <div className="absolute z-20 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-white/70 drop-shadow-md">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-white/95 drop-shadow-md">
             {state === 'idle' ? 'Ready' : state}
           </span>
         </div>
       </motion.div>
 
-      {/* Outer soundwave ring overlays for speaking state */}
-      {state === 'speaking' && (
+      {/* Outer soundwave ring overlays for speaking/challenging state */}
+      {(state === 'speaking' || state === 'challenging') && (
         <>
           <motion.div
             initial={{ scale: 0.8, opacity: 0.8 }}
             animate={{ scale: 1.6, opacity: 0 }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }}
-            className="absolute z-0 h-48 w-48 rounded-full border border-pink-500/30"
+            transition={{ duration: state === 'challenging' ? 1.0 : 1.5, repeat: Infinity, ease: 'easeOut' }}
+            className={`absolute z-0 h-48 w-48 rounded-full border ${state === 'challenging' ? 'border-red-500/40' : 'border-pink-500/30'}`}
           />
           <motion.div
             initial={{ scale: 0.8, opacity: 0.5 }}
             animate={{ scale: 1.9, opacity: 0 }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut', delay: 0.5 }}
-            className="absolute z-0 h-48 w-48 rounded-full border border-indigo-500/20"
+            transition={{ duration: state === 'challenging' ? 1.0 : 1.5, repeat: Infinity, ease: 'easeOut', delay: 0.3 }}
+            className={`absolute z-0 h-48 w-48 rounded-full border ${state === 'challenging' ? 'border-orange-500/30' : 'border-indigo-500/20'}`}
           />
         </>
       )}

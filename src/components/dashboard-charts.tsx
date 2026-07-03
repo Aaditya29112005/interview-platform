@@ -84,20 +84,20 @@ export function DashboardCharts({ radarData, trendData }: ChartData) {
                   dataKey="score"
                   stroke="url(#line-grad)"
                   strokeWidth={3}
-                  dot={{ r: 4, stroke: '#6366f1', strokeWidth: 2, fill: '#09090b' }}
+                  dot={{ r: 4, stroke: '#6E7DFF', strokeWidth: 2, fill: '#050816' }}
                   activeDot={{ r: 6 }}
                 />
                 <defs>
                   <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#6366f1" />
-                    <stop offset="50%" stopColor="#a855f7" />
-                    <stop offset="100%" stopColor="#ec4899" />
+                    <stop offset="0%" stopColor="#6E7DFF" />
+                    <stop offset="50%" stopColor="#8B5CF6" />
+                    <stop offset="100%" stopColor="#00D9FF" />
                   </linearGradient>
                 </defs>
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex h-full items-center justify-center text-xs text-zinc-500">
+            <div className="flex h-full items-center justify-center text-xs text-zinc-550">
               Complete interviews to visualize your improvement trend.
             </div>
           )}
@@ -105,37 +105,37 @@ export function DashboardCharts({ radarData, trendData }: ChartData) {
       </div>
 
       {/* Radar Chart: Skill Breakdown */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 backdrop-blur-sm">
+      <div className="rounded-2xl border border-zinc-800 bg-[#0A1022]/60 p-6 backdrop-blur-sm">
         <h3 className="text-sm font-semibold text-zinc-300 mb-4">Competency Map</h3>
         <div className="h-64 w-full flex items-center justify-center">
           {hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                <PolarGrid stroke="#27272a" />
+                <PolarGrid stroke="rgba(255,255,255,0.06)" />
                 <PolarAngleAxis
                   dataKey="subject"
-                  stroke="#a1a1aa"
+                  stroke="#98A2B3"
                   fontSize={10}
                 />
                 <PolarRadiusAxis
                   angle={30}
                   domain={[0, 100]}
-                  stroke="#52525b"
+                  stroke="rgba(255,255,255,0.2)"
                   fontSize={8}
                   tickLine={false}
                 />
                 <Radar
                   name="Candidate"
                   dataKey="A"
-                  stroke="#a855f7"
-                  fill="#a855f7"
-                  fillOpacity={0.15}
-                  strokeWidth={2}
+                  stroke="#6E7DFF"
+                  fill="#8B5CF6"
+                  fillOpacity={0.2}
+                  strokeWidth={2.5}
                 />
               </RadarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex h-full items-center justify-center text-xs text-zinc-500">
+            <div className="flex h-full items-center justify-center text-xs text-zinc-550">
               Competencies will populate after your first feedback report.
             </div>
           )}

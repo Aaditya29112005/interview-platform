@@ -72,7 +72,8 @@ export async function POST(request: Request) {
       personality, 
       jobDescription,
       resumeFile,
-      jobDescriptionFile
+      jobDescriptionFile,
+      mode
     } = await request.json();
 
     if (!role || !difficulty || !company || experience === undefined) {
@@ -193,6 +194,7 @@ You MUST respond with a single JSON object matching this structure. Do not outpu
         jobDescription: jobDescriptionFile?.fileName ? `[Uploaded File: ${jobDescriptionFile.fileName}]` : (jobDescription || null),
         cheatingLog: [],
         memory: {
+          mode: mode || 'Classic',
           candidate_strengths: [],
           weak_areas: [],
           repeated_mistakes: [],
