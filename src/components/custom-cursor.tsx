@@ -62,13 +62,13 @@ export function CustomCursor() {
       <div
         className="pointer-events-none fixed inset-0 z-0 hidden md:block"
         style={{
-          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(110, 125, 255, 0.05), rgba(139, 92, 246, 0.02) 40%, transparent 80%)`,
+          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(79, 124, 255, 0.05), rgba(124, 108, 255, 0.02) 40%, transparent 80%)`,
         }}
       />
 
       {/* Lag-smoothed ambient blob light */}
       <div
-        className="pointer-events-none fixed z-50 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-[#6E7DFF]/30 to-[#8B5CF6]/30 blur-[14px] transition-transform duration-300 ease-out hidden md:block"
+        className="pointer-events-none fixed z-50 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-[#4F7CFF]/30 to-[#7C6CFF]/30 blur-[14px] transition-transform duration-300 ease-out hidden md:block"
         style={{
           left: `${trail.x}px`,
           top: `${trail.y}px`,
@@ -78,7 +78,7 @@ export function CustomCursor() {
       
       {/* Precision cursor tip: stretches to capsule/pill on hover */}
       <div
-        className="pointer-events-none fixed z-50 rounded-full bg-[#6E7DFF] mix-blend-screen transition-all duration-200 ease-out hidden md:block shadow-[0_0_12px_rgba(110,125,255,0.8)]"
+        className="pointer-events-none fixed z-50 rounded-full bg-[#4F7CFF] mix-blend-screen transition-all duration-200 ease-out hidden md:block shadow-[0_0_12px_rgba(79,124,255,0.8)]"
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,

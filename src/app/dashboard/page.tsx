@@ -320,7 +320,7 @@ export default function DashboardPage() {
                     onClick={() => setActiveTab('sessions')}
                     className={`pb-2 text-sm font-semibold border-b-2 transition cursor-pointer ${
                       activeTab === 'sessions'
-                        ? 'border-[#6E7DFF] text-white'
+                        ? 'border-[#4F7CFF] text-white'
                         : 'border-transparent text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
@@ -330,7 +330,7 @@ export default function DashboardPage() {
                     onClick={() => setActiveTab('analytics')}
                     className={`pb-2 text-sm font-semibold border-b-2 transition cursor-pointer ${
                       activeTab === 'analytics'
-                        ? 'border-[#6E7DFF] text-white'
+                        ? 'border-[#4F7CFF] text-white'
                         : 'border-transparent text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
@@ -343,9 +343,9 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column: Recent Feedback & Guidelines */}
                     <div className="lg:col-span-1 space-y-6">
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1022]/60 p-6 backdrop-blur-sm space-y-4">
+                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-sm space-y-4">
                         <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                          <Sparkles className="h-4.5 w-4.5 text-[#6E7DFF]" />
+                          <Sparkles className="h-4.5 w-4.5 text-[#4F7CFF]" />
                           <span>Recent Evaluation Insights</span>
                         </h2>
                         {analytics.recentFeedback.length > 0 ? (
@@ -353,13 +353,13 @@ export default function DashboardPage() {
                             {analytics.recentFeedback.map((feedback) => (
                               <div
                                 key={feedback.id}
-                                className="border-l-2 border-[#6E7DFF]/50 pl-3 py-1 space-y-1.5"
+                                className="border-l-2 border-[#4F7CFF]/50 pl-3 py-1 space-y-1.5"
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs font-semibold text-zinc-300">
                                     {feedback.role} ({feedback.company})
                                   </span>
-                                  <span className="text-xs font-bold text-[#6E7DFF]">
+                                  <span className="text-xs font-bold text-[#4F7CFF]">
                                     {feedback.overall}%
                                   </span>
                                 </div>
@@ -376,7 +376,7 @@ export default function DashboardPage() {
                         )}
                       </div>
 
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1022]/60 p-6 backdrop-blur-sm space-y-4">
+                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-sm space-y-4">
                         <h3 className="text-sm font-semibold text-white">Directives for Candidates</h3>
                         <ul className="text-xs text-zinc-400 space-y-2 list-disc list-inside">
                           <li>Grant browser microphone access before loading the interview.</li>
@@ -389,7 +389,7 @@ export default function DashboardPage() {
 
                     {/* Right Column: Interviews List */}
                     <div className="lg:col-span-2 space-y-6">
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1022]/60 p-6 backdrop-blur-sm">
+                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-sm">
                         <h2 className="text-sm font-bold text-white mb-6">Your Interviews</h2>
                         {interviews.length > 0 ? (
                           <div className="divide-y divide-zinc-900/60">
@@ -404,7 +404,7 @@ export default function DashboardPage() {
                                     <span className="inline-flex items-center rounded-md bg-zinc-900 px-2 py-0.5 text-2xs font-medium text-zinc-400">
                                       {interview.company} • {(interview as any).personality || 'Google Staff'}
                                     </span>
-                                    <span className="inline-flex items-center rounded-md bg-[#6E7DFF]/10 px-2 py-0.5 text-2xs font-medium text-[#6E7DFF] border border-[#6E7DFF]/15">
+                                    <span className="inline-flex items-center rounded-md bg-[#4F7CFF]/10 px-2 py-0.5 text-2xs font-medium text-[#4F7CFF] border border-[#4F7CFF]/15">
                                       {(interview as any).memory?.mode || 'Classic'}
                                     </span>
                                     <span className="inline-flex items-center rounded-md bg-zinc-900/40 px-2 py-0.5 text-2xs font-medium text-zinc-400">
@@ -423,7 +423,7 @@ export default function DashboardPage() {
                                 <div className="flex items-center gap-3">
                                   {interview.status === 'completed' ? (
                                     <>
-                                      <span className="text-sm font-bold text-[#6E7DFF]">
+                                      <span className="text-sm font-bold text-[#4F7CFF]">
                                         Score: {interview.scores?.overall}%
                                       </span>
                                       <Link
@@ -441,7 +441,7 @@ export default function DashboardPage() {
                                       </span>
                                       <Link
                                         href={`/interview/${interview.id}`}
-                                        className="inline-flex items-center gap-1 rounded-lg bg-[#6E7DFF] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#6E7DFF]/90"
+                                        className="inline-flex items-center gap-1 rounded-lg bg-[#4F7CFF] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#4F7CFF]/90"
                                       >
                                         <Play className="h-3.5 w-3.5" />
                                         <span>Resume</span>
@@ -465,7 +465,7 @@ export default function DashboardPage() {
                             </div>
                             <button
                               onClick={() => setIsModalOpen(true)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-[#6E7DFF] px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#6E7DFF]/95"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-[#4F7CFF] px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#4F7CFF]/95"
                             >
                               <Plus className="h-4 w-4" />
                               <span>Start First Interview</span>
@@ -481,10 +481,10 @@ export default function DashboardPage() {
                     {/* Stats Summary Cards */}
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                       {/* Card 1: Average Score */}
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1022]/60 p-6 backdrop-blur-md">
+                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-md">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-zinc-400">Average Score</span>
-                          <Award className="h-5 w-5 text-[#6E7DFF]" />
+                          <span className="text-sm font-semibold text-[#7F8AA6]">Average Score</span>
+                          <Award className="h-5 w-5 text-[#4F7CFF]" />
                         </div>
                         <div className="mt-4 flex items-baseline gap-2">
                           <span className="text-4xl font-bold text-white">
@@ -502,10 +502,10 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Card 2: Completed Interviews */}
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1022]/60 p-6 backdrop-blur-md">
+                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-md">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-zinc-400">Completed Sessions</span>
-                          <Play className="h-5 w-5 text-[#8B5CF6]" />
+                          <span className="text-sm font-semibold text-[#7F8AA6]">Completed Sessions</span>
+                          <Play className="h-5 w-5 text-[#7C6CFF]" />
                         </div>
                         <div className="mt-4 flex items-baseline gap-2">
                           <span className="text-4xl font-bold text-white">{analytics.totalInterviews}</span>
@@ -516,10 +516,10 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Card 3: Performance Streak */}
-                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1022]/60 p-6 backdrop-blur-md">
+                      <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-md">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-zinc-400">Assessment Streaks</span>
-                          <Sparkles className="h-5 w-5 text-[#00D9FF]" />
+                          <span className="text-sm font-semibold text-[#7F8AA6]">Assessment Streaks</span>
+                          <Sparkles className="h-5 w-5 text-[#4DE2FF]" />
                         </div>
                         <div className="mt-4 flex items-baseline gap-2">
                           <span className="text-2xl font-bold text-white">
@@ -545,13 +545,13 @@ export default function DashboardPage() {
                     )}
 
                     {/* Skill Galaxy Interactive Widget */}
-                    <div className="rounded-2xl border border-zinc-800 bg-[#0A1022]/60 p-6 backdrop-blur-sm">
-                      <div className="border-b border-zinc-900 pb-4 mb-6">
+                    <div className="rounded-2xl border border-zinc-800 bg-[#0A1020]/60 p-6 backdrop-blur-sm">
+                      <div className="border-b border-zinc-900/60 pb-4 mb-6">
                         <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                          <Globe className="h-4.5 w-4.5 text-[#00D9FF]" />
+                          <Globe className="h-4.5 w-4.5 text-[#4DE2FF]" />
                           <span>Interactive Skill Galaxy Constellation</span>
                         </h3>
-                        <p className="text-2xs text-zinc-500 mt-1">
+                        <p className="text-2xs text-[#7F8AA6] mt-1">
                           Click skill nodes to explore detailed performance calibrations and targeted recommendations.
                         </p>
                       </div>
@@ -560,48 +560,48 @@ export default function DashboardPage() {
                         <div className="md:col-span-2 relative h-64 bg-zinc-950/40 rounded-xl flex items-center justify-center border border-zinc-900/50">
                           <svg className="w-full h-full max-w-md" viewBox="0 0 400 200">
                             {/* Star Constellation links */}
-                            <line x1="80" y1="50" x2="200" y2="30" stroke="rgba(110, 125, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
-                            <line x1="200" y1="30" x2="320" y2="60" stroke="rgba(110, 125, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
-                            <line x1="320" y1="60" x2="280" y2="150" stroke="rgba(110, 125, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
-                            <line x1="280" y1="150" x2="120" y2="140" stroke="rgba(110, 125, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
-                            <line x1="120" y1="140" x2="80" y2="50" stroke="rgba(110, 125, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
+                            <line x1="80" y1="50" x2="200" y2="30" stroke="rgba(79, 124, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
+                            <line x1="200" y1="30" x2="320" y2="60" stroke="rgba(79, 124, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
+                            <line x1="320" y1="60" x2="280" y2="150" stroke="rgba(79, 124, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
+                            <line x1="280" y1="150" x2="120" y2="140" stroke="rgba(79, 124, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
+                            <line x1="120" y1="140" x2="80" y2="50" stroke="rgba(79, 124, 255, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
                             
                             {/* Skill Nodes */}
                             <g className="cursor-pointer group">
-                              <circle cx="80" cy="50" r="14" fill="#00D9FF" className="opacity-10 group-hover:opacity-25 transition" />
-                              <circle cx="80" cy="50" r="5" fill="#00D9FF" />
-                              <text x="80" y="75" fill="#98A2B3" fontSize="8" fontWeight="bold" textAnchor="middle">React & Frontend</text>
+                              <circle cx="80" cy="50" r="14" fill="#4DE2FF" className="opacity-10 group-hover:opacity-25 transition" />
+                              <circle cx="80" cy="50" r="5" fill="#4DE2FF" />
+                              <text x="80" y="75" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">React & Frontend</text>
                             </g>
 
                             <g className="cursor-pointer group">
-                              <circle cx="200" cy="30" r="16" fill="#8B5CF6" className="opacity-10 group-hover:opacity-25 transition" />
-                              <circle cx="200" cy="30" r="5" fill="#8B5CF6" />
-                              <text x="200" y="55" fill="#98A2B3" fontSize="8" fontWeight="bold" textAnchor="middle">System Design</text>
+                              <circle cx="200" cy="30" r="16" fill="#7C6CFF" className="opacity-10 group-hover:opacity-25 transition" />
+                              <circle cx="200" cy="30" r="5" fill="#7C6CFF" />
+                              <text x="200" y="55" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">System Design</text>
                             </g>
 
                             <g className="cursor-pointer group">
-                              <circle cx="320" cy="60" r="14" fill="#6E7DFF" className="opacity-10 group-hover:opacity-25 transition" />
-                              <circle cx="320" cy="60" r="5" fill="#6E7DFF" />
-                              <text x="320" y="85" fill="#98A2B3" fontSize="8" fontWeight="bold" textAnchor="middle">SQL & DB</text>
+                              <circle cx="320" cy="60" r="14" fill="#4F7CFF" className="opacity-10 group-hover:opacity-25 transition" />
+                              <circle cx="320" cy="60" r="5" fill="#4F7CFF" />
+                              <text x="320" y="85" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">SQL & DB</text>
                             </g>
 
                             <g className="cursor-pointer group">
                               <circle cx="280" cy="150" r="15" fill="#00E676" className="opacity-10 group-hover:opacity-25 transition" />
                               <circle cx="280" cy="150" r="5" fill="#00E676" />
-                              <text x="280" y="172" fill="#98A2B3" fontSize="8" fontWeight="bold" textAnchor="middle">NodeJS APIs</text>
+                              <text x="280" y="172" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">NodeJS APIs</text>
                             </g>
 
                             <g className="cursor-pointer group">
                               <circle cx="120" cy="140" r="15" fill="#FF8A00" className="opacity-10 group-hover:opacity-25 transition" />
                               <circle cx="120" cy="140" r="5" fill="#FF8A00" />
-                              <text x="120" y="162" fill="#98A2B3" fontSize="8" fontWeight="bold" textAnchor="middle">Communication</text>
+                              <text x="120" y="162" fill="#7F8AA6" fontSize="8" fontWeight="bold" textAnchor="middle">Communication</text>
                             </g>
                           </svg>
                         </div>
 
                         <div className="space-y-4">
                           <div className="bg-zinc-950/40 border border-zinc-900 p-4 rounded-xl space-y-2">
-                            <span className="text-[10px] font-bold text-[#6E7DFF] uppercase tracking-wider block">Constellation Health</span>
+                            <span className="text-[10px] font-bold text-[#4F7CFF] uppercase tracking-wider block">Constellation Health</span>
                             <h4 className="text-xs font-bold text-white">SDE-II Benchmark Calibration</h4>
                             <p className="text-2xs text-zinc-400 leading-relaxed">
                               Your database and API nodes are lighting up strongly, showing solid technical depth. Focus on structuring scalability trade-offs in system design to match L4 requirements.
@@ -609,7 +609,7 @@ export default function DashboardPage() {
                           </div>
                           
                           <div className="flex gap-2">
-                            <span className="text-2xs bg-[#6E7DFF]/10 text-[#6E7DFF] px-2 py-1 rounded border border-[#6E7DFF]/20 font-bold uppercase tracking-wider">
+                            <span className="text-2xs bg-[#4F7CFF]/10 text-[#4F7CFF] px-2 py-1 rounded border border-[#4F7CFF]/20 font-bold uppercase tracking-wider">
                               Overall Readiness: 78%
                             </span>
                             <span className="text-2xs bg-[#00E676]/10 text-[#00E676] px-2 py-1 rounded border border-[#00E676]/20 font-bold uppercase tracking-wider">

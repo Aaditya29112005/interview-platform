@@ -19,29 +19,29 @@ export function OrbVisualizer({ state }: OrbVisualizerProps) {
   switch (state) {
     case 'listening':
       // Calm, slow breathing pulse in teal/cyan
-      orbClass = 'bg-gradient-to-tr from-[#00D9FF] via-emerald-400 to-[#6E7DFF]';
-      shadowColor = 'shadow-[#00D9FF]/30';
+      orbClass = 'bg-gradient-to-tr from-[#4DE2FF] via-emerald-400 to-[#4F7CFF]';
+      shadowColor = 'shadow-[#4DE2FF]/30';
       scale = [1, 1.08, 1];
       break;
 
     case 'thinking':
       // Fast, morphing pulse in indigo/purple/violet
-      orbClass = 'bg-gradient-to-tr from-[#6E7DFF] via-[#8B5CF6] to-pink-500';
-      shadowColor = 'shadow-[#8B5CF6]/40';
+      orbClass = 'bg-gradient-to-tr from-[#4F7CFF] via-[#7C6CFF] to-pink-500';
+      shadowColor = 'shadow-[#7C6CFF]/45';
       scale = [1, 0.95, 1.05, 1];
       rotate = 360;
       break;
 
     case 'speaking':
       // Highly active, expanding and contracting soundwave scale in rose/pink
-      orbClass = 'bg-gradient-to-tr from-[#6E7DFF] via-pink-500 to-rose-400';
+      orbClass = 'bg-gradient-to-tr from-[#4F7CFF] via-pink-500 to-rose-400';
       shadowColor = 'shadow-pink-500/40';
       scale = [1, 1.2, 0.95, 1.15, 1];
       break;
 
     case 'challenging':
       // Erratic, deep red/crimson intense pulse for CTO/Bar Raiser challenge
-      orbClass = 'bg-gradient-to-tr from-red-600 via-rose-500 to-[#8B5CF6]';
+      orbClass = 'bg-gradient-to-tr from-red-650 via-rose-500 to-[#7C6CFF]';
       shadowColor = 'shadow-red-600/50';
       scale = [1, 1.18, 0.88, 1.25, 0.95, 1];
       rotate = -180;
