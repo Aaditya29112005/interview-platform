@@ -1,49 +1,62 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #050816;
-  --color-surface: #0A1020;
-  --color-primary: #4F7CFF;
-  --color-secondary: #7C6CFF;
+  --color-background: #020305;
+  --color-surface: #0D111B;
+  --color-primary: #5B7CFF;
+  --color-secondary: #8B5CF6;
   --color-cyan: #4DE2FF;
-  --color-success: #00E676;
-  --color-muted: #7F8AA6;
+  --color-success: #22C55E;
+  --color-muted: #94A3B8;
 }
 
 :root {
-  --background: #050816;
-  --foreground: #ffffff;
-  --surface: #0A1020;
-  --card: rgba(255, 255, 255, 0.04);
+  --background: #020305;
+  --foreground: #F8FAFC;
+  
+  --bg-secondary: #070B12;
+  --surface: #0D111B;
+  --surface-elevated: #151A27;
 
-  --primary: #4F7CFF;
-  --secondary: #7C6CFF;
+  --white: #FFFFFF;
+  --white-soft: #F8FAFC;
+  --white-muted: #E2E8F0;
+
+  --primary: #5B7CFF;
+  --secondary: #8B5CF6;
   --cyan: #4DE2FF;
 
-  --success: #00E676;
+  --success: #22C55E;
 
   --text: #FFFFFF;
-  --body: #C8D1E8;
-  --muted: #7F8AA6;
+  --body: #CBD5E1;
+  --muted: #94A3B8;
 
   --border: rgba(255, 255, 255, 0.08);
-  --glass: rgba(255, 255, 255, 0.05);
-  --glow: rgba(79, 124, 255, 0.15);
+  --glass: rgba(255, 255, 255, 0.04);
 }
 
 body {
-  background-color: #050816;
-  color: #C8D1E8;
+  background-color: #020305;
+  color: #CBD5E1;
   font-family: var(--font-geist-sans), 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
 }
 
-/* Premium Typography System for Satoshi/Geist look */
+/* Premium Typography System */
 h1, h2, h3, h4, h5, h6 {
   color: #FFFFFF;
-  font-weight: 750;
-  letter-spacing: -0.03em;
+  font-weight: 800;
+  letter-spacing: -0.04em;
   line-height: 1;
+}
+
+/* Molten White Gradient Text */
+.molten-text {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 50%, #CBD5E1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Custom Scrollbars */
@@ -52,15 +65,15 @@ h1, h2, h3, h4, h5, h6 {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #050816;
+  background: #020305;
 }
 ::-webkit-scrollbar-thumb {
-  background: #0E1428;
+  background: #0D111B;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(79, 124, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Noise overlay background */
@@ -76,24 +89,31 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Glassmorphism Card Panels */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
-  box-shadow: 0 20px 80px rgba(0,0,0,.45), 0 0 80px rgba(79,124,255,.15);
+  box-shadow: 0 25px 80px rgba(0,0,0,.55), 0 0 40px rgba(255,255,255,.04);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Primary Glow Button */
+/* Premium Button (Molten White Reflection style) */
 .glow-button {
-  background: linear-gradient(90deg, #4F7CFF, #7C6CFF);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 999px;
   font-weight: 600;
-  box-shadow: 0 0 40px rgba(79, 124, 255, 0.45);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.02);
 }
 .glow-button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 60px rgba(79, 124, 255, 0.65);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.25);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
 }
 
-
+/* Premium Soft White Glow effect for cards/modals */
+.premium-white-glow {
+  box-shadow: 0 0 30px rgba(255,255,255,.08), 0 0 80px rgba(255,255,255,.05), 0 0 180px rgba(255,255,255,.02);
+}
