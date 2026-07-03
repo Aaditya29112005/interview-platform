@@ -207,8 +207,77 @@ export function useGSAPAnimations() {
         }
       );
 
+      // ── 11. Tactile Magnetic Buttons ─────────────────────────────────
+      const magneticEls = document.querySelectorAll<HTMLElement>('.btn-magnetic');
+      const onMouseMoveMagnetic = (e: MouseEvent) => {
+        magneticEls.forEach((el) => {
+          const bound = el.getBoundingClientRect();
+          const elX = bound.left + bound.width / 2;
+          const elY = bound.top + bound.height / 2;
+          const distX = e.clientX - elX;
+          const distY = e.clientY - elY;
+          const dist = Math.hypot(distX, distY);
+          
+          if (dist < 75) {
+            // Pull closer to cursor
+            gsap.to(el, {
+              x: distX * 0.35,
+              y: distY * 0.35,
+              rotateX: -distY * 0.1,
+              rotateY: distX * 0.1,
+              duration: 0.3,
+              ease: 'power2.out',
+            });
+          } else {
+            // Reset to original place
+            gsap.to(el, {
+              x: 0,
+              y: 0,
+              rotateX: 0,
+              rotateY: 0,
+              duration: 0.4,
+              ease: 'elastic.out(1.2, 0.4)',
+            });
+          }
+        });
+      };
+      window.addEventListener('mousemove', onMouseMoveMagnetic);
+
+      // ── 12. Text Scramble / Decoder Reveal ───────────────────────────
+      const scrambleEls = document.querySelectorAll<HTMLElement>('[data-gsap="scramble"]');
+      scrambleEls.forEach((el) => {
+        const originalText = el.innerText || '';
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@$%&*';
+        
+        ScrollTrigger.create({
+          trigger: el,
+          start: 'top 92%',
+          once: true,
+          onEnter: () => {
+            let iterations = 0;
+            const interval = setInterval(() => {
+              el.innerText = originalText
+                .split('')
+                .map((char, index) => {
+                  if (char === ' ' || char === '\n') return char;
+                  if (index < iterations) return originalText[index];
+                  return chars[Math.floor(Math.random() * chars.length)];
+                })
+                .join('');
+              
+              if (iterations >= originalText.length) {
+                clearInterval(interval);
+                el.innerText = originalText; // Ensure exact text matches
+              }
+              iterations += 1 / 2;
+            }, 25);
+          }
+        });
+      });
+
       return () => {
         ScrollTrigger.getAll().forEach((t) => t.kill());
+        window.removeEventListener('mousemove', onMouseMoveMagnetic);
       };
     })();
   }, []);

@@ -240,14 +240,14 @@ export default function Home() {
           >
             <Link
               href={user ? '/dashboard' : '/signup'}
-              className="btn-primary inline-flex items-center gap-2 px-8 py-4 text-sm font-bold rounded-full"
+              className="btn-primary btn-magnetic inline-flex items-center gap-2 px-8 py-4 text-sm font-bold rounded-full"
             >
               {user ? 'Go to Dashboard' : 'Start Free Today'}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <button
               onClick={handleResetDemo}
-              className="glow-button inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold rounded-full"
+              className="glow-button btn-magnetic inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold rounded-full"
             >
               <Play className="h-4 w-4 fill-white" />
               Watch Live Demo
@@ -378,7 +378,7 @@ export default function Home() {
           <div data-gsap="fade-left" className="space-y-8 text-left">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Sparkles className="h-3 w-3" />
-              Platform
+              <span data-gsap="scramble">Platform</span>
             </div>
             <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white leading-[1.05]">
               Built to simulate the <span className="text-gradient-ice">hardest interviews</span> in the world.
@@ -405,7 +405,7 @@ export default function Home() {
             </div>
             <button
               onClick={handleResetDemo}
-              className="glow-button inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold rounded-full"
+              className="glow-button btn-magnetic inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold rounded-full"
             >
               <Play className="h-4 w-4 fill-white" />
               Play Demo Interview
@@ -450,7 +450,7 @@ export default function Home() {
           <div data-gsap="fade-up" className="text-center max-w-2xl mx-auto space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Layers className="h-3 w-3" />
-              Capabilities
+              <span data-gsap="scramble">Capabilities</span>
             </div>
             <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">
               Every tool you need to <span className="text-gradient-ice">ace your loop.</span>
@@ -564,7 +564,7 @@ export default function Home() {
           <div data-gsap="fade-up" className="text-center max-w-xl mx-auto space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Heart className="h-3 w-3" />
-              Reviews
+              <span data-gsap="scramble">Reviews</span>
             </div>
             <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">Succeeding at top-tier teams.</h2>
             <p className="text-base text-[#94A3B8]">Candidates prepared with InterviewOS are landing leadership offers at high-scale tech firms.</p>
@@ -605,7 +605,7 @@ export default function Home() {
           <div data-gsap="fade-up" className="text-center max-w-xl mx-auto space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
               <Award className="h-3 w-3" />
-              Pricing
+              <span data-gsap="scramble">Pricing</span>
             </div>
             <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">Flexible plans for candidates and teams.</h2>
             <p className="text-base text-[#94A3B8]">Unlock unlimited voice interview practice and enterprise-grade recruiter tools.</p>
