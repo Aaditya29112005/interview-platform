@@ -765,14 +765,9 @@ export default function Home() {
           FOOTER
       ═══════════════════════════════════════════════════════ */}
       <footer className="relative border-t border-white/[0.04] bg-[#020305] z-10 overflow-hidden">
-        {/* Giant watermark text with Image Sequence overlay */}
-        <div className="relative w-full overflow-hidden select-none py-10 flex flex-col items-center justify-center">
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
-            <ImageSequenceVisualizer />
-          </div>
-          <div className="relative z-10 text-[clamp(3rem,12vw,9rem)] font-black tracking-[-0.04em] text-center text-white/[0.04] leading-none uppercase whitespace-nowrap pointer-events-none">
-            INTERVIEWOS
-          </div>
+        {/* Interactive WebGL-like Particle text swarm visualizer */}
+        <div className="relative w-full overflow-hidden py-10">
+          <ImageSequenceVisualizer />
         </div>
 
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 pb-12">
