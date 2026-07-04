@@ -31,6 +31,7 @@ import { OrbVisualizer } from '@/components/orb-visualizer';
 import { useGSAPAnimations } from '@/hooks/use-gsap-animations';
 import { StreamVisualizer } from '@/components/stream-visualizer';
 import { MorphingLogo } from '@/components/morphing-logo';
+import { RollingText } from '@/components/rolling-text';
 
 // ─── Background Particles ───────────────────────────────────────
 function BackgroundParticles() {
@@ -234,7 +235,9 @@ export default function Home() {
           >
             <span className="text-gradient-white block">The AI Interview</span>
             <span className="text-gradient-white block">Platform for</span>
-            <span className="text-gradient-ice block">Elite Engineers.</span>
+            <span className="text-gradient-ice block">
+              <RollingText text="Elite Engineers." delay={0.4} />
+            </span>
           </motion.h1>
 
           {/* Subheadline */}
