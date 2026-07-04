@@ -30,6 +30,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motio
 import { OrbVisualizer } from '@/components/orb-visualizer';
 import { useGSAPAnimations } from '@/hooks/use-gsap-animations';
 import { StreamVisualizer } from '@/components/stream-visualizer';
+import { MorphingLogo } from '@/components/morphing-logo';
 
 // ─── Background Particles ───────────────────────────────────────
 function BackgroundParticles() {
@@ -197,6 +198,19 @@ export default function Home() {
 
         {/* Content */}
         <div className="relative z-10 max-w-5xl mx-auto space-y-8 pt-20 pb-12">
+          {/* Morphing Brand Logo */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="flex justify-center mb-2"
+          >
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-[#7DD3FC]/05 border border-[#7DD3FC]/15 drop-shadow-[0_0_15px_rgba(125,211,252,0.15)] hover:border-[#7DD3FC]/30 transition-all duration-300">
+              <div className="absolute inset-0 rounded-2xl bg-[#7DD3FC]/05 blur-md" />
+              <MorphingLogo className="relative text-white drop-shadow-[0_0_10px_rgba(125,211,252,0.8)]" size={32} />
+            </div>
+          </motion.div>
+
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: -16 }}
@@ -212,62 +226,26 @@ export default function Home() {
           </motion.div>
 
           {/* Headline */}
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[1.02] text-white">
-            <span className="overflow-hidden block py-1">
-              <motion.span 
-                initial={{ y: "105%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="text-gradient-white block"
-              >
-                The AI Interview
-              </motion.span>
-            </span>
-            <span className="overflow-hidden block py-1">
-              <motion.span 
-                initial={{ y: "105%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="text-gradient-white block"
-              >
-                Platform for
-              </motion.span>
-            </span>
-            <span className="overflow-hidden block py-1">
-              <motion.span 
-                initial={{ y: "105%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="text-gradient-ice block"
-              >
-                Elite Engineers.
-              </motion.span>
-            </span>
-          </h1>
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[1.02] text-white"
+          >
+            <span className="text-gradient-white block">The AI Interview</span>
+            <span className="text-gradient-white block">Platform for</span>
+            <span className="text-gradient-ice block">Elite Engineers.</span>
+          </motion.h1>
 
           {/* Subheadline */}
-          <p className="text-lg sm:text-xl text-[#94A3B8] leading-relaxed max-w-2xl mx-auto font-medium space-y-1">
-            <span className="overflow-hidden block">
-              <motion.span 
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                className="block"
-              >
-                Real-time voice AI, adaptive questioning, sandboxed code execution,
-              </motion.span>
-            </span>
-            <span className="overflow-hidden block">
-              <motion.span 
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                className="block"
-              >
-                and forensic performance analytics. All in one cinematic interface.
-              </motion.span>
-            </span>
-          </p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="text-lg sm:text-xl text-[#94A3B8] leading-relaxed max-w-2xl mx-auto font-medium"
+          >
+            Real-time voice AI, adaptive questioning, sandboxed code execution, and forensic performance analytics. All in one cinematic interface.
+          </motion.p>
 
           {/* CTAs */}
           <motion.div

@@ -5,6 +5,7 @@ import { useAuth } from './auth-context';
 import { LogOut, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MorphingLogo } from './morphing-logo';
 
 export function NavBar() {
   const { user, logout } = useAuth();
@@ -33,9 +34,7 @@ export function NavBar() {
             {/* Crystal star mark */}
             <div className="relative flex h-8 w-8 items-center justify-center">
               <div className="absolute inset-0 rounded-xl bg-[#7DD3FC]/10 blur-sm group-hover:bg-[#7DD3FC]/20 transition-all duration-300" />
-              <svg className="relative w-5 h-5 text-white drop-shadow-[0_0_8px_rgba(125,211,252,0.8)]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C12 7.52285 7.52285 12 2 12C7.52285 12 12 16.4771 12 22C12 16.4771 16.4771 12 22 12C16.4771 12 12 7.52285 12 2Z" />
-              </svg>
+              <MorphingLogo className="relative w-5 h-5 text-white drop-shadow-[0_0_8px_rgba(125,211,252,0.8)]" size={20} />
             </div>
             <span className="text-[15px] font-bold tracking-tight text-white">
               InterviewOS<span className="text-[#7DD3FC]">AI</span>
