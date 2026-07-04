@@ -31,6 +31,7 @@ import { OrbVisualizer } from '@/components/orb-visualizer';
 import { useGSAPAnimations } from '@/hooks/use-gsap-animations';
 import { StreamVisualizer } from '@/components/stream-visualizer';
 import { MorphingLogo } from '@/components/morphing-logo';
+import { ImageSequenceVisualizer } from '@/components/image-sequence-visualizer';
 
 // ─── Background Particles ───────────────────────────────────────
 function BackgroundParticles() {
@@ -764,9 +765,12 @@ export default function Home() {
           FOOTER
       ═══════════════════════════════════════════════════════ */}
       <footer className="relative border-t border-white/[0.04] bg-[#020305] z-10 overflow-hidden">
-        {/* Giant watermark text */}
-        <div className="relative w-full overflow-hidden select-none pointer-events-none py-10">
-          <div className="text-[clamp(3rem,12vw,9rem)] font-black tracking-[-0.04em] text-center text-white/[0.03] leading-none uppercase whitespace-nowrap">
+        {/* Giant watermark text with Image Sequence overlay */}
+        <div className="relative w-full overflow-hidden select-none py-10 flex flex-col items-center justify-center">
+          <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+            <ImageSequenceVisualizer />
+          </div>
+          <div className="relative z-10 text-[clamp(3rem,12vw,9rem)] font-black tracking-[-0.04em] text-center text-white/[0.04] leading-none uppercase whitespace-nowrap pointer-events-none">
             INTERVIEWOS
           </div>
         </div>
