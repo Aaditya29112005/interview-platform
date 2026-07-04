@@ -7,6 +7,55 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MorphingLogo } from './morphing-logo';
 
+const containerVariants = {
+  hidden: { opacity: 0, y: -24, scaleY: 0.88 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scaleY: 1,
+    transition: {
+      type: "spring",
+      stiffness: 220,
+      damping: 18,
+      mass: 0.8,
+      staggerChildren: 0.05,
+      delayChildren: 0.05
+    }
+  },
+  exit: {
+    opacity: 0,
+    y: -24,
+    scaleY: 0.88,
+    transition: {
+      ease: [0.25, 1, 0.5, 1], // expo easeOut
+      duration: 0.35,
+      staggerChildren: 0.03,
+      staggerDirection: -1
+    }
+  }
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -16 },
+  show: { 
+    opacity: 1, 
+    x: 0,
+    transition: {
+      type: "spring",
+      stiffness: 220,
+      damping: 16
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    x: -12,
+    transition: {
+      ease: "easeInOut",
+      duration: 0.2
+    }
+  }
+} as const;
+
 export function NavBar() {
   const { user, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
@@ -121,11 +170,11 @@ export function NavBar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-x-0 top-16 z-40 border-b border-white/[0.06] bg-[#020305]/95 backdrop-blur-2xl p-5 flex flex-col gap-2 md:hidden"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            className="fixed inset-x-0 top-16 z-40 border-b border-white/[0.06] bg-[#020305]/95 backdrop-blur-2xl p-5 flex flex-col gap-2 md:hidden origin-top"
           >
             {[
               { href: '/#about', label: 'Platform' },
@@ -133,20 +182,21 @@ export function NavBar() {
               { href: '/#pricing', label: 'Pricing' },
               { href: '/#faq', label: 'FAQ' },
             ].map((item) => (
-              <a
+              <motion.a
+                variants={itemVariants}
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className="block px-4 py-3 rounded-xl text-sm font-semibold text-[#94A3B8] hover:text-white hover:bg-white/[0.04] transition-all"
               >
                 {item.label}
-              </a>
+              </motion.a>
             ))}
-            <div className="mt-2 pt-4 border-t border-white/[0.06] flex flex-col gap-2">
+            <motion.div variants={itemVariants} className="mt-2 pt-4 border-t border-white/[0.06] flex flex-col gap-2">
               {user ? (
                 <button
                   onClick={() => { logout(); setMobileOpen(false); }}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-[#94A3B8] hover:text-white hover:bg-white/[0.04]"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-[#94A3B8] hover:text-white hover:bg-white/[0.04] w-full text-left"
                 >
                   <LogOut className="h-4 w-4" />
                   Logout
@@ -157,7 +207,7 @@ export function NavBar() {
                   <Link href="/signup" onClick={() => setMobileOpen(false)} className="btn-primary text-center py-3 rounded-xl text-sm">Get Started</Link>
                 </>
               )}
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
