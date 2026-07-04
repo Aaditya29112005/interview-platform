@@ -44,7 +44,7 @@ export function ImageSequenceVisualizer() {
     const setDimensions = () => {
       if (!canvas || !containerRef.current) return;
       const width = containerRef.current.clientWidth;
-      const height = 240;
+      const height = 320;
       canvas.width = width * 2;
       canvas.height = height * 2;
       canvas.style.width = `${width}px`;
@@ -66,19 +66,19 @@ export function ImageSequenceVisualizer() {
       offscreen.height = height;
 
       // Draw bold clean reference text
-      const fontSize = Math.min(width * 0.11, 150);
+      const fontSize = Math.min(width * 0.14, 250);
       offCtx.font = `900 ${fontSize}px system-ui, -apple-system, sans-serif`;
       offCtx.fillStyle = '#ffffff';
       offCtx.textAlign = 'center';
       offCtx.textBaseline = 'middle';
-      offCtx.letterSpacing = '6px';
+      offCtx.letterSpacing = '8px';
       offCtx.fillText('INTERVIEWOS', width / 2, height / 2);
 
       const imgData = offCtx.getImageData(0, 0, width, height).data;
       const tempParticles: Particle[] = [];
 
-      // Sample density based on width sizing
-      const spacing = width > 1200 ? 6 : 4;
+      // Sample density based on width sizing (lower spacing -> more particles)
+      const spacing = width > 1200 ? 5 : 3;
 
       for (let y = 0; y < height; y += spacing) {
         for (let x = 0; x < width; x += spacing) {
@@ -89,13 +89,13 @@ export function ImageSequenceVisualizer() {
             const originX = Math.random() * width;
             const originY = Math.random() * height;
 
-            // Define custom particle color mix
+            // Define custom particle color mix matching original white/[0.03] subtle tone
             const rand = Math.random();
-            let color = 'rgba(255, 255, 255, 0.85)'; // White default
+            let color = 'rgba(255, 255, 255, 0.04)'; // White default
             if (rand > 0.6) {
-              color = 'rgba(125, 211, 252, 0.85)'; // Ice Blue (#7DD3FC)
+              color = 'rgba(125, 211, 252, 0.04)'; // Ice Blue (#7DD3FC)
             } else if (rand > 0.4) {
-              color = 'rgba(14, 165, 233, 0.65)'; // Tech Sky Blue
+              color = 'rgba(14, 165, 233, 0.03)'; // Tech Sky Blue
             }
 
             tempParticles.push({
@@ -233,7 +233,7 @@ export function ImageSequenceVisualizer() {
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full h-[240px] flex items-center justify-center overflow-hidden bg-transparent select-none cursor-pointer"
+      className="relative w-full h-[320px] flex items-center justify-center overflow-hidden bg-transparent select-none cursor-pointer"
     >
       {/* Background neon light aura matching branding */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(125,211,252,0.02)_0%,transparent_80%)] pointer-events-none" />
