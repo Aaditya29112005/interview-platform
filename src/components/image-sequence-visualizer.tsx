@@ -89,13 +89,13 @@ export function ImageSequenceVisualizer() {
             const originX = Math.random() * width;
             const originY = Math.random() * height;
 
-            // Define custom particle color mix matching original white/[0.03] subtle tone
+            // Define custom particle color mix matching white glow diamond style
             const rand = Math.random();
-            let color = 'rgba(255, 255, 255, 0.04)'; // White default
+            let color = 'rgba(255, 255, 255, 0.95)'; // Pure White
             if (rand > 0.6) {
-              color = 'rgba(125, 211, 252, 0.04)'; // Ice Blue (#7DD3FC)
+              color = 'rgba(224, 242, 254, 0.9)'; // Ice white
             } else if (rand > 0.4) {
-              color = 'rgba(14, 165, 233, 0.03)'; // Tech Sky Blue
+              color = 'rgba(186, 230, 253, 0.85)'; // Light Ice Blue
             }
 
             tempParticles.push({
@@ -105,7 +105,7 @@ export function ImageSequenceVisualizer() {
               originY,
               targetX: x,
               targetY: y,
-              size: Math.random() * 2 + 1,
+              size: Math.random() * 2 + 1.2, // Slightly larger diamonds for visibility
               color,
               speed: 0.05 + Math.random() * 0.08,
               vx: 0,
@@ -156,6 +156,10 @@ export function ImageSequenceVisualizer() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       time += 0.02;
 
+      // Enable white-glow diamond branding aura
+      ctx.shadowColor = 'rgba(125, 211, 252, 0.85)';
+      ctx.shadowBlur = 10;
+
       const progress = scrollProgressRef.current;
       
       // Interpolate mouse coordinates for fluid lag effect
@@ -202,11 +206,14 @@ export function ImageSequenceVisualizer() {
         p.x += p.vx;
         p.y += p.vy;
 
-        // 4. Draw Particle
+        // Draw Particle as a four-pointed diamond
         ctx.fillStyle = p.color;
         ctx.beginPath();
-        // Slightly blur / glow particles
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.moveTo(p.x, p.y - p.size); // Top point
+        ctx.lineTo(p.x + p.size, p.y); // Right point
+        ctx.lineTo(p.x, p.y + p.size); // Bottom point
+        ctx.lineTo(p.x - p.size, p.y); // Left point
+        ctx.closePath();
         ctx.fill();
       });
 
