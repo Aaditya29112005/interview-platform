@@ -212,26 +212,62 @@ export default function Home() {
           </motion.div>
 
           {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[1.02] text-white"
-          >
-            <span className="text-gradient-white block">The AI Interview</span>
-            <span className="text-gradient-white block">Platform for</span>
-            <span className="text-gradient-ice block">Elite Engineers.</span>
-          </motion.h1>
+          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[1.02] text-white">
+            <span className="overflow-hidden block py-1">
+              <motion.span 
+                initial={{ y: "105%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="text-gradient-white block"
+              >
+                The AI Interview
+              </motion.span>
+            </span>
+            <span className="overflow-hidden block py-1">
+              <motion.span 
+                initial={{ y: "105%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="text-gradient-white block"
+              >
+                Platform for
+              </motion.span>
+            </span>
+            <span className="overflow-hidden block py-1">
+              <motion.span 
+                initial={{ y: "105%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="text-gradient-ice block"
+              >
+                Elite Engineers.
+              </motion.span>
+            </span>
+          </h1>
 
           {/* Subheadline */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className="text-lg sm:text-xl text-[#94A3B8] leading-relaxed max-w-2xl mx-auto font-medium"
-          >
-            Real-time voice AI, adaptive questioning, sandboxed code execution, and forensic performance analytics. All in one cinematic interface.
-          </motion.p>
+          <p className="text-lg sm:text-xl text-[#94A3B8] leading-relaxed max-w-2xl mx-auto font-medium space-y-1">
+            <span className="overflow-hidden block">
+              <motion.span 
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="block"
+              >
+                Real-time voice AI, adaptive questioning, sandboxed code execution,
+              </motion.span>
+            </span>
+            <span className="overflow-hidden block">
+              <motion.span 
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                className="block"
+              >
+                and forensic performance analytics. All in one cinematic interface.
+              </motion.span>
+            </span>
+          </p>
 
           {/* CTAs */}
           <motion.div
