@@ -115,6 +115,13 @@ export function useGSAPAnimations() {
       // ── 6. Horizontal marquee speed-boost on scroll ───────────────────
       const marqueeEl = document.querySelector<HTMLElement>('.gsap-marquee-inner');
       if (marqueeEl) {
+        const tween = gsap.to(marqueeEl, {
+          xPercent: -50,
+          ease: 'none',
+          duration: 25,
+          repeat: -1,
+        });
+
         let speed = 1;
         ScrollTrigger.create({
           trigger: 'body',
@@ -122,10 +129,10 @@ export function useGSAPAnimations() {
           end: 'bottom bottom',
           onUpdate: (self) => {
             const v = self.getVelocity();
-            speed = gsap.utils.clamp(0.5, 3, 1 + Math.abs(v) / 2000);
-            gsap.to(marqueeEl, {
+            speed = gsap.utils.clamp(0.5, 3.5, 1 + Math.abs(v) / 2200);
+            gsap.to(tween, {
               timeScale: speed,
-              duration: 0.5,
+              duration: 0.4,
               overwrite: true,
             });
           },
@@ -209,39 +216,54 @@ export function useGSAPAnimations() {
 
       // ── 11. Tactile Magnetic Buttons ─────────────────────────────────
       const magneticEls = document.querySelectorAll<HTMLElement>('.btn-magnetic');
-      const onMouseMoveMagnetic = (e: MouseEvent) => {
-        magneticEls.forEach((el) => {
-          const bound = el.getBoundingClientRect();
+      const cleanups: Array<() => void> = [];
+
+      magneticEls.forEach((el) => {
+        let bound: DOMRect | null = null;
+
+        const onMouseEnter = () => {
+          bound = el.getBoundingClientRect();
+        };
+
+        const onMouseMove = (e: MouseEvent) => {
+          if (!bound) return;
           const elX = bound.left + bound.width / 2;
           const elY = bound.top + bound.height / 2;
           const distX = e.clientX - elX;
           const distY = e.clientY - elY;
-          const dist = Math.hypot(distX, distY);
           
-          if (dist < 75) {
-            // Pull closer to cursor
-            gsap.to(el, {
-              x: distX * 0.35,
-              y: distY * 0.35,
-              rotateX: -distY * 0.1,
-              rotateY: distX * 0.1,
-              duration: 0.3,
-              ease: 'power2.out',
-            });
-          } else {
-            // Reset to original place
-            gsap.to(el, {
-              x: 0,
-              y: 0,
-              rotateX: 0,
-              rotateY: 0,
-              duration: 0.4,
-              ease: 'elastic.out(1.2, 0.4)',
-            });
-          }
+          gsap.to(el, {
+            x: distX * 0.35,
+            y: distY * 0.35,
+            rotateX: -distY * 0.1,
+            rotateY: distX * 0.1,
+            duration: 0.3,
+            ease: 'power2.out',
+          });
+        };
+
+        const onMouseLeave = () => {
+          bound = null;
+          gsap.to(el, {
+            x: 0,
+            y: 0,
+            rotateX: 0,
+            rotateY: 0,
+            duration: 0.4,
+            ease: 'elastic.out(1.2, 0.4)',
+          });
+        };
+
+        el.addEventListener('mouseenter', onMouseEnter, { passive: true });
+        el.addEventListener('mousemove', onMouseMove, { passive: true });
+        el.addEventListener('mouseleave', onMouseLeave, { passive: true });
+
+        cleanups.push(() => {
+          el.removeEventListener('mouseenter', onMouseEnter);
+          el.removeEventListener('mousemove', onMouseMove);
+          el.removeEventListener('mouseleave', onMouseLeave);
         });
-      };
-      window.addEventListener('mousemove', onMouseMoveMagnetic);
+      });
 
       // ── 12. Text Scramble / Decoder Reveal ───────────────────────────
       const scrambleEls = document.querySelectorAll<HTMLElement>('[data-gsap="scramble"]');
@@ -277,7 +299,7 @@ export function useGSAPAnimations() {
 
       return () => {
         ScrollTrigger.getAll().forEach((t) => t.kill());
-        window.removeEventListener('mousemove', onMouseMoveMagnetic);
+        cleanups.forEach((c) => c());
       };
     })();
   }, []);

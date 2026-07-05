@@ -44,6 +44,7 @@ function BackgroundParticles() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
     let raf: number;
+    let isRunning = false;
     const particles = Array.from({ length: 55 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -60,7 +61,9 @@ function BackgroundParticles() {
       height = canvas.height = window.innerHeight;
     };
     window.addEventListener('resize', onResize, { passive: true });
+    
     const draw = () => {
+      if (!isRunning) return;
       ctx.clearRect(0, 0, width, height);
       for (const p of particles) {
         p.x += p.vx;
@@ -78,10 +81,36 @@ function BackgroundParticles() {
       }
       raf = requestAnimationFrame(draw);
     };
-    draw();
+
+    const startLoop = () => {
+      if (isRunning) return;
+      isRunning = true;
+      draw();
+    };
+
+    const stopLoop = () => {
+      isRunning = false;
+      if (raf) {
+        cancelAnimationFrame(raf);
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startLoop();
+        } else {
+          stopLoop();
+        }
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(canvas);
+
     return () => {
       window.removeEventListener('resize', onResize);
-      cancelAnimationFrame(raf);
+      observer.disconnect();
+      stopLoop();
     };
   }, []);
   return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-0" />;
@@ -376,7 +405,7 @@ export default function Home() {
       <section className="relative py-10 border-y border-white/[0.04] bg-[#020305] z-10 overflow-hidden">
         <p className="text-center text-[10px] font-bold text-[#475569] uppercase tracking-[0.2em] mb-8 font-mono">Trusted by engineers at</p>
         <div className="flex overflow-hidden">
-          <div className="flex gap-16 items-center animate-marquee whitespace-nowrap">
+          <div className="flex gap-16 items-center whitespace-nowrap gsap-marquee-inner">
             {['GOOGLE', 'STRIPE', 'VERCEL', 'NOTION', 'MICROSOFT', 'AIRBNB', 'LINEAR', 'FIGMA', 'ANTHROPIC', 'OPENAI'].map((co, i) => (
               <span key={i} className="text-sm font-black tracking-[0.15em] text-[#1E293B] hover:text-[#475569] transition font-mono">{co}</span>
             ))}
@@ -390,7 +419,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           ABOUT SECTION
       ═══════════════════════════════════════════════════════ */}
-      <section id="about" className="relative py-32 z-10">
+      <section id="about" className="relative py-32 z-10 section-deferred-about">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div data-gsap="fade-left" className="space-y-8 text-left">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
@@ -461,7 +490,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           FEATURES GRID
       ═══════════════════════════════════════════════════════ */}
-      <section id="features" className="relative py-32 border-t border-white/[0.04] z-10">
+      <section id="features" className="relative py-32 border-t border-white/[0.04] z-10 section-deferred-features">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(125,211,252,0.03)_0%,transparent_70%)] pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 space-y-16">
           <div data-gsap="fade-up" className="text-center max-w-2xl mx-auto space-y-5">
@@ -576,7 +605,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           TESTIMONIALS
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative py-32 border-t border-white/[0.04] z-10">
+      <section className="relative py-32 border-t border-white/[0.04] z-10 section-deferred-testimonials">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 space-y-16">
           <div data-gsap="fade-up" className="text-center max-w-xl mx-auto space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#7DD3FC]/08 border border-[#7DD3FC]/15 px-4 py-1.5 text-[11px] font-bold text-[#7DD3FC] tracking-wider uppercase font-mono">
@@ -616,7 +645,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           PRICING
       ═══════════════════════════════════════════════════════ */}
-      <section id="pricing" className="relative py-32 border-t border-white/[0.04] z-10">
+      <section id="pricing" className="relative py-32 border-t border-white/[0.04] z-10 section-deferred-pricing">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(125,211,252,0.04)_0%,transparent_60%)] pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 space-y-16">
           <div data-gsap="fade-up" className="text-center max-w-xl mx-auto space-y-5">
@@ -702,7 +731,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           FAQ
       ═══════════════════════════════════════════════════════ */}
-      <section id="faq" className="relative py-32 border-t border-white/[0.04] z-10">
+      <section id="faq" className="relative py-32 border-t border-white/[0.04] z-10 section-deferred-faq">
         <div className="mx-auto max-w-3xl px-5 sm:px-8 space-y-16">
           <div data-gsap="fade-up" className="text-center space-y-5">
             <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">Frequently asked questions.</h2>
@@ -742,7 +771,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           FOOTER CTA
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative py-32 border-t border-white/[0.04] z-10 overflow-hidden">
+      <section className="relative py-32 border-t border-white/[0.04] z-10 overflow-hidden section-deferred-footer-cta">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(255,255,255,0.04)_0%,transparent_70%)] pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_50%,rgba(125,211,252,0.06)_0%,transparent_70%)] pointer-events-none" />
         <div data-gsap="fade-up" className="mx-auto max-w-4xl px-5 text-center space-y-8 relative z-10">

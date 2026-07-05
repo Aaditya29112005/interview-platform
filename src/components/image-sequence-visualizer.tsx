@@ -18,6 +18,7 @@ interface Particle {
   vy: number;
   angle: number;
   seed: number;
+  spriteIndex: number;
 }
 
 export function ImageSequenceVisualizer() {
@@ -39,6 +40,7 @@ export function ImageSequenceVisualizer() {
 
     let animationFrameId: number;
     let particles: Particle[] = [];
+    let isRunning = false;
 
     // Set high density sizing
     const setDimensions = () => {
@@ -51,6 +53,37 @@ export function ImageSequenceVisualizer() {
       canvas.style.height = `${height}px`;
     };
     setDimensions();
+
+    // ─── Pre-render Particle Sprites (Offscreen Cache) ───────────────────
+    const createParticleSprite = (color: string) => {
+      const spriteCanvas = document.createElement('canvas');
+      spriteCanvas.width = 48;
+      spriteCanvas.height = 48;
+      const sCtx = spriteCanvas.getContext('2d');
+      if (sCtx) {
+        sCtx.shadowColor = 'rgba(125, 211, 252, 0.85)';
+        sCtx.shadowBlur = 10;
+        sCtx.fillStyle = color;
+        
+        const cx = 24;
+        const cy = 24;
+        const radius = 4; // Base drawing radius
+        
+        sCtx.beginPath();
+        sCtx.moveTo(cx, cy - radius); // Top point
+        sCtx.lineTo(cx + radius, cy); // Right point
+        sCtx.lineTo(cx, cy + radius); // Bottom point
+        sCtx.lineTo(cx - radius, cy); // Left point
+        sCtx.closePath();
+        sCtx.fill();
+      }
+      return spriteCanvas;
+    };
+
+    const spriteWhite = createParticleSprite('rgba(255, 255, 255, 0.95)');
+    const spriteIceWhite = createParticleSprite('rgba(224, 242, 254, 0.9)');
+    const spriteIceBlue = createParticleSprite('rgba(186, 230, 253, 0.85)');
+    const sprites = [spriteWhite, spriteIceWhite, spriteIceBlue];
 
     // ─── Generate Text Targets offscreen ─────────────────────────────
     const generateParticles = () => {
@@ -77,8 +110,8 @@ export function ImageSequenceVisualizer() {
       const imgData = offCtx.getImageData(0, 0, width, height).data;
       const tempParticles: Particle[] = [];
 
-      // Sample density based on width sizing (lower spacing -> more particles)
-      const spacing = width > 1200 ? 5 : 3;
+      // Balanced spacing to keep particle count efficient while keeping readability
+      const spacing = width > 1200 ? 6 : 5;
 
       for (let y = 0; y < height; y += spacing) {
         for (let x = 0; x < width; x += spacing) {
@@ -92,10 +125,13 @@ export function ImageSequenceVisualizer() {
             // Define custom particle color mix matching white glow diamond style
             const rand = Math.random();
             let color = 'rgba(255, 255, 255, 0.95)'; // Pure White
+            let spriteIndex = 0;
             if (rand > 0.6) {
               color = 'rgba(224, 242, 254, 0.9)'; // Ice white
+              spriteIndex = 1;
             } else if (rand > 0.4) {
               color = 'rgba(186, 230, 253, 0.85)'; // Light Ice Blue
+              spriteIndex = 2;
             }
 
             tempParticles.push({
@@ -111,7 +147,8 @@ export function ImageSequenceVisualizer() {
               vx: 0,
               vy: 0,
               angle: Math.random() * Math.PI * 2,
-              seed: Math.random() * 100
+              seed: Math.random() * 100,
+              spriteIndex
             });
           }
         }
@@ -135,8 +172,8 @@ export function ImageSequenceVisualizer() {
       mouseRef.current.targetY = -1000;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    canvas.addEventListener('mouseleave', handleMouseLeave, { passive: true });
 
     // ─── Scroll Trigger Setup ────────────────────────────────────────
     const trigger = ScrollTrigger.create({
@@ -155,10 +192,6 @@ export function ImageSequenceVisualizer() {
       if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       time += 0.02;
-
-      // Enable white-glow diamond branding aura
-      ctx.shadowColor = 'rgba(125, 211, 252, 0.85)';
-      ctx.shadowBlur = 10;
 
       const progress = scrollProgressRef.current;
       
@@ -206,33 +239,59 @@ export function ImageSequenceVisualizer() {
         p.x += p.vx;
         p.y += p.vy;
 
-        // Draw Particle as a four-pointed diamond
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y - p.size); // Top point
-        ctx.lineTo(p.x + p.size, p.y); // Right point
-        ctx.lineTo(p.x, p.y + p.size); // Bottom point
-        ctx.lineTo(p.x - p.size, p.y); // Left point
-        ctx.closePath();
-        ctx.fill();
+        // Draw Particle using pre-rendered canvas sprites
+        const sprite = sprites[p.spriteIndex];
+        const destSize = 48 * (p.size / 4); // Scale factor matching base radius
+        ctx.drawImage(sprite, p.x - destSize / 2, p.y - destSize / 2, destSize, destSize);
       });
 
-      animationFrameId = requestAnimationFrame(render);
+      if (isRunning) {
+        animationFrameId = requestAnimationFrame(render);
+      }
     };
-    render();
+
+    const startLoop = () => {
+      if (isRunning) return;
+      isRunning = true;
+      render();
+    };
+
+    const stopLoop = () => {
+      isRunning = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+
+    // ─── Intersection Observer to Pause Offscreen Rendering ──────────
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startLoop();
+        } else {
+          stopLoop();
+        }
+      },
+      { threshold: 0.01 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
 
     // Resize Handler
     const handleResize = () => {
       setDimensions();
       generateParticles();
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       if (canvas) canvas.removeEventListener('mouseleave', handleMouseLeave);
       window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
+      stopLoop();
       trigger.kill();
     };
   }, []);

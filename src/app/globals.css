@@ -385,3 +385,31 @@ h1, h2, h3, h4, h5, h6 {
 /* Text sizes for extra small */
 .text-2xs { font-size: 0.625rem; line-height: 1rem; }
 .text-3xs { font-size: 0.5rem; line-height: 0.75rem; }
+
+/* Defer rendering of offscreen sections to maximize initial rendering speed */
+.section-deferred-about {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+.section-deferred-features {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1000px;
+}
+.section-deferred-testimonials {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+.section-deferred-pricing {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
+}
+.section-deferred-faq {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+.section-deferred-footer-cta {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+

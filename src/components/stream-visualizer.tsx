@@ -148,13 +148,15 @@ export function StreamVisualizer() {
       mouseX = (event.clientX / window.innerWidth - 0.5) * 2;
       mouseY = (event.clientY / window.innerHeight - 0.5) * 2;
     };
-    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
 
     // Loop Frame Execution tick
     const startTime = performance.now();
     let animationFrameId: number;
+    let isRunning = false;
 
     function renderFrame() {
+      if (!isRunning) return;
       animationFrameId = requestAnimationFrame(renderFrame);
       const elapsedTime = (performance.now() - startTime) * 0.001;
       material.uniforms.uTime.value = elapsedTime;
@@ -167,7 +169,32 @@ export function StreamVisualizer() {
       camera.position.x = targetX * 2.0;
       renderer.render(scene, camera);
     }
-    renderFrame();
+
+    const startLoop = () => {
+      if (isRunning) return;
+      isRunning = true;
+      renderFrame();
+    };
+
+    const stopLoop = () => {
+      isRunning = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+
+    // Intersection Observer to stop render loop when not visible
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startLoop();
+        } else {
+          stopLoop();
+        }
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(container);
 
     // Canvas Viewport Update Constraints
     const onResize = () => {
@@ -178,12 +205,13 @@ export function StreamVisualizer() {
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
     };
-    window.addEventListener('resize', onResize);
+    window.addEventListener('resize', onResize, { passive: true });
 
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('resize', onResize);
-      cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
+      stopLoop();
       
       // Cleanup Three.js resources
       geometry.dispose();
